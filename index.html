@@ -1,509 +1,1644 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>RANDY — The Angel's Road</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#02030a">
+<title>THE NIGHT REMEMBERS — Randy</title>
 
 <style>
-*{box-sizing:border-box}
-html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#020308;
-    font-family:Georgia,"Times New Roman",serif;
-    color:#fff;
+:root{
+--black:#010208;
+--night:#030611;
+--blue:#b9d9ff;
+--white:#f4f7ff;
+--gold:#e9cf88;
+--red:#8d1833;
+--muted:#8994ad;
+--glass:rgba(5,8,17,.72);
+--border:rgba(220,235,255,.17);
 }
-
-#game{
-    position:fixed;
-    inset:0;
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
 }
-
+html,
+body{
+width:100%;
+height:100%;
+overflow:hidden;
+background:#010208;
+color:var(--white);
+font-family:Georgia,"Times New Roman",serif;
+}
+body{
+user-select:none;
+-webkit-user-select:none;
+}
 canvas{
-    display:block;
-    width:100%;
-    height:100%;
+position:fixed;
+inset:0;
+width:100%;
+height:100%;
+display:block;
 }
-
+#game{
+position:fixed;
+inset:0;
+overflow:hidden;
+background:#010208;
+}
 #cinematic{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    z-index:5;
-    background:
-      radial-gradient(ellipse at center,
-      transparent 35%,
-      rgba(0,0,0,.28) 72%,
-      rgba(0,0,0,.88) 100%);
+position:fixed;
+inset:0;
+pointer-events:none;
+z-index:10;
 }
-
-#top{
-    position:fixed;
-    top:25px;
-    left:35px;
-    z-index:20;
-    opacity:0;
-    transition:1s;
-    pointer-events:none;
+#vignette{
+position:absolute;
+inset:0;
+background:
+radial-gradient(
+circle at 50% 45%,
+transparent 25%,
+rgba(0,0,0,.12) 48%,
+rgba(0,0,0,.72) 100%
+);
 }
-
-#chapter{
-    font-size:11px;
-    letter-spacing:6px;
-    text-transform:uppercase;
-    color:#e8d9a4;
+#colorGrade{
+position:absolute;
+inset:0;
+background:
+linear-gradient(
+180deg,
+rgba(90,130,190,.035),
+transparent 35%,
+rgba(20,0,10,.18)
+);
+mix-blend-mode:screen;
 }
-
-#location{
-    margin-top:7px;
-    font-size:25px;
-    letter-spacing:3px;
-    text-shadow:0 2px 15px #000;
+#scanlines{
+position:absolute;
+inset:0;
+opacity:.025;
+background:
+repeating-linear-gradient(
+180deg,
+rgba(255,255,255,.5) 0px,
+rgba(255,255,255,.5) 1px,
+transparent 1px,
+transparent 4px
+);
 }
-
-#dialogue{
-    position:fixed;
-    left:50%;
-    bottom:55px;
-    transform:translateX(-50%);
-    width:min(850px,90%);
-    z-index:30;
-    padding:24px 30px;
-    border:1px solid rgba(255,255,255,.18);
-    background:linear-gradient(
-      135deg,
-      rgba(5,8,15,.88),
-      rgba(20,14,25,.72)
-    );
-    backdrop-filter:blur(12px);
-    box-shadow:0 15px 60px #000;
-    opacity:0;
-    pointer-events:none;
-    transition:.5s;
+#grain{
+position:absolute;
+inset:-60%;
+opacity:.045;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+animation:noise .13s steps(2) infinite;
 }
-
-#speaker{
-    color:#d9c47d;
-    font-size:12px;
-    letter-spacing:4px;
-    text-transform:uppercase;
-    margin-bottom:10px;
+@keyframes noise{
+0%{transform:translate(0,0)}
+25%{transform:translate(2%,1%)}
+50%{transform:translate(-1%,2%)}
+75%{transform:translate(1%,-2%)}
+100%{transform:translate(-2%,1%)}
 }
-
-#text{
-    font-size:19px;
-    line-height:1.7;
+#letterboxTop,
+#letterboxBottom{
+position:absolute;
+left:0;
+right:0;
+height:6vh;
+background:#000;
 }
-
-#continue{
-    position:absolute;
-    right:20px;
-    bottom:12px;
-    font-size:10px;
-    letter-spacing:2px;
-    color:#aaa;
+#letterboxTop{top:0}
+#letterboxBottom{bottom:0}
+#boot{
+position:fixed;
+inset:0;
+z-index:100;
+display:grid;
+place-items:center;
+background:#010208;
+transition:opacity 1.4s ease;
 }
-
-#choice{
-    position:fixed;
-    left:50%;
-    bottom:28px;
-    transform:translateX(-50%);
-    z-index:40;
-    display:flex;
-    gap:12px;
-    flex-wrap:wrap;
-    justify-content:center;
+.boot-content{
+width:min(700px,86vw);
+text-align:center;
 }
-
+.boot-symbol{
+font-size:76px;
+color:#dcecff;
+text-shadow:
+0 0 20px #dcecff,
+0 0 60px rgba(170,210,255,.7);
+animation:float 3s ease-in-out infinite;
+}
+.boot-title{
+margin-top:20px;
+font-size:11px;
+letter-spacing:.55em;
+color:#a9b8d1;
+}
+.boot-line{
+height:1px;
+width:300px;
+max-width:70vw;
+margin:28px auto;
+background:#172338;
+overflow:hidden;
+}
+.boot-line span{
+display:block;
+width:0%;
+height:100%;
+background:#e9f3ff;
+box-shadow:0 0 20px #fff;
+animation:bootload 2.7s forwards;
+}
+.boot-small{
+font-size:10px;
+letter-spacing:.22em;
+color:#56627b;
+}
+@keyframes bootload{
+to{width:100%}
+}
+@keyframes float{
+0%,100%{transform:translateY(0)}
+50%{transform:translateY(-10px)}
+}
+#title{
+position:fixed;
+inset:0;
+z-index:80;
+display:flex;
+align-items:flex-end;
+justify-content:center;
+padding:7vh 6vw 10vh;
+text-align:center;
+background:
+linear-gradient(
+180deg,
+transparent 15%,
+rgba(1,2,7,.2) 45%,
+rgba(1,2,7,.88) 88%,
+#010208 100%
+);
+transition:
+opacity 1s ease,
+transform 1s ease;
+}
+.title-inner{
+width:min(1000px,94vw);
+}
+.title-eyebrow{
+font-size:10px;
+letter-spacing:.55em;
+color:#b5c7df;
+margin-bottom:25px;
+}
+.title-main{
+font-size:
+clamp(48px,10vw,125px);
+font-weight:400;
+line-height:.82;
+letter-spacing:-.055em;
+text-shadow:
+0 5px 25px rgba(0,0,0,.9),
+0 0 55px rgba(180,210,255,.16);
+}
+.title-divider{
+height:1px;
+width:150px;
+margin:32px auto;
+background:
+linear-gradient(
+90deg,
+transparent,
+#dcecff,
+transparent
+);
+box-shadow:0 0 20px #dcecff;
+}
+.title-sub{
+font-size:
+clamp(13px,2vw,21px);
+line-height:1.8;
+color:#cbd2df;
+max-width:720px;
+margin:auto;
+}
+.title-warning{
+margin-top:24px;
+font-size:9px;
+letter-spacing:.3em;
+color:#6e7890;
+}
+#startButton{
+margin-top:32px;
+}
 button{
-    border:1px solid rgba(240,220,160,.45);
-    background:rgba(10,10,15,.75);
-    color:#eee;
-    padding:13px 25px;
-    font-family:inherit;
-    letter-spacing:2px;
-    cursor:pointer;
-    transition:.25s;
-    backdrop-filter:blur(8px);
+font-family:Georgia,"Times New Roman",serif;
+font-size:11px;
+letter-spacing:.2em;
+text-transform:uppercase;
+color:#edf4ff;
+background:rgba(5,8,17,.74);
+border:1px solid rgba(225,239,255,.25);
+padding:15px 28px;
+cursor:pointer;
+border-radius:2px;
+transition:
+transform .25s ease,
+box-shadow .25s ease,
+border-color .25s ease,
+background .25s ease;
+backdrop-filter:blur(12px);
 }
-
 button:hover{
-    background:rgba(220,195,120,.18);
-    box-shadow:0 0 30px rgba(220,195,120,.18);
-    transform:translateY(-2px);
+transform:translateY(-2px);
+border-color:#e6f0ff;
+box-shadow:
+0 0 25px rgba(205,228,255,.15),
+0 0 60px rgba(205,228,255,.08);
 }
-
-#start{
-    position:fixed;
-    inset:0;
-    z-index:100;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    background:
-      radial-gradient(circle at center,
-      rgba(100,120,160,.18),
-      rgba(1,2,7,.98) 70%);
+button:active{
+transform:translateY(0);
 }
-
-.startInner{
-    max-width:750px;
-    padding:30px;
+button.primary{
+border-color:rgba(220,237,255,.62);
+background:
+linear-gradient(
+180deg,
+rgba(220,237,255,.15),
+rgba(220,237,255,.035)
+);
+box-shadow:
+0 0 30px rgba(210,230,255,.08);
 }
-
-.eyebrow{
-    font-size:11px;
-    letter-spacing:8px;
-    color:#d7c58d;
-    margin-bottom:25px;
+button.danger{
+border-color:rgba(150,35,58,.6);
 }
-
-h1{
-    font-size:clamp(45px,9vw,110px);
-    font-weight:normal;
-    letter-spacing:10px;
-    margin:0;
-    text-shadow:
-      0 0 30px rgba(255,255,255,.12),
-      0 10px 60px #000;
+#hud{
+position:fixed;
+z-index:50;
+top:0;
+left:0;
+right:0;
+padding:
+calc(18px + env(safe-area-inset-top))
+24px
+18px;
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+pointer-events:none;
+opacity:0;
+transition:opacity .8s ease;
 }
-
-.startSub{
-    margin:25px auto 35px;
-    max-width:570px;
-    line-height:1.8;
-    color:#aaa;
+.hud-block{
+display:flex;
+flex-direction:column;
+gap:5px;
 }
-
-#begin{
-    padding:17px 45px;
-    font-size:12px;
+.hud-block.right{
+text-align:right;
 }
-
+.hud-kicker{
+font-size:9px;
+letter-spacing:.38em;
+color:#8e9bb3;
+text-transform:uppercase;
+}
+.hud-location{
+font-size:17px;
+color:#eef4ff;
+}
+.hud-status{
+font-size:10px;
+letter-spacing:.2em;
+color:#68758e;
+}
+#objective{
+position:fixed;
+z-index:50;
+left:50%;
+top:18%;
+transform:translateX(-50%);
+font-size:10px;
+letter-spacing:.35em;
+color:#a9b9d0;
+text-align:center;
+opacity:0;
+transition:opacity .7s ease;
+pointer-events:none;
+text-transform:uppercase;
+}
+#chapter{
+position:fixed;
+z-index:51;
+left:50%;
+top:10%;
+transform:translate(-50%,-20px);
+opacity:0;
+font-size:11px;
+letter-spacing:.6em;
+color:#dcecff;
+text-align:center;
+pointer-events:none;
+text-transform:uppercase;
+transition:
+opacity .8s ease,
+transform .8s ease;
+text-shadow:0 0 25px rgba(220,236,255,.4);
+}
+#dialogue{
+position:fixed;
+z-index:60;
+left:50%;
+bottom:
+calc(34px + env(safe-area-inset-bottom));
+transform:translateX(-50%) translateY(25px);
+width:min(940px,90vw);
+opacity:0;
+pointer-events:none;
+transition:
+opacity .4s ease,
+transform .4s ease;
+}
+.dialogue-visible{
+opacity:1!important;
+transform:translateX(-50%) translateY(0)!important;
+pointer-events:auto!important;
+}
+.dialogue-box{
+position:relative;
+padding:
+22px 28px
+22px 28px;
+background:
+linear-gradient(
+180deg,
+rgba(6,10,19,.82),
+rgba(3,5,12,.92)
+);
+border:1px solid var(--border);
+box-shadow:
+0 25px 80px rgba(0,0,0,.5),
+inset 0 1px rgba(255,255,255,.035);
+backdrop-filter:blur(14px);
+}
+.dialogue-box::before{
+content:"";
+position:absolute;
+left:0;
+top:0;
+bottom:0;
+width:2px;
+background:
+linear-gradient(
+180deg,
+transparent,
+#dcecff,
+transparent
+);
+box-shadow:0 0 20px rgba(220,236,255,.45);
+}
+.dialogue-name{
+font-size:10px;
+letter-spacing:.3em;
+color:#b8c7dc;
+margin-bottom:12px;
+text-transform:uppercase;
+}
+.dialogue-text{
+font-size:
+clamp(15px,2vw,21px);
+line-height:1.75;
+color:#f0f3f8;
+min-height:38px;
+}
+.dialogue-hint{
+margin-top:12px;
+font-size:9px;
+letter-spacing:.2em;
+color:#65728a;
+}
+#choice{
+position:fixed;
+z-index:65;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+width:min(560px,88vw);
+padding:25px;
+background:rgba(3,6,13,.9);
+border:1px solid var(--border);
+box-shadow:
+0 35px 120px rgba(0,0,0,.75),
+0 0 80px rgba(180,215,255,.06);
+backdrop-filter:blur(18px);
+display:none;
+text-align:center;
+}
+.choice-title{
+font-size:10px;
+letter-spacing:.4em;
+color:#94a2bb;
+margin-bottom:18px;
+}
+.choice-text{
+font-size:19px;
+line-height:1.6;
+margin-bottom:18px;
+}
+.choice-actions{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:4px;
+}
+#puzzle{
+position:fixed;
+z-index:75;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+background:rgba(0,0,0,.62);
+backdrop-filter:blur(10px);
+}
+.puzzle-card{
+width:min(580px,88vw);
+padding:36px;
+background:
+linear-gradient(
+180deg,
+rgba(8,12,23,.96),
+rgba(2,4,10,.98)
+);
+border:1px solid rgba(220,236,255,.2);
+box-shadow:
+0 40px 150px rgba(0,0,0,.8);
+text-align:center;
+}
+.puzzle-symbol{
+font-size:46px;
+color:#dcecff;
+text-shadow:0 0 35px #b8d7ff;
+margin-bottom:16px;
+}
+.puzzle-title{
+font-size:12px;
+letter-spacing:.4em;
+color:#c4d2e7;
+}
+.puzzle-question{
+font-size:18px;
+line-height:1.7;
+color:#eef2fa;
+margin:20px 0;
+}
+.puzzle-input{
+width:180px;
+height:58px;
+font-family:Georgia,serif;
+font-size:25px;
+text-align:center;
+letter-spacing:.4em;
+color:#fff;
+background:#02040a;
+border:1px solid rgba(220,236,255,.3);
+outline:none;
+}
+.puzzle-input:focus{
+border-color:#dcecff;
+box-shadow:0 0 25px rgba(220,236,255,.12);
+}
+.puzzle-error{
+height:20px;
+margin-top:12px;
+font-size:10px;
+letter-spacing:.15em;
+color:#b64b62;
+}
+#answer{
+position:fixed;
+z-index:75;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+background:rgba(0,0,0,.66);
+backdrop-filter:blur(12px);
+}
+.answer-card{
+width:min(650px,90vw);
+padding:40px 30px;
+background:
+radial-gradient(
+circle at 50% 0%,
+rgba(180,215,255,.09),
+transparent 45%
+),
+rgba(3,6,14,.96);
+border:1px solid rgba(220,236,255,.2);
+box-shadow:0 40px 150px rgba(0,0,0,.85);
+text-align:center;
+}
+.answer-title{
+font-size:11px;
+letter-spacing:.5em;
+color:#9eacc3;
+}
+.answer-question{
+font-size:22px;
+margin:22px 0;
+line-height:1.6;
+}
+.answer-input{
+width:min(430px,80vw);
+height:55px;
+padding:0 18px;
+font-family:Georgia,serif;
+font-size:18px;
+text-align:center;
+color:#fff;
+background:#02040a;
+border:1px solid rgba(220,236,255,.25);
+outline:none;
+}
+.answer-input:focus{
+border-color:#dcecff;
+box-shadow:0 0 30px rgba(220,236,255,.13);
+}
+.answer-message{
+min-height:22px;
+margin-top:10px;
+font-size:10px;
+letter-spacing:.12em;
+color:#aeb9cc;
+}
 #letter{
-    position:fixed;
-    inset:0;
-    z-index:80;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    background:rgba(0,0,0,.78);
-    backdrop-filter:blur(15px);
+position:fixed;
+z-index:90;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+background:rgba(0,0,0,.75);
+backdrop-filter:blur(14px);
 }
-
-.paper{
-    width:min(650px,88%);
-    max-height:80vh;
-    overflow:auto;
-    padding:55px;
-    color:#241b15;
-    background:
-      linear-gradient(120deg,#e8dfc8,#cfc2a4);
-    box-shadow:0 25px 100px #000;
-    transform:rotate(-1deg);
+.letter-paper{
+width:min(760px,88vw);
+max-height:82vh;
+overflow:auto;
+padding:50px 55px;
+background:
+linear-gradient(
+135deg,
+#eee8d9,
+#d9d0bc
+);
+color:#211f1b;
+box-shadow:
+0 40px 160px rgba(0,0,0,.85),
+0 0 0 1px rgba(255,255,255,.2);
+transform:rotate(-.5deg);
 }
-
-.paper h2{
-    text-align:center;
-    font-weight:normal;
-    letter-spacing:5px;
+.letter-small{
+font-size:10px;
+letter-spacing:.3em;
+color:#6e6659;
 }
-
-.paper p{
-    line-height:1.9;
-    font-size:17px;
+.letter-title{
+font-size:clamp(27px,5vw,48px);
+font-weight:400;
+margin:20px 0 28px;
 }
-
-.signature{
-    text-align:right;
-    font-style:italic;
-    margin-top:35px;
+.letter-text{
+font-size:
+clamp(15px,2vw,20px);
+line-height:2;
+white-space:pre-line;
 }
-
-#ending{
-    position:fixed;
-    inset:0;
-    z-index:90;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    background:
-      radial-gradient(circle,
-      rgba(150,170,210,.12),
-      #010207 70%);
+.letter-sign{
+margin-top:35px;
+font-size:24px;
+font-style:italic;
 }
-
-.endTitle{
-    font-size:clamp(35px,7vw,80px);
-    letter-spacing:8px;
+#final{
+position:fixed;
+z-index:100;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+text-align:center;
+background:
+radial-gradient(
+circle at 50% 45%,
+rgba(185,217,255,.12),
+transparent 35%
+),
+rgba(1,2,7,.94);
 }
-
-.endSmall{
-    color:#aaa;
-    letter-spacing:4px;
-    margin-top:20px;
+.final-inner{
+width:min(1000px,90vw);
 }
-
-#fade{
-    position:fixed;
-    inset:0;
-    z-index:200;
-    background:#000;
-    pointer-events:none;
-    opacity:1;
-    transition:opacity 1.5s;
+.final-overline{
+font-size:10px;
+letter-spacing:.6em;
+color:#9eabc0;
+margin-bottom:25px;
 }
-
-@media(max-width:600px){
-    #text{font-size:16px}
-    #dialogue{bottom:30px;padding:20px}
-    #location{font-size:19px}
-    #top{left:20px;top:20px}
+.final-main{
+font-size:
+clamp(42px,9vw,115px);
+line-height:.85;
+font-weight:400;
+letter-spacing:-.04em;
+text-shadow:
+0 0 30px rgba(220,236,255,.4),
+0 0 100px rgba(220,236,255,.15);
+}
+.final-name{
+margin-top:30px;
+font-size:
+clamp(18px,3vw,30px);
+letter-spacing:.45em;
+color:#e7d08d;
+}
+.final-sub{
+margin-top:25px;
+font-size:14px;
+color:#aeb8ca;
+letter-spacing:.2em;
+}
+.final-heart{
+margin-top:35px;
+font-size:30px;
+color:#c03a56;
+text-shadow:0 0 30px rgba(190,50,80,.6);
+animation:heart 1.6s infinite;
+}
+@keyframes heart{
+0%,100%{transform:scale(1)}
+15%{transform:scale(1.16)}
+30%{transform:scale(1)}
+45%{transform:scale(1.08)}
+60%{transform:scale(1)}
+}
+#flash{
+position:fixed;
+z-index:95;
+inset:0;
+background:#fff;
+opacity:0;
+pointer-events:none;
+}
+#flash.active{
+animation:flash .45s ease-out;
+}
+@keyframes flash{
+0%{opacity:.9}
+100%{opacity:0}
+}
+#hint{
+position:fixed;
+z-index:55;
+bottom:12%;
+left:50%;
+transform:translateX(-50%);
+font-size:9px;
+letter-spacing:.28em;
+color:#66748d;
+opacity:0;
+transition:opacity .5s;
+pointer-events:none;
+text-align:center;
+}
+#mobile{
+display:none;
+left:50%;
+bottom:28px;
+transform:translateX(-50%);
+z-index:70;
+}
+@media(max-width:700px){
+#hud{
+padding-left:14px;
+padding-right:14px;
+}
+.hud-location{
+font-size:14px;
+}
+.dialogue-box{
+padding:18px 20px;
+}
+.dialogue-text{
+font-size:15px;
+}
+.letter-paper{
+padding:34px 25px;
+}
+}
+@media(pointer:coarse){
+#mobile{
+display:block;
+}
+}
+.hidden{
+display:none!important;
 }
 </style>
 </head>
 
 <body>
 
-<div id="game"></div>
-<div id="cinematic"></div>
-
-<div id="top">
-    <div id="chapter">CHAPTER I</div>
-    <div id="location">THE FOREST</div>
+<div id="game">
+<canvas id="scene"></canvas>
 </div>
+
+<div id="cinematic">
+<div id="vignette"></div>
+<div id="colorGrade"></div>
+<div id="scanlines"></div>
+<div id="grain"></div>
+<div id="letterboxTop"></div>
+<div id="letterboxBottom"></div>
+</div>
+
+<div id="boot">
+<div class="boot-content">
+<div class="boot-symbol">✦</div>
+<div class="boot-title">INITIALIZING THE NIGHT</div>
+<div class="boot-line"><span></span></div>
+<div class="boot-small">MEMORY • MOONLIGHT • BLOOD • LIGHT</div>
+</div>
+</div>
+
+<div id="title">
+<div class="title-inner">
+<div class="title-eyebrow">AN INTERACTIVE NIGHT</div>
+<div class="title-main">THE NIGHT<br>REMEMBERS</div>
+<div class="title-divider"></div>
+<div class="title-sub">
+بعض الليالي لا تنتهي عندما تشرق الشمس...
+بعضها تبقى تنتظر الشخص الصحيح.
+</div>
+<div class="title-warning">
+HEADPHONES RECOMMENDED
+</div>
+<br>
+<button id="startButton" class="primary">ENTER THE NIGHT</button>
+</div>
+</div>
+
+<div id="hud">
+<div class="hud-block">
+<div class="hud-kicker">Chapter</div>
+<div id="hudChapter" class="hud-location">THE FOREST</div>
+<div id="hudObjective" class="hud-status">FOLLOW THE LIGHT</div>
+</div>
+<div class="hud-block right">
+<div class="hud-kicker">Night</div>
+<div id="hudTime" class="hud-location">00:00</div>
+<div id="hudStatus" class="hud-status">THE STORY IS WAITING</div>
+</div>
+</div>
+
+<div id="chapter">THE FOREST</div>
+
+<div id="objective">FOLLOW THE LIGHT</div>
 
 <div id="dialogue">
-    <div id="speaker"></div>
-    <div id="text"></div>
-    <div id="continue">CLICK TO CONTINUE</div>
+<div class="dialogue-box">
+<div id="dialogueName" class="dialogue-name">UNKNOWN</div>
+<div id="dialogueText" class="dialogue-text"></div>
+<div class="dialogue-hint">CLICK TO CONTINUE</div>
+</div>
 </div>
 
-<div id="choice"></div>
+<div id="choice">
+<div class="choice-title">THE PATH DIVIDES</div>
+<div id="choiceText" class="choice-text"></div>
+<div class="choice-actions">
+<button id="choiceA"></button>
+<button id="choiceB"></button>
+</div>
+</div>
 
-<div id="start">
-    <div class="startInner">
-        <div class="eyebrow">A SHORT 3D GOTHIC STORY</div>
-        <h1>RANDY</h1>
-        <div class="startSub">
-            Some roads lead home.<br>
-            Others lead to the place where you were always meant to be.
-        </div>
-        <button id="begin">ENTER THE NIGHT</button>
-    </div>
+<div id="puzzle">
+<div class="puzzle-card">
+<div class="puzzle-symbol">☽</div>
+<div class="puzzle-title">THE HALL OF SILENCE</div>
+<div class="puzzle-question">
+ثلاث خطوات إلى الباب.<br>
+ثلاث نبضات.<br>
+والرقم الذي لم تنسه الليلة.
+</div>
+<input
+id="puzzleInput"
+class="puzzle-input"
+maxlength="3"
+inputmode="numeric"
+autocomplete="off"
+>
+<div id="puzzleError" class="puzzle-error"></div>
+<button id="puzzleButton" class="primary">UNLOCK</button>
+</div>
+</div>
+
+<div id="answer">
+<div class="answer-card">
+<div class="answer-title">THE LAST QUESTION</div>
+<div class="answer-question">
+من الشخص الذي كانت الليلة تقودك إليه؟
+</div>
+<input
+id="answerInput"
+class="answer-input"
+type="text"
+autocomplete="off"
+spellcheck="false"
+placeholder="TYPE THE NAME OF THE SECRET"
+>
+<div id="answerMessage" class="answer-message"></div>
+<button id="answerButton" class="primary">OPEN THE FINAL DOOR</button>
+</div>
 </div>
 
 <div id="letter">
-    <div class="paper">
-        <h2>THE LAST LETTER</h2>
-        <p>
-            Randy,
-        </p>
-        <p>
-            I spent a long time believing that some people arrive in
-            our lives by accident.
-        </p>
-        <p>
-            Then I walked through the forest, crossed the river,
-            passed the dead, and followed an angel to a castle
-            that should never have existed.
-        </p>
-        <p>
-            And I understood something.
-        </p>
-        <p>
-            Perhaps the road was never leading me to the castle.
-            Perhaps it was leading me to you.
-        </p>
-        <p class="signature">
-            Forever yours,<br>
-            Nour 🩸
-        </p>
-        <button id="closeLetter">CLOSE</button>
-    </div>
+<div class="letter-paper">
+<div class="letter-small">A LETTER LEFT BEHIND</div>
+<div class="letter-title">إلى Randy...</div>
+<div class="letter-text">
+إذا وصلت إلى هذه الرسالة،
+فمعنى هذا أنك عبرت الغابة،
+ومشيت في الطريق،
+ووقفت أمام القلعة،
+ولم تخف من الباب.
+
+لكن الحقيقة...
+لم تكن القلعة هي الشيء الذي كنت أبحث عنه.
+
+كنت أبحث عن لحظة
+تستحق أن أتذكرها.
+
+عن شخص
+يستحق أن تُكتب له ليلة كاملة.
+
+وهذه الليلة...
+كانت لك.
+
+من نور،
+إلى Randy.
+
+كل عام وأنت بخير.
+</div>
+<div class="letter-sign">Forever yours — Nour ♡</div>
+<br>
+<button id="closeLetter">CONTINUE</button>
+</div>
 </div>
 
-<div id="ending">
-    <div>
-        <div class="eyebrow">THE NIGHT REMEMBERS</div>
-        <div class="endTitle">NOOR ♡ RANDY</div>
-        <div class="endSmall">THE ROAD ENDS. THE STORY DOES NOT.</div>
-    </div>
+<div id="final">
+<div class="final-inner">
+<div class="final-overline">THE NIGHT HAS REMEMBERED</div>
+<div class="final-main">HAPPY<br>BIRTHDAY</div>
+<div class="final-name">RANDY</div>
+<div class="final-sub">NOOR ♡ RANDY</div>
+<div class="final-heart">♥</div>
+</div>
 </div>
 
-<div id="fade"></div>
+<div id="flash"></div>
+
+<div id="hint">THE LIGHT IS WAITING</div>
+
+<button id="mobile">CONTINUE</button>
 
 <script type="module">
 
 import * as THREE from
 "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
 
+import {GLTFLoader} from
+"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
 
 /* =========================================================
    CORE
 ========================================================= */
 
-const renderer = new THREE.WebGLRenderer({
-    antialias:true,
-    powerPreference:"high-performance"
+const canvas =
+document.getElementById("scene");
+
+const renderer =
+new THREE.WebGLRenderer({
+canvas,
+antialias:true,
+alpha:false,
+powerPreference:"high-performance"
 });
 
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(
+Math.min(window.devicePixelRatio,2)
+);
+
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
+
 renderer.shadowMap.enabled=true;
-renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.outputColorSpace=THREE.SRGBColorSpace;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.05;
 
-document.getElementById("game").appendChild(renderer.domElement);
+renderer.shadowMap.type=
+THREE.PCFSoftShadowMap;
 
-const scene = new THREE.Scene();
+renderer.outputColorSpace=
+THREE.SRGBColorSpace;
 
-scene.background = new THREE.Color(0x02040a);
+renderer.toneMapping=
+THREE.ACESFilmicToneMapping;
 
-scene.fog = new THREE.FogExp2(
-    0x07101a,
-    0.015
+renderer.toneMappingExposure=1.08;
+
+const camera=
+new THREE.PerspectiveCamera(
+52,
+window.innerWidth/window.innerHeight,
+.05,
+3000
 );
 
-const camera = new THREE.PerspectiveCamera(
-    60,
-    innerWidth/innerHeight,
-    .1,
-    1000
+camera.position.set(
+0,
+4,
+18
 );
 
-camera.position.set(0,4,12);
+const world=
+new THREE.Scene();
 
-const clock = new THREE.Clock();
+world.background=
+new THREE.Color("#02030a");
 
-const world = new THREE.Group();
-scene.add(world);
+const clock=
+new THREE.Clock();
 
-let currentPlace = "";
-let currentChapter = 0;
-let moving = false;
-let dialogueIndex = 0;
-let dialogueList = [];
+const raycaster=
+new THREE.Raycaster();
 
-const actors = {};
-const particles = {};
-const objects = {};
+const pointer=
+new THREE.Vector2();
 
+const loader=
+new GLTFLoader();
+
+const state={
+started:false,
+scene:"forest",
+sceneIndex:0,
+time:0,
+dialogue:false,
+dialogueIndex:0,
+typing:false,
+choiceOpen:false,
+puzzleSolved:false,
+answerSolved:false,
+final:false,
+letter:false,
+audio:false,
+lightning:0,
+shake:0,
+cameraMode:"cinematic",
+transition:false,
+transitionProgress:0
+};
+
+const scenes=[
+"forest",
+"path",
+"ruins",
+"castle",
+"gate",
+"hall",
+"chamber",
+"final"
+];
+
+const sceneNames={
+forest:"THE FOREST",
+path:"THE MISTY PATH",
+ruins:"THE FORGOTTEN SHRINE",
+castle:"THE CASTLE",
+gate:"THE IRON GATE",
+hall:"THE HALL OF SILENCE",
+chamber:"THE SEALED CHAMBER",
+final:"THE LAST ROOM"
+};
+
+const sceneObjectives={
+forest:"FOLLOW THE LIGHT",
+path:"KEEP WALKING",
+ruins:"FIND WHAT WAS LEFT",
+castle:"APPROACH THE CASTLE",
+gate:"OPEN THE GATE",
+hall:"FIND THE NUMBER",
+chamber:"ANSWER THE LAST QUESTION",
+final:"REMEMBER THIS NIGHT"
+};
 
 /* =========================================================
-   LIGHTING
+   GROUPS
 ========================================================= */
 
-const ambient = new THREE.HemisphereLight(
-    0x7185a5,
-    0x050308,
-    1.2
-);
+let environment=
+new THREE.Group();
 
-scene.add(ambient);
+let props=
+new THREE.Group();
 
-const moon = new THREE.DirectionalLight(
-    0xdfe9ff,
-    3
-);
+let particles=
+new THREE.Group();
 
-moon.position.set(-30,40,15);
-moon.castShadow=true;
-moon.shadow.mapSize.set(2048,2048);
-scene.add(moon);
+let characters=
+new THREE.Group();
 
-const angelLight = new THREE.PointLight(
-    0xfff5d2,
-    0,
-    30
-);
+let lights=
+new THREE.Group();
 
-scene.add(angelLight);
-
+world.add(environment);
+world.add(props);
+world.add(particles);
+world.add(characters);
+world.add(lights);
 
 /* =========================================================
    MATERIALS
 ========================================================= */
 
-function mat(color,rough=.8,metal=0){
-    return new THREE.MeshStandardMaterial({
-        color,
-        roughness:rough,
-        metalness:metal
-    });
-}
+const materials={};
 
-const skin = mat(0xc68f75,.7);
-const skinPale = mat(0xe3c5b7,.65);
-const hair = mat(0x151015,.5);
-const black = mat(0x09090d,.85);
-const white = mat(0xe9e5d8,.6);
-const stone = mat(0x24252c,.95);
-const oldStone = mat(0x343238,1);
-const gold = new THREE.MeshStandardMaterial({
-    color:0xd8bd6a,
-    roughness:.4,
-    metalness:.65
+materials.black=
+new THREE.MeshStandardMaterial({
+color:0x020307,
+roughness:.95,
+metalness:.05
 });
 
+materials.darkStone=
+new THREE.MeshStandardMaterial({
+color:0x171b25,
+roughness:.92,
+metalness:.02
+});
+
+materials.stone=
+new THREE.MeshStandardMaterial({
+color:0x343947,
+roughness:.9,
+metalness:.04
+});
+
+materials.oldStone=
+new THREE.MeshStandardMaterial({
+color:0x262b35,
+roughness:1
+});
+
+materials.wood=
+new THREE.MeshStandardMaterial({
+color:0x17100e,
+roughness:.9
+});
+
+materials.iron=
+new THREE.MeshStandardMaterial({
+color:0x10131a,
+roughness:.48,
+metalness:.72
+});
+
+materials.gold=
+new THREE.MeshStandardMaterial({
+color:0xd6b96d,
+roughness:.25,
+metalness:.75
+});
+
+materials.blueGlow=
+new THREE.MeshBasicMaterial({
+color:0xbddcff
+});
+
+materials.whiteGlow=
+new THREE.MeshBasicMaterial({
+color:0xffffff
+});
+
+materials.redGlow=
+new THREE.MeshBasicMaterial({
+color:0x9c1835
+});
+
+materials.candle=
+new THREE.MeshStandardMaterial({
+color:0xd8c79c,
+roughness:.65
+});
+
+materials.water=
+new THREE.MeshStandardMaterial({
+color:0x07111c,
+roughness:.08,
+metalness:.65,
+transparent:true,
+opacity:.7
+});
+
+/* =========================================================
+   UTILS
+========================================================= */
+
+function add(group,object){
+group.add(object);
+return object;
+}
+
+function box(
+w,
+h,
+d,
+material,
+x=0,
+y=0,
+z=0
+){
+const mesh=
+new THREE.Mesh(
+new THREE.BoxGeometry(w,h,d),
+material
+);
+mesh.position.set(x,y,z);
+mesh.castShadow=true;
+mesh.receiveShadow=true;
+return mesh;
+}
+
+function sphere(
+r,
+material,
+x=0,
+y=0,
+z=0,
+segments=24
+){
+const mesh=
+new THREE.Mesh(
+new THREE.SphereGeometry(
+r,
+segments,
+segments
+),
+material
+);
+mesh.position.set(x,y,z);
+mesh.castShadow=true;
+mesh.receiveShadow=true;
+return mesh;
+}
+
+function cylinder(
+r1,
+r2,
+h,
+material,
+x=0,
+y=0,
+z=0,
+segments=24
+){
+const mesh=
+new THREE.Mesh(
+new THREE.CylinderGeometry(
+r1,
+r2,
+h,
+segments
+),
+material
+);
+mesh.position.set(x,y,z);
+mesh.castShadow=true;
+mesh.receiveShadow=true;
+return mesh;
+}
+
+function cone(
+r,
+h,
+material,
+x=0,
+y=0,
+z=0
+){
+const mesh=
+new THREE.Mesh(
+new THREE.ConeGeometry(r,h,24),
+material
+);
+mesh.position.set(x,y,z);
+mesh.castShadow=true;
+mesh.receiveShadow=true;
+return mesh;
+}
+
+function plane(
+w,
+h,
+material,
+x=0,
+y=0,
+z=0
+){
+const mesh=
+new THREE.Mesh(
+new THREE.PlaneGeometry(w,h),
+material
+);
+mesh.position.set(x,y,z);
+return mesh;
+}
+
+function clearGroup(group){
+while(group.children.length){
+const child=group.children.pop();
+child.traverse?.(
+object=>{
+if(object.geometry)
+object.geometry.dispose?.();
+if(object.material){
+if(Array.isArray(object.material)){
+object.material.forEach(m=>m.dispose?.());
+}else{
+object.material.dispose?.();
+}
+}
+}
+);
+}
+}
+
+/* =========================================================
+   LIGHTING
+========================================================= */
+
+let moonLight;
+let moonGlow;
+let ambientLight;
+let heavenLight;
+
+function setupLighting(){
+
+clearGroup(lights);
+
+ambientLight=
+new THREE.HemisphereLight(
+0x7890b5,
+0x050609,
+.42
+);
+
+lights.add(ambientLight);
+
+moonLight=
+new THREE.DirectionalLight(
+0xaecfff,
+2.4
+);
+
+moonLight.position.set(
+-30,
+50,
+-35
+);
+
+moonLight.castShadow=true;
+
+moonLight.shadow.mapSize.set(
+2048,
+2048
+);
+
+moonLight.shadow.camera.left=-80;
+moonLight.shadow.camera.right=80;
+moonLight.shadow.camera.top=80;
+moonLight.shadow.camera.bottom=-80;
+moonLight.shadow.camera.near=.5;
+moonLight.shadow.camera.far=220;
+
+lights.add(moonLight);
+
+heavenLight=
+new THREE.DirectionalLight(
+0xdcecff,
+0
+);
+
+heavenLight.position.set(
+0,
+45,
+10
+);
+
+heavenLight.castShadow=true;
+
+lights.add(heavenLight);
+
+const fill=
+new THREE.PointLight(
+0x355c9e,
+1.4,
+80,
+2
+);
+
+fill.position.set(
+0,
+8,
+20
+);
+
+lights.add(fill);
+
+}
+
+/* =========================================================
+   MOON
+========================================================= */
+
+function createMoon(
+x=-45,
+y=48,
+z=-90,
+scale=1
+){
+
+const moon=
+new THREE.Mesh(
+new THREE.SphereGeometry(
+8*scale,
+48,
+48
+),
+new THREE.MeshBasicMaterial({
+color:0xf2f5ff
+})
+);
+
+moon.position.set(
+x,
+y,
+z
+);
+
+add(environment,moon);
+
+const glowMaterial=
+new THREE.MeshBasicMaterial({
+color:0xabcfff,
+transparent:true,
+opacity:.055,
+side:THREE.BackSide
+});
+
+const glow=
+new THREE.Mesh(
+new THREE.SphereGeometry(
+12*scale,
+32,
+32
+),
+glowMaterial
+);
+
+glow.position.copy(moon.position);
+
+add(environment,glow);
+
+moonGlow=glow;
+
+}
+
+/* =========================================================
+   STARS
+========================================================= */
+
+function createStars(
+count=1500,
+radius=500
+){
+
+const positions=
+new Float32Array(count*3);
+
+const sizes=
+new Float32Array(count);
+
+for(let i=0;i<count;i++){
+
+const r=
+radius*(.55+Math.random()*.45);
+
+const theta=
+Math.random()*Math.PI*2;
+
+const phi=
+Math.acos(
+2*Math.random()-1
+);
+
+positions[i*3]=
+r*Math.sin(phi)*Math.cos(theta);
+
+positions[i*3+1]=
+Math.abs(
+r*Math.cos(phi)
+);
+
+positions[i*3+2]=
+r*Math.sin(phi)*Math.sin(theta);
+
+sizes[i]=
+.5+Math.random()*2.2;
+
+}
+
+const geometry=
+new THREE.BufferGeometry();
+
+geometry.setAttribute(
+"position",
+new THREE.BufferAttribute(
+positions,
+3
+)
+);
+
+const material=
+new THREE.PointsMaterial({
+color:0xdcecff,
+size:.8,
+transparent:true,
+opacity:.7,
+sizeAttenuation:true
+});
+
+const starField=
+new THREE.Points(
+geometry,
+material
+);
+
+add(environment,starField);
+
+return starField;
+}
+
+/* =========================================================
+   FOG
+========================================================= */
+
+function setFog(
+color=0x050811,
+near=5,
+far=140
+){
+
+world.fog=
+new THREE.Fog(
+color,
+near,
+far
+);
+
+world.background=
+new THREE.Color(color);
+
+}
 
 /* =========================================================
    GROUND
 ========================================================= */
 
-function ground(size=200,color=0x07100b){
+function createGround(
+size=180,
+material=materials.darkStone
+){
 
-    const mesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(size,size),
-        mat(color,1)
-    );
+const ground=
+new THREE.Mesh(
+new THREE.PlaneGeometry(
+size,
+size,
+80,
+80
+),
+material
+);
 
-    mesh.rotation.x=-Math.PI/2;
-    mesh.receiveShadow=true;
-    world.add(mesh);
+ground.rotation.x=-Math.PI/2;
 
-    return mesh;
+ground.receiveShadow=true;
+
+add(environment,ground);
+
+return ground;
+
 }
-
 
 /* =========================================================
    TREES
 ========================================================= */
 
-function tree(x,z,s=1){
+function createTree(
+x,
+z,
+scale=1,
+variant=0
+){
 
-    const g=new THREE.Group();
+const tree=
+new THREE.Group();
 
-    const trunk=new THREE.Mesh(
-        new THREE.CylinderGeometry(.25*s,.45*s,5*s,8),
-        mat(0x241811)
-    );
+tree.position.set(
+x,
+0,
+z
+);
 
-    trunk.position.y=2.5*s;
-    trunk.castShadow=true;
+tree.scale.setScalar(scale);
 
-    const crown=new THREE.Mesh(
-        new THREE.ConeGeometry(2.1*s,5*s,9),
-        mat(0x07140c)
-    );
+const trunk=
+cylinder(
+.32,
+.48,
+5,
+materials.wood,
+0,
+2.5,
+0,
+12
+);
 
-    crown.position.y=6*s;
-    crown.castShadow=true;
+tree.add(trunk);
 
-    g.add(trunk,crown);
-    g.position.set(x,0,z);
+const darkLeaf=
+new THREE.MeshStandardMaterial({
+color:
+variant%2===0
+?0x07130f
+:0x0b1514,
+roughness:1
+});
 
-    world.add(g);
+const levels=4;
+
+for(let i=0;i<levels;i++){
+
+const h=
+5.2-i*.75;
+
+const radius=
+2.8-i*.48;
+
+const foliage=
+cone(
+radius,
+3.2,
+darkLeaf,
+0,
+h,
+0
+);
+
+tree.add(foliage);
+
 }
 
+tree.rotation.y=
+Math.random()*Math.PI*2;
+
+add(environment,tree);
+
+return tree;
+
+}
 
 /* =========================================================
    FOREST
@@ -511,1359 +1646,5491 @@ function tree(x,z,s=1){
 
 function buildForest(){
 
-    ground(180,0x061009);
+clearGroup(environment);
+clearGroup(props);
+clearGroup(particles);
+clearGroup(characters);
+clearGroup(lights);
 
-    for(let i=0;i<90;i++){
+setupLighting();
 
-        const x=(Math.random()-.5)*90;
-        const z=(Math.random()-.5)*110;
+setFog(
+0x03070b,
+5,
+125
+);
 
-        if(Math.abs(x)<7) continue;
+createGround(
+190,
+new THREE.MeshStandardMaterial({
+color:0x070b0d,
+roughness:1
+})
+);
 
-        tree(
-            x,
-            z,
-            .65+Math.random()*1.1
-        );
-    }
+createMoon(
+-38,
+47,
+-105,
+1
+);
 
-    createFireflies();
+createStars(
+1900,
+450
+);
+
+for(let i=0;i<85;i++){
+
+const angle=
+Math.random()*Math.PI*2;
+
+const distance=
+8+Math.random()*75;
+
+const x=
+Math.cos(angle)*distance;
+
+const z=
+Math.sin(angle)*distance-20;
+
+const scale=
+.65+Math.random()*1.5;
+
+createTree(
+x,
+z,
+scale,
+i
+);
+
 }
 
+createForestRocks();
+
+createFogBanks();
+
+createFireflies(
+120,
+0x9bcaff
+);
+
+createRain(
+900
+);
+
+createForestLights();
+
+}
 
 /* =========================================================
-   FIREFLIES
+   FOREST ROCKS
 ========================================================= */
 
-function createFireflies(){
+function createForestRocks(){
 
-    const geo=new THREE.BufferGeometry();
-    const pos=[];
+for(let i=0;i<35;i++){
 
-    for(let i=0;i<220;i++){
+const rock=
+new THREE.Mesh(
+new THREE.IcosahedronGeometry(
+.5+Math.random()*1.4,
+1
+),
+materials.oldStone
+);
 
-        pos.push(
-            (Math.random()-.5)*55,
-            1+Math.random()*12,
-            (Math.random()-.5)*70
-        );
-    }
+rock.position.set(
+(Math.random()-.5)*100,
+.2+Math.random()*.6,
+Math.random()*90-50
+);
 
-    geo.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(pos,3)
-    );
+rock.scale.y=
+.45+Math.random()*.5;
 
-    const material=new THREE.PointsMaterial({
-        color:0xd9d19c,
-        size:.08,
-        transparent:true,
-        opacity:.8
-    });
+rock.rotation.set(
+Math.random(),
+Math.random(),
+Math.random()
+);
 
-    particles.fireflies=new THREE.Points(
-        geo,
-        material
-    );
+rock.castShadow=true;
+rock.receiveShadow=true;
 
-    world.add(particles.fireflies);
+add(props,rock);
+
 }
 
+}
 
 /* =========================================================
-   RIVER
+   FOREST LIGHTS
 ========================================================= */
 
-function buildRiver(){
+function createForestLights(){
 
-    const water=new THREE.Mesh(
-        new THREE.PlaneGeometry(25,100),
-        new THREE.MeshStandardMaterial({
-            color:0x071526,
-            roughness:.15,
-            metalness:.65,
-            transparent:true,
-            opacity:.88
-        })
-    );
+for(let i=0;i<8;i++){
 
-    water.rotation.x=-Math.PI/2;
-    water.position.set(0,.03,-35);
+const light=
+new THREE.PointLight(
+0x9bcaff,
+1.8,
+13,
+2
+);
 
-    world.add(water);
+light.position.set(
+(Math.random()-.5)*60,
+1.8+Math.random()*3,
+Math.random()*60-30
+);
 
-    const moonReflection=new THREE.PointLight(
-        0x9db8e8,
-        5,
-        35
-    );
+add(lights,light);
 
-    moonReflection.position.set(0,8,-35);
+const orb=
+sphere(
+.055,
+materials.blueGlow,
+light.position.x,
+light.position.y,
+light.position.z,
+12
+);
 
-    world.add(moonReflection);
+add(props,orb);
+
 }
 
+}
 
 /* =========================================================
-   GRAVES
+   FOG BANKS
 ========================================================= */
 
-function grave(x,z,rot=0){
+function createFogBanks(){
 
-    const g=new THREE.Group();
+const fogMaterial=
+new THREE.MeshBasicMaterial({
+color:0x93a9bf,
+transparent:true,
+opacity:.035,
+depthWrite:false
+});
 
-    const body=new THREE.Mesh(
-        new THREE.BoxGeometry(1.1,.3,.25),
-        oldStone
-    );
+for(let i=0;i<30;i++){
 
-    body.position.y=.8;
+const fog=
+new THREE.Mesh(
+new THREE.SphereGeometry(
+3+Math.random()*8,
+20,
+12
+),
+fogMaterial.clone()
+);
 
-    const top=new THREE.Mesh(
-        new THREE.BoxGeometry(.9,.9,.22),
-        oldStone
-    );
+fog.scale.y=
+.25+Math.random()*.4;
 
-    top.position.y=1.3;
+fog.position.set(
+(Math.random()-.5)*100,
+.7+Math.random()*2,
+Math.random()*100-50
+);
 
-    g.add(body,top);
+fog.userData.speed=
+.002+Math.random()*.006;
 
-    g.position.set(x,0,z);
-    g.rotation.y=rot;
+add(particles,fog);
 
-    world.add(g);
 }
 
-
-function buildCemetery(){
-
-    for(let i=0;i<35;i++){
-
-        grave(
-            (Math.random()-.5)*35,
-            -10+(Math.random()-.5)*30,
-            Math.random()*Math.PI
-        );
-    }
 }
-
 
 /* =========================================================
-   MOUNTAIN PATH
+   FIRELIES
 ========================================================= */
 
-function buildMountain(){
+function createFireflies(
+count,
+color
+){
 
-    for(let i=0;i<35;i++){
+const positions=
+new Float32Array(count*3);
 
-        const rock=new THREE.Mesh(
-            new THREE.DodecahedronGeometry(
-                .5+Math.random()*1.5
-            ),
-            oldStone
-        );
+const data=[];
 
-        rock.position.set(
-            (Math.random()-.5)*35,
-            Math.random()*2,
-            -55-Math.random()*35
-        );
+for(let i=0;i<count;i++){
 
-        rock.rotation.set(
-            Math.random()*2,
-            Math.random()*2,
-            Math.random()*2
-        );
+positions[i*3]=
+(Math.random()-.5)*100;
 
-        rock.castShadow=true;
+positions[i*3+1]=
+.6+Math.random()*5;
 
-        world.add(rock);
-    }
+positions[i*3+2]=
+Math.random()*100-50;
+
+data.push({
+phase:Math.random()*Math.PI*2,
+speed:.3+Math.random()*1.2,
+radius:.3+Math.random()*1.8
+});
+
 }
 
+const geometry=
+new THREE.BufferGeometry();
 
-/* =========================================================
-   CASTLE
-========================================================= */
+geometry.setAttribute(
+"position",
+new THREE.BufferAttribute(
+positions,
+3
+)
+);
 
-function castle(){
+const material=
+new THREE.PointsMaterial({
+color,
+size:.09,
+transparent:true,
+opacity:.85,
+blending:THREE.AdditiveBlending
+});
 
-    const g=new THREE.Group();
+const points=
+new THREE.Points(
+geometry,
+material
+);
 
-    const main=new THREE.Mesh(
-        new THREE.BoxGeometry(24,22,13),
-        stone
-    );
+points.userData.fireflies=data;
 
-    main.position.y=11;
-    main.castShadow=true;
-    main.receiveShadow=true;
+add(particles,points);
 
-    g.add(main);
-
-    for(const x of [-14,14]){
-
-        const tower=new THREE.Mesh(
-            new THREE.CylinderGeometry(
-                4,4,27,16
-            ),
-            stone
-        );
-
-        tower.position.set(x,13,0);
-        tower.castShadow=true;
-
-        const roof=new THREE.Mesh(
-            new THREE.ConeGeometry(5,7,16),
-            black
-        );
-
-        roof.position.set(x,30,0);
-
-        g.add(tower,roof);
-    }
-
-    const gate=new THREE.Mesh(
-        new THREE.BoxGeometry(5,9,.8),
-        black
-    );
-
-    gate.position.set(0,4.5,6.7);
-
-    objects.gate=gate;
-
-    g.add(gate);
-
-    for(let x=-8;x<=8;x+=4){
-
-        const window=new THREE.Mesh(
-            new THREE.BoxGeometry(
-                1.2,4,.15
-            ),
-            new THREE.MeshStandardMaterial({
-                color:0xe7d49b,
-                emissive:0x8d6827,
-                emissiveIntensity:2
-            })
-        );
-
-        window.position.set(x,12,6.7);
-
-        g.add(window);
-    }
-
-    g.position.set(0,0,-95);
-
-    world.add(g);
 }
-
-
-/* =========================================================
-   HUMAN CHARACTER
-========================================================= */
-
-function humanCharacter({
-    pale=false,
-    female=false
-}={}){
-
-    const g=new THREE.Group();
-
-    const body=new THREE.Mesh(
-        new THREE.CylinderGeometry(
-            .65,.8,2.3,16
-        ),
-        black
-    );
-
-    body.position.y=2.2;
-    body.castShadow=true;
-
-    const neck=new THREE.Mesh(
-        new THREE.CylinderGeometry(
-            .23,.27,.35,12
-        ),
-        pale?skinPale:skin
-    );
-
-    neck.position.y=3.55;
-
-    const head=new THREE.Mesh(
-        new THREE.SphereGeometry(
-            .72,32,24
-        ),
-        pale?skinPale:skin
-    );
-
-    head.position.y=4.35;
-    head.scale.set(.88,1.05,.9);
-    head.castShadow=true;
-
-    const hairMesh=new THREE.Mesh(
-        new THREE.SphereGeometry(
-            .76,24,18,
-            0,Math.PI*2,
-            0,Math.PI*.55
-        ),
-        hair
-    );
-
-    hairMesh.position.y=4.7;
-
-    const eyeMat=new THREE.MeshStandardMaterial({
-        color:0x8c1624,
-        emissive:0x8c1624,
-        emissiveIntensity:4
-    });
-
-    for(const x of [-.24,.24]){
-
-        const eye=new THREE.Mesh(
-            new THREE.SphereGeometry(.055,12,12),
-            eyeMat
-        );
-
-        eye.position.set(
-            x,
-            4.38,
-            .68
-        );
-
-        g.add(eye);
-    }
-
-    const armL=new THREE.Mesh(
-        new THREE.CapsuleGeometry(.22,1.5,6,12),
-        black
-    );
-
-    armL.position.set(-.85,2.3,0);
-    armL.rotation.z=-.1;
-
-    const armR=armL.clone();
-    armR.position.x=.85;
-    armR.rotation.z=.1;
-
-    const legL=new THREE.Mesh(
-        new THREE.CapsuleGeometry(.27,1.8,6,12),
-        black
-    );
-
-    legL.position.set(-.35,.65,0);
-
-    const legR=legL.clone();
-    legR.position.x=.35;
-
-    g.add(
-        body,
-        neck,
-        head,
-        hairMesh,
-        armL,
-        armR,
-        legL,
-        legR
-    );
-
-    return g;
-}
-
-
-/* =========================================================
-   ANGEL
-========================================================= */
-
-function createAngel(){
-
-    const g=humanCharacter({
-        pale:true,
-        female:false
-    });
-
-    g.scale.set(.9,.9,.9);
-
-    const halo=new THREE.Mesh(
-        new THREE.TorusGeometry(
-            1.05,.055,12,48
-        ),
-        new THREE.MeshStandardMaterial({
-            color:0xffe6a0,
-            emissive:0xffd56a,
-            emissiveIntensity:4
-        })
-    );
-
-    halo.position.y=5.4;
-    halo.rotation.x=Math.PI/2;
-
-    g.add(halo);
-
-    function wing(side){
-
-        const shape=new THREE.Shape();
-
-        shape.moveTo(0,0);
-        shape.quadraticCurveTo(
-            3*side,
-            2,
-            4*side,
-            .5
-        );
-
-        shape.quadraticCurveTo(
-            2.8*side,
-            -.8,
-            0,
-            -1
-        );
-
-        const geometry=new THREE.ShapeGeometry(shape);
-
-        const wing=new THREE.Mesh(
-            geometry,
-            new THREE.MeshStandardMaterial({
-                color:0xf1eee4,
-                roughness:.7,
-                side:THREE.DoubleSide,
-                transparent:true,
-                opacity:.92
-            })
-        );
-
-        wing.position.y=3.4;
-
-        return wing;
-    }
-
-    g.add(
-        wing(1),
-        wing(-1)
-    );
-
-    angelLight.intensity=5;
-
-    actors.angel=g;
-
-    world.add(g);
-
-    g.position.set(2,2,-8);
-}
-
-
-/* =========================================================
-   NOUR
-========================================================= */
-
-function createNour(){
-
-    const g=humanCharacter({
-        pale:true
-    });
-
-    g.scale.set(1.05,1.05,1.05);
-
-    const cape=new THREE.Mesh(
-        new THREE.PlaneGeometry(3.2,4.5),
-        black
-    );
-
-    cape.position.set(0,2.6,-.55);
-    cape.rotation.x=.12;
-
-    g.add(cape);
-
-    actors.nour=g;
-
-    world.add(g);
-
-    g.position.set(0,0,4);
-}
-
-
-/* =========================================================
-   RANDY
-========================================================= */
-
-function createRandy(){
-
-    const g=humanCharacter({
-        pale:false
-    });
-
-    g.scale.set(1.1,1.1,1.1);
-
-    /*
-      Human appearance first.
-      The transformation is represented through lighting,
-      eyes and posture instead of turning him into a cartoon wolf.
-    */
-
-    const ears=[];
-
-    for(const x of [-.4,.4]){
-
-        const ear=new THREE.Mesh(
-            new THREE.ConeGeometry(
-                .25,.65,4
-            ),
-            skin
-        );
-
-        ear.position.set(
-            x,
-            5.1,
-            0
-        );
-
-        ears.push(ear);
-        g.add(ear);
-    }
-
-    actors.randy=g;
-
-    world.add(g);
-
-    g.position.set(0,0,-91);
-}
-
 
 /* =========================================================
    RAIN
 ========================================================= */
 
-function createRain(){
+let rain;
 
-    const geo=new THREE.BufferGeometry();
-    const pos=[];
-    const vel=[];
+function createRain(count=1000){
 
-    for(let i=0;i<1800;i++){
+const positions=
+new Float32Array(count*3);
 
-        pos.push(
-            (Math.random()-.5)*90,
-            Math.random()*35,
-            (Math.random()-.5)*110
-        );
+const velocities=
+new Float32Array(count);
 
-        vel.push(
-            .08+Math.random()*.15
-        );
-    }
+for(let i=0;i<count;i++){
 
-    geo.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(pos,3)
-    );
+positions[i*3]=
+(Math.random()-.5)*120;
 
-    particles.rain=new THREE.Points(
-        geo,
-        new THREE.PointsMaterial({
-            color:0x91a6c0,
-            size:.035,
-            transparent:true,
-            opacity:.55
-        })
-    );
+positions[i*3+1]=
+Math.random()*55;
 
-    particles.rain.userData.vel=vel;
+positions[i*3+2]=
+Math.random()*120-60;
 
-    world.add(particles.rain);
+velocities[i]=
+.35+Math.random()*.8;
+
 }
 
+const geometry=
+new THREE.BufferGeometry();
+
+geometry.setAttribute(
+"position",
+new THREE.BufferAttribute(
+positions,
+3
+)
+);
+
+const material=
+new THREE.PointsMaterial({
+color:0x9bb8d8,
+size:.055,
+transparent:true,
+opacity:.5
+});
+
+rain=
+new THREE.Points(
+geometry,
+material
+);
+
+rain.userData.velocities=velocities;
+
+add(particles,rain);
+
+}
 
 /* =========================================================
-   STARS
+   PATH
 ========================================================= */
 
-function stars(){
+function buildPath(){
 
-    const geo=new THREE.BufferGeometry();
-    const arr=[];
+clearGroup(environment);
+clearGroup(props);
+clearGroup(particles);
+clearGroup(characters);
+clearGroup(lights);
 
-    for(let i=0;i<1200;i++){
+setupLighting();
 
-        arr.push(
-            (Math.random()-.5)*300,
-            25+Math.random()*100,
-            (Math.random()-.5)*300
-        );
-    }
+setFog(
+0x070b13,
+4,
+130
+);
 
-    geo.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(arr,3)
-    );
+createGround(
+190,
+new THREE.MeshStandardMaterial({
+color:0x090c12,
+roughness:.98
+})
+);
 
-    scene.add(
-        new THREE.Points(
-            geo,
-            new THREE.PointsMaterial({
-                color:0xdfe9ff,
-                size:.12
-            })
-        )
-    );
+createMoon(
+32,
+42,
+-110,
+.85
+);
+
+createStars(
+1200,
+400
+);
+
+for(let i=0;i<40;i++){
+
+const x=
+(i%2===0?1:-1)*
+(5+Math.random()*14);
+
+const z=
+-i*4+
+Math.random()*3;
+
+createTree(
+x,
+z,
+.7+Math.random()*1.2,
+i
+);
+
 }
 
+createStonePath();
+
+createPathLanterns();
+
+createFireflies(
+80,
+0xbddcff
+);
+
+createRain(
+650
+);
+
+createPathArch();
+
+}
 
 /* =========================================================
-   DIALOGUE
+   STONE PATH
 ========================================================= */
 
-function dialogue(lines){
+function createStonePath(){
 
-    dialogueList=lines;
-    dialogueIndex=0;
+for(let i=0;i<32;i++){
 
-    showDialogueLine();
+const stone=
+new THREE.Mesh(
+new THREE.BoxGeometry(
+3.4+Math.random()*1.5,
+.25,
+2.4+Math.random()*.8
+),
+materials.stone
+);
+
+stone.position.set(
+(Math.random()-.5)*2.2,
+.13,
+-i*4
+);
+
+stone.rotation.y=
+(Math.random()-.5)*.35;
+
+stone.rotation.x=
+(Math.random()-.5)*.04;
+
+stone.receiveShadow=true;
+stone.castShadow=true;
+
+add(props,stone);
+
 }
 
-function showDialogueLine(){
-
-    const box=document.getElementById("dialogue");
-
-    if(dialogueIndex>=dialogueList.length){
-
-        box.style.opacity=0;
-        box.style.pointerEvents="none";
-
-        afterDialogue();
-
-        return;
-    }
-
-    const line=dialogueList[dialogueIndex];
-
-    document.getElementById("speaker").textContent=
-        line.speaker;
-
-    document.getElementById("text").textContent=
-        line.text;
-
-    box.style.opacity=1;
-    box.style.pointerEvents="auto";
 }
-
-function nextDialogue(){
-
-    if(
-        document.getElementById("dialogue").style.opacity==="0"
-    ) return;
-
-    dialogueIndex++;
-    showDialogueLine();
-}
-
-document.getElementById("dialogue")
-.addEventListener("click",nextDialogue);
-
 
 /* =========================================================
-   CHAPTER UI
+   LANTERNS
 ========================================================= */
 
-function chapter(n,title){
+function createPathLanterns(){
 
-    currentChapter=n;
+for(let i=0;i<12;i++){
 
-    document.getElementById("chapter").textContent=
-        "CHAPTER " + ["I","II","III","IV","V","VI"][n-1];
+const side=
+i%2===0?1:-1;
 
-    document.getElementById("location").textContent=
-        title;
+const z=
+-i*10-2;
 
-    document.getElementById("top").style.opacity=1;
+const x=
+side*(4+Math.random()*1.5);
+
+const pole=
+cylinder(
+.07,
+.1,
+2.5,
+materials.iron,
+x,
+1.25,
+z,
+10
+);
+
+add(props,pole);
+
+const top=
+box(
+.42,
+.42,
+.42,
+materials.iron,
+x,
+2.6,
+z
+);
+
+add(props,top);
+
+const flame=
+sphere(
+.1,
+materials.blueGlow,
+x,
+2.6,
+z,
+16
+);
+
+add(props,flame);
+
+const light=
+new THREE.PointLight(
+0x9fc8ff,
+2,
+12,
+2
+);
+
+light.position.set(
+x,
+2.6,
+z
+);
+
+add(lights,light);
+
 }
 
+}
 
 /* =========================================================
-   CHOICES
+   ARCH
 ========================================================= */
 
-function choice(label,fn){
+function createPathArch(){
 
-    const holder=document.getElementById("choice");
+const z=-125;
 
-    const b=document.createElement("button");
+const left=
+box(
+2.5,
+12,
+3,
+materials.oldStone,
+-8,
+6,
+z
+);
 
-    b.textContent=label;
+const right=
+box(
+2.5,
+12,
+3,
+materials.oldStone,
+8,
+6,
+z
+);
 
-    b.onclick=()=>{
+const top=
+box(
+18,
+3,
+3,
+materials.oldStone,
+0,
+11,
+z
+);
 
-        holder.innerHTML="";
-        fn();
-    };
+add(props,left);
+add(props,right);
+add(props,top);
 
-    holder.appendChild(b);
+const symbol=
+new THREE.Mesh(
+new THREE.TorusGeometry(
+3,
+.15,
+12,
+48
+),
+new THREE.MeshBasicMaterial({
+color:0xdcecff
+})
+);
+
+symbol.position.set(
+0,
+6,
+z-1.7
+);
+
+symbol.rotation.x=
+Math.PI/2;
+
+add(props,symbol);
+
 }
-
 
 /* =========================================================
-   CAMERA
+   RUINS
 ========================================================= */
 
-function cameraTo(x,y,z,duration=1800){
+function buildRuins(){
 
-    moving=true;
+clearGroup(environment);
+clearGroup(props);
+clearGroup(particles);
+clearGroup(characters);
+clearGroup(lights);
 
-    const start=camera.position.clone();
+setupLighting();
 
-    const target=new THREE.Vector3(x,y,z);
+setFog(
+0x060a12,
+3,
+110
+);
 
-    const begin=performance.now();
+createGround(
+180,
+new THREE.MeshStandardMaterial({
+color:0x080b12,
+roughness:1
+})
+);
 
-    function animateCamera(now){
+createMoon(
+-25,
+43,
+-80,
+.9
+);
 
-        const t=Math.min(
-            (now-begin)/duration,
-            1
-        );
+createStars(
+1600,
+420
+);
 
-        const eased=
-            t<.5
-            ?4*t*t*t
-            :1-Math.pow(-2*t+2,3)/2;
+createRuinWalls();
 
-        camera.position.lerpVectors(
-            start,
-            target,
-            eased
-        );
+createBrokenColumns();
 
-        if(t<1){
+createShrine();
 
-            requestAnimationFrame(animateCamera);
+createCandles();
 
-        }else{
+createSymbols();
 
-            moving=false;
-        }
-    }
+createFireflies(
+110,
+0xd5e8ff
+);
 
-    requestAnimationFrame(animateCamera);
 }
-
 
 /* =========================================================
-   LOOK AT
+   RUIN WALLS
 ========================================================= */
 
-function lookAt(target){
+function createRuinWalls(){
 
-    camera.lookAt(
-        new THREE.Vector3(
-            target.x,
-            target.y+2,
-            target.z
-        )
-    );
+const walls=[
+[-14,5,-18,2,10,16],
+[14,5,-18,2,10,16],
+[-12,4,-36,2,8,20],
+[12,4,-36,2,8,20],
+[-18,3,-50,20,6,2],
+[18,3,-50,20,6,2]
+];
+
+walls.forEach(
+w=>{
+const mesh=
+box(
+w[3],
+w[4],
+w[5],
+materials.oldStone,
+w[0],
+w[1],
+w[2]
+);
+
+mesh.rotation.y=
+(Math.random()-.5)*.08;
+
+add(props,mesh);
 }
+);
 
+}
 
 /* =========================================================
-   STORY
+   COLUMNS
 ========================================================= */
 
-function startStory(){
+function createBrokenColumns(){
 
-    document.getElementById("start").style.display="none";
+for(let i=0;i<16;i++){
 
-    document.getElementById("fade").style.opacity=0;
+const side=
+i%2===0?1:-1;
 
-    chapter(1,"THE FOREST");
+const x=
+side*(6+Math.random()*7);
 
-    camera.position.set(
-        0,
-        4,
-        13
-    );
+const z=
+-5-Math.random()*45;
 
-    lookAt(new THREE.Vector3(0,3,-5));
+const height=
+2+Math.random()*6;
 
-    dialogue([
-        {
-            speaker:"NOOR",
-            text:"Where am I...?"
-        },
-        {
-            speaker:"UNKNOWN",
-            text:"Somewhere between the road you chose... and the road that chose you."
-        }
-    ]);
+const col=
+cylinder(
+.55,
+.7,
+height,
+materials.oldStone,
+x,
+height/2,
+z,
+18
+);
+
+col.rotation.z=
+(Math.random()-.5)*.08;
+
+add(props,col);
+
+const cap=
+cylinder(
+.9,
+.8,
+.3,
+materials.stone,
+x,
+height+.15,
+z,
+18
+);
+
+add(props,cap);
+
 }
 
+}
+
+/* =========================================================
+   SHRINE
+========================================================= */
+
+function createShrine(){
+
+const base=
+box(
+8,
+1,
+6,
+materials.darkStone,
+0,
+.5,
+-38
+);
+
+add(props,base);
+
+const altar=
+box(
+4,
+2.4,
+2,
+materials.stone,
+0,
+2.2,
+-40
+);
+
+add(props,altar);
+
+const halo=
+new THREE.Mesh(
+new THREE.TorusGeometry(
+2.1,
+.12,
+16,
+64
+),
+new THREE.MeshBasicMaterial({
+color:0xdcecff,
+transparent:true,
+opacity:.8
+})
+);
+
+halo.position.set(
+0,
+4.2,
+-41.1
+);
+
+add(props,halo);
+
+const light=
+new THREE.PointLight(
+0xcfe4ff,
+5,
+28,
+2
+);
+
+light.position.set(
+0,
+4,
+-41
+);
+
+add(lights,light);
+
+}
+
+/* =========================================================
+   CANDLES
+========================================================= */
+
+function createCandles(){
+
+for(let i=0;i<28;i++){
+
+const x=
+(Math.random()-.5)*18;
+
+const z=
+-5-Math.random()*48;
+
+const candle=
+cylinder(
+.06,
+.08,
+.45,
+materials.candle,
+x,
+.3,
+z,
+10
+);
+
+add(props,candle);
+
+const flame=
+sphere(
+.06,
+materials.gold,
+x,
+.58,
+z,
+12
+);
+
+add(props,flame);
+
+const light=
+new THREE.PointLight(
+0xffd990,
+.35+Math.random()*.5,
+4,
+2
+);
+
+light.position.set(
+x,
+.6,
+z
+);
+
+light.userData.flicker=true;
+
+add(lights,light);
+
+}
+
+}
+
+/* =========================================================
+   SYMBOLS
+========================================================= */
+
+function createSymbols(){
+
+for(let i=0;i<9;i++){
+
+const ring=
+new THREE.Mesh(
+new THREE.TorusGeometry(
+.6+Math.random()*.6,
+.035,
+8,
+40
+),
+new THREE.MeshBasicMaterial({
+color:
+i%2===0
+?0xbddcff
+:0xd5b76b,
+transparent:true,
+opacity:.65
+})
+);
+
+ring.position.set(
+(Math.random()-.5)*16,
+.06,
+-8-Math.random()*38
+);
+
+ring.rotation.x=
+-Math.PI/2;
+
+add(props,ring);
+
+}
+
+}
+
+/* =========================================================
+   CASTLE
+========================================================= */
+
+function buildCastle(){
+
+clearGroup(environment);
+clearGroup(props);
+clearGroup(particles);
+clearGroup(characters);
+clearGroup(lights);
+
+setupLighting();
+
+setFog(
+0x04060c,
+5,
+180
+);
+
+createGround(
+250,
+new THREE.MeshStandardMaterial({
+color:0x07090f,
+roughness:1
+})
+);
+
+createMoon(
+0,
+55,
+-135,
+1.3
+);
+
+createStars(
+2200,
+600
+);
+
+createCastleBody();
+
+createCastleTowers();
+
+createCastleWindows();
+
+createCastleGate();
+
+createCastleBridge();
+
+createCastleBats();
+
+createRain(
+1200
+);
+
+createCastleMist();
+
+}
+
+/* =========================================================
+   CASTLE BODY
+========================================================= */
+
+function createCastleBody(){
+
+const main=
+box(
+38,
+30,
+16,
+materials.darkStone,
+0,
+15,
+-65
+);
+
+add(props,main);
+
+const central=
+box(
+24,
+38,
+14,
+materials.oldStone,
+0,
+19,
+-75
+);
+
+add(props,central);
+
+}
+
+/* =========================================================
+   CASTLE TOWERS
+========================================================= */
+
+function createCastleTowers(){
+
+const positions=[
+[-24,22,-69],
+[24,22,-69],
+[-21,27,-88],
+[21,27,-88]
+];
+
+positions.forEach(
+p=>{
+
+const tower=
+cylinder(
+7,
+8,
+44,
+materials.darkStone,
+p[0],
+p[1],
+p[2],
+20
+);
+
+add(props,tower);
+
+const roof=
+cone(
+9,
+10,
+materials.black,
+p[0],
+p[1]+27,
+p[2]
+);
+
+add(props,roof);
+
+const cap=
+cylinder(
+8.4,
+8.4,
+.6,
+materials.stone,
+p[0],
+p[1]+5,
+p[2],
+20
+);
+
+add(props,cap);
+
+}
+);
+
+}
+
+/* =========================================================
+   CASTLE WINDOWS
+========================================================= */
+
+function createCastleWindows(){
+
+for(let side of [-1,1]){
+
+for(let i=0;i<7;i++){
+
+const x=
+side*(i%2===0?5:12);
+
+const y=
+6+i*4;
+
+const z=-73;
+
+const material=
+new THREE.MeshBasicMaterial({
+color:
+i%3===0
+?0xdcecff
+:0x6d8bb7
+});
+
+const window=
+box(
+1.1,
+2.5,
+.15,
+material,
+x,
+y,
+z
+);
+
+add(props,window);
+
+const glow=
+new THREE.PointLight(
+0x9bbcff,
+.5,
+9,
+2
+);
+
+glow.position.set(
+x,
+y,
+z+1
+);
+
+add(lights,glow);
+
+}
+
+}
+
+}
+
+/* =========================================================
+   CASTLE GATE
+========================================================= */
+
+function createCastleGate(){
+
+const frameL=
+box(
+4,
+20,
+4,
+materials.oldStone,
+-10,
+10,
+-91
+);
+
+const frameR=
+box(
+4,
+20,
+4,
+materials.oldStone,
+10,
+10,
+-91
+);
+
+const top=
+box(
+24,
+4,
+4,
+materials.oldStone,
+0,
+20,
+-91
+);
+
+add(props,frameL);
+add(props,frameR);
+add(props,top);
+
+const door=
+box(
+15,
+17,
+1.5,
+materials.iron,
+0,
+8.5,
+-92
+);
+
+door.userData.gate=true;
+
+add(props,door);
+
+for(let x=-6;x<=6;x+=2){
+
+const spike=
+cone(
+.35,
+2.5,
+materials.iron,
+x,
+18.5,
+-92
+);
+
+add(props,spike);
+
+}
+
+}
+
+/* =========================================================
+   BRIDGE
+========================================================= */
+
+function createCastleBridge(){
+
+for(let i=0;i<12;i++){
+
+const block=
+box(
+5,
+.8,
+3,
+materials.stone,
+0,
+.4,
+-i*3-15
+);
+
+add(props,block);
+
+}
+
+for(let side of [-1,1]){
+
+const rail=
+box(
+.5,
+2,
+35,
+materials.oldStone,
+side*3,
+1.3,
+-32
+);
+
+add(props,rail);
+
+}
+
+}
+
+/* =========================================================
+   BATS
+========================================================= */
+
+let bats=[];
+
+function createCastleBats(){
+
+bats=[];
+
+for(let i=0;i<18;i++){
+
+const bat=
+new THREE.Group();
+
+bat.position.set(
+(Math.random()-.5)*50,
+20+Math.random()*28,
+-40-Math.random()*60
+);
+
+const body=
+sphere(
+.18,
+materials.black,
+0,
+0,
+0,
+12
+);
+
+bat.add(body);
+
+const wingL=
+new THREE.Mesh(
+new THREE.PlaneGeometry(
+1.2,
+.6
+),
+materials.black
+);
+
+wingL.position.x=-.55;
+wingL.rotation.z=.25;
+
+bat.add(wingL);
+
+const wingR=
+wingL.clone();
+
+wingR.position.x=.55;
+wingR.rotation.z=-.25;
+
+bat.add(wingR);
+
+bat.userData.phase=
+Math.random()*Math.PI*2;
+
+bat.userData.speed=
+.4+Math.random();
+
+bats.push(bat);
+
+add(particles,bat);
+
+}
+
+}
+
+/* =========================================================
+   CASTLE MIST
+========================================================= */
+
+function createCastleMist(){
+
+for(let i=0;i<18;i++){
+
+const mist=
+new THREE.Mesh(
+new THREE.SphereGeometry(
+4+Math.random()*7,
+18,
+10
+),
+new THREE.MeshBasicMaterial({
+color:0x9bb0c6,
+transparent:true,
+opacity:.025,
+depthWrite:false
+})
+);
+
+mist.position.set(
+(Math.random()-.5)*70,
+1+Math.random()*3,
+-20-Math.random()*90
+);
+
+mist.scale.y=.25;
+
+add(particles,mist);
+
+}
+
+}
+
+/* =========================================================
+   GATE
+========================================================= */
+
+function buildGate(){
+
+buildCastle();
+
+camera.position.set(
+0,
+8,
+-55
+);
+
+}
+
+/* =========================================================
+   HALL
+========================================================= */
+
+function buildHall(){
+
+clearGroup(environment);
+clearGroup(props);
+clearGroup(particles);
+clearGroup(characters);
+clearGroup(lights);
+
+setupLighting();
+
+setFog(
+0x02040a,
+4,
+115
+);
+
+createHallFloor();
+
+createHallWalls();
+
+createHallColumns();
+
+createChandeliers();
+
+createStainedGlass();
+
+createHallCandles();
+
+createHallFog();
+
+createHeavenBeams();
+
+}
+
+/* =========================================================
+   HALL FLOOR
+========================================================= */
+
+function createHallFloor(){
+
+const floor=
+new THREE.Mesh(
+new THREE.PlaneGeometry(
+100,
+180,
+30,
+50
+),
+new THREE.MeshStandardMaterial({
+color:0x11141c,
+roughness:.2,
+metalness:.65
+})
+);
+
+floor.rotation.x=-Math.PI/2;
+
+floor.position.z=-45;
+
+floor.receiveShadow=true;
+
+add(environment,floor);
+
+}
+
+/* =========================================================
+   HALL WALLS
+========================================================= */
+
+function createHallWalls(){
+
+const left=
+box(
+5,
+24,
+120,
+materials.oldStone,
+-18,
+12,
+-50
+);
+
+const right=
+box(
+5,
+24,
+120,
+materials.oldStone,
+18,
+12,
+-50
+);
+
+add(props,left);
+add(props,right);
+
+const ceiling=
+box(
+42,
+3,
+120,
+materials.black,
+0,
+25,
+-50
+);
+
+add(props,ceiling);
+
+}
+
+/* =========================================================
+   HALL COLUMNS
+========================================================= */
+
+function createHallColumns(){
+
+for(let z=0;z>-110;z-=10){
+
+for(let side of [-1,1]){
+
+const col=
+cylinder(
+1.8,
+2.2,
+22,
+materials.stone,
+side*14,
+11,
+z,
+24
+);
+
+add(props,col);
+
+const cap=
+box(
+4,
+1,
+4,
+materials.oldStone,
+side*14,
+22.5,
+z
+);
+
+add(props,cap);
+
+}
+
+}
+
+}
+
+/* =========================================================
+   CHANDELIERS
+========================================================= */
+
+function createChandeliers(){
+
+for(let i=0;i<6;i++){
+
+const z=
+-8-i*18;
+
+const chain=
+cylinder(
+.05,
+.07,
+5,
+materials.iron,
+0,
+22,
+z,
+8
+);
+
+add(props,chain);
+
+const ring=
+new THREE.Mesh(
+new THREE.TorusGeometry(
+3,
+.18,
+12,
+32
+),
+materials.iron
+);
+
+ring.position.set(
+0,
+19,
+z
+);
+
+ring.rotation.x=Math.PI/2;
+
+add(props,ring);
+
+for(let j=0;j<8;j++){
+
+const angle=
+j/8*Math.PI*2;
+
+const x=
+Math.cos(angle)*2.6;
+
+const zz=
+z+Math.sin(angle)*2.6;
+
+const flame=
+sphere(
+.08,
+materials.gold,
+x,
+18.8,
+zz,
+12
+);
+
+add(props,flame);
+
+const light=
+new THREE.PointLight(
+0xffd894,
+.6,
+10,
+2
+);
+
+light.position.set(
+x,
+18.8,
+zz
+);
+
+light.userData.flicker=true;
+
+add(lights,light);
+
+}
+
+}
+
+}
+
+/* =========================================================
+   STAINED GLASS
+========================================================= */
+
+function createStainedGlass(){
+
+for(let i=0;i<9;i++){
+
+const z=
+-8-i*12;
+
+const material=
+new THREE.MeshBasicMaterial({
+color:
+i%2===0
+?0x8eb5df
+:0xc9a95d,
+transparent:true,
+opacity:.32,
+side:THREE.DoubleSide
+});
+
+const glass=
+new THREE.Mesh(
+new THREE.PlaneGeometry(
+8,
+11
+),
+material
+);
+
+glass.position.set(
+0,
+12,
+z
+);
+
+glass.rotation.y=Math.PI;
+
+add(props,glass);
+
+const glow=
+new THREE.PointLight(
+i%2===0
+?0x8ebcff
+:0xd9b85e,
+.35,
+18,
+2
+);
+
+glow.position.set(
+0,
+12,
+z+3
+);
+
+add(lights,glow);
+
+}
+
+}
+
+/* =========================================================
+   HALL CANDLES
+========================================================= */
+
+function createHallCandles(){
+
+for(let z=0;z>-112;z-=6){
+
+for(let side of [-1,1]){
+
+const x=
+side*(7+Math.random()*2);
+
+const candle=
+cylinder(
+.08,
+.1,
+.7,
+materials.candle,
+x,
+.4,
+z,
+12
+);
+
+add(props,candle);
+
+const flame=
+sphere(
+.08,
+materials.gold,
+x,
+.82,
+z,
+12
+);
+
+add(props,flame);
+
+const light=
+new THREE.PointLight(
+0xffc96f,
+.45,
+5,
+2
+);
+
+light.position.set(
+x,
+.8,
+z
+);
+
+light.userData.flicker=true;
+
+add(lights,light);
+
+}
+
+}
+
+}
+
+/* =========================================================
+   HALL FOG
+========================================================= */
+
+function createHallFog(){
+
+for(let i=0;i<22;i++){
+
+const fog=
+new THREE.Mesh(
+new THREE.SphereGeometry(
+2+Math.random()*6,
+16,
+8
+),
+new THREE.MeshBasicMaterial({
+color:0xa9b9ce,
+transparent:true,
+opacity:.018,
+depthWrite:false
+})
+);
+
+fog.position.set(
+(Math.random()-.5)*24,
+.3+Math.random()*2,
+-Math.random()*110
+);
+
+fog.scale.y=.2;
+
+add(particles,fog);
+
+}
+
+}
+
+/* =========================================================
+   HEAVEN BEAMS
+========================================================= */
+
+function createHeavenBeams(){
+
+for(let i=0;i<5;i++){
+
+const material=
+new THREE.MeshBasicMaterial({
+color:0xcde5ff,
+transparent:true,
+opacity:.018,
+depthWrite:false,
+side:THREE.DoubleSide
+});
+
+const beam=
+new THREE.Mesh(
+new THREE.PlaneGeometry(
+5+Math.random()*5,
+35
+),
+material
+);
+
+beam.position.set(
+-12+i*6,
+17,
+-20-i*18
+);
+
+beam.rotation.z=
+-.1+Math.random()*.2;
+
+add(particles,beam);
+
+}
+
+heavenLight.intensity=.8;
+
+}
+
+/* =========================================================
+   CHAMBER
+========================================================= */
+
+function buildChamber(){
+
+clearGroup(environment);
+clearGroup(props);
+clearGroup(particles);
+clearGroup(characters);
+clearGroup(lights);
+
+setupLighting();
+
+setFog(
+0x020307,
+3,
+90
+);
+
+createChamberRoom();
+
+createChamberSeal();
+
+createFloatingSymbols();
+
+createChamberCandles();
+
+createAngelLight();
+
+}
+
+/* =========================================================
+   CHAMBER ROOM
+========================================================= */
+
+function createChamberRoom(){
+
+const floor=
+box(
+30,
+1,
+34,
+materials.darkStone,
+0,
+0,
+-16
+);
+
+add(environment,floor);
+
+const back=
+box(
+30,
+20,
+2,
+materials.oldStone,
+0,
+10,
+-33
+);
+
+add(props,back);
+
+const left=
+box(
+2,
+20,
+34,
+materials.oldStone,
+-15,
+10,
+-16
+);
+
+const right=
+box(
+2,
+20,
+34,
+materials.oldStone,
+15,
+10,
+-16
+);
+
+add(props,left);
+add(props,right);
+
+}
+
+/* =========================================================
+   CHAMBER SEAL
+========================================================= */
+
+function createChamberSeal(){
+
+const seal=
+new THREE.Mesh(
+new THREE.TorusGeometry(
+5,
+.12,
+18,
+96
+),
+new THREE.MeshBasicMaterial({
+color:0xdcecff,
+transparent:true,
+opacity:.9
+})
+);
+
+seal.position.set(
+0,
+7,
+-31.8
+);
+
+add(props,seal);
+
+for(let i=0;i<8;i++){
+
+const angle=
+i/8*Math.PI*2;
+
+const x=
+Math.cos(angle)*4;
+
+const y=
+7+Math.sin(angle)*4;
+
+const crystal=
+new THREE.Mesh(
+new THREE.OctahedronGeometry(
+.35,
+1
+),
+new THREE.MeshBasicMaterial({
+color:
+i%2===0
+?0xbddcff
+:0xd6b96d
+})
+);
+
+crystal.position.set(
+x,
+y,
+-31
+);
+
+crystal.userData.rotationSpeed=
+.003+Math.random()*.006;
+
+add(props,crystal);
+
+}
+
+}
+
+/* =========================================================
+   FLOATING SYMBOLS
+========================================================= */
+
+function createFloatingSymbols(){
+
+for(let i=0;i<20;i++){
+
+const symbol=
+new THREE.Mesh(
+new THREE.TorusGeometry(
+.12+Math.random()*.35,
+.025,
+8,
+24
+),
+new THREE.MeshBasicMaterial({
+color:0xcfe6ff,
+transparent:true,
+opacity:.4
+})
+);
+
+symbol.position.set(
+(Math.random()-.5)*18,
+1+Math.random()*14,
+-4-Math.random()*24
+);
+
+symbol.userData.phase=
+Math.random()*Math.PI*2;
+
+symbol.userData.speed=
+.3+Math.random();
+
+add(particles,symbol);
+
+}
+
+}
+
+/* =========================================================
+   CHAMBER CANDLES
+========================================================= */
+
+function createChamberCandles(){
+
+for(let i=0;i<16;i++){
+
+const angle=
+i/16*Math.PI*2;
+
+const radius=
+8+Math.random()*3;
+
+const x=
+Math.cos(angle)*radius;
+
+const z=
+-16+Math.sin(angle)*radius;
+
+const candle=
+cylinder(
+.08,
+.11,
+.8,
+materials.candle,
+x,
+.4,
+z,
+12
+);
+
+add(props,candle);
+
+const flame=
+sphere(
+.09,
+materials.gold,
+x,
+.9,
+z,
+12
+);
+
+add(props,flame);
+
+const light=
+new THREE.PointLight(
+0xffd78c,
+.5,
+7,
+2
+);
+
+light.position.set(
+x,
+1,
+z
+);
+
+light.userData.flicker=true;
+
+add(lights,light);
+
+}
+
+}
+
+/* =========================================================
+   ANGEL LIGHT
+========================================================= */
+
+function createAngelLight(){
+
+const halo=
+new THREE.Mesh(
+new THREE.TorusGeometry(
+3,
+.08,
+12,
+64
+),
+new THREE.MeshBasicMaterial({
+color:0xf0f7ff,
+transparent:true,
+opacity:.85
+})
+);
+
+halo.position.set(
+0,
+9,
+-10
+);
+
+halo.rotation.x=Math.PI/2;
+
+add(props,halo);
+
+const light=
+new THREE.PointLight(
+0xdcecff,
+6,
+35,
+2
+);
+
+light.position.set(
+0,
+8,
+-10
+);
+
+add(lights,light);
+
+}
+
+/* =========================================================
+   FINAL ROOM
+========================================================= */
+
+function buildFinalRoom(){
+
+clearGroup(environment);
+clearGroup(props);
+clearGroup(particles);
+clearGroup(characters);
+clearGroup(lights);
+
+setupLighting();
+
+setFog(
+0x02040a,
+3,
+100
+);
+
+createFinalFloor();
+
+createFinalWalls();
+
+createFinalCandles();
+
+createFinalStars();
+
+createFinalPortal();
+
+createBirthdayLights();
+
+}
+
+/* =========================================================
+   FINAL FLOOR
+========================================================= */
+
+function createFinalFloor(){
+
+const floor=
+new THREE.Mesh(
+new THREE.PlaneGeometry(
+80,
+80,
+20,
+20
+),
+new THREE.MeshStandardMaterial({
+color:0x11151d,
+roughness:.12,
+metalness:.8
+})
+);
+
+floor.rotation.x=-Math.PI/2;
+
+floor.position.z=-15;
+
+floor.receiveShadow=true;
+
+add(environment,floor);
+
+}
+
+/* =========================================================
+   FINAL WALLS
+========================================================= */
+
+function createFinalWalls(){
+
+const back=
+box(
+60,
+28,
+2,
+materials.oldStone,
+0,
+14,
+-45
+);
+
+add(props,back);
+
+for(let side of [-1,1]){
+
+const wall=
+box(
+2,
+28,
+60,
+materials.oldStone,
+side*30,
+14,
+-15
+);
+
+add(props,wall);
+
+}
+
+}
+
+/* =========================================================
+   FINAL CANDLES
+========================================================= */
+
+function createFinalCandles(){
+
+for(let i=0;i<40;i++){
+
+const angle=
+i/40*Math.PI*2;
+
+const radius=
+7+Math.random()*13;
+
+const x=
+Math.cos(angle)*radius;
+
+const z=
+-16+Math.sin(angle)*radius;
+
+const candle=
+cylinder(
+.09,
+.12,
+.9,
+materials.candle,
+x,
+.45,
+z,
+12
+);
+
+add(props,candle);
+
+const flame=
+sphere(
+.1,
+materials.gold,
+x,
+1,
+z,
+12
+);
+
+add(props,flame);
+
+const light=
+new THREE.PointLight(
+0xffd58c,
+.5+Math.random()*.7,
+8,
+2
+);
+
+light.position.set(
+x,
+1,
+z
+);
+
+light.userData.flicker=true;
+
+add(lights,light);
+
+}
+
+}
+
+/* =========================================================
+   FINAL STARS
+========================================================= */
+
+function createFinalStars(){
+
+const geometry=
+new THREE.BufferGeometry();
+
+const count=800;
+
+const positions=
+new Float32Array(count*3);
+
+for(let i=0;i<count;i++){
+
+positions[i*3]=
+(Math.random()-.5)*55;
+
+positions[i*3+1]=
+2+Math.random()*25;
+
+positions[i*3+2]=
+-43+Math.random()*2;
+
+}
+
+geometry.setAttribute(
+"position",
+new THREE.BufferAttribute(
+positions,
+3
+)
+);
+
+const points=
+new THREE.Points(
+geometry,
+new THREE.PointsMaterial({
+color:0xeaf4ff,
+size:.09,
+transparent:true,
+opacity:.7
+})
+);
+
+add(particles,points);
+
+}
+
+/* =========================================================
+   FINAL PORTAL
+========================================================= */
+
+function createFinalPortal(){
+
+const outer=
+new THREE.Mesh(
+new THREE.TorusGeometry(
+8,
+.18,
+20,
+100
+),
+new THREE.MeshBasicMaterial({
+color:0xdcecff,
+transparent:true,
+opacity:.9
+})
+);
+
+outer.position.set(
+0,
+9,
+-39
+);
+
+outer.rotation.x=Math.PI/2;
+
+add(props,outer);
+
+const inner=
+new THREE.Mesh(
+new THREE.CircleGeometry(
+7.8,
+64
+),
+new THREE.MeshBasicMaterial({
+color:0xabcfff,
+transparent:true,
+opacity:.08,
+side:THREE.DoubleSide
+})
+);
+
+inner.position.set(
+0,
+9,
+-38.8
+);
+
+inner.rotation.x=0;
+
+add(props,inner);
+
+}
+
+/* =========================================================
+   BIRTHDAY LIGHTS
+========================================================= */
+
+function createBirthdayLights(){
+
+const colors=[
+0xdcecff,
+0xf0d38b,
+0xb4c9ff,
+0xffffff
+];
+
+for(let i=0;i<20;i++){
+
+const light=
+new THREE.PointLight(
+colors[i%colors.length],
+1.2,
+16,
+2
+);
+
+light.position.set(
+(Math.random()-.5)*25,
+2+Math.random()*12,
+-20+Math.random()*20
+);
+
+add(lights,light);
+
+}
+
+heavenLight.intensity=2.4;
+
+}
+
+/* =========================================================
+   CHARACTER ASSETS
+========================================================= */
+
+const ASSETS={
+nour:"./assets/nour.glb",
+randy:"./assets/randy.glb",
+angel:"./assets/angel.glb"
+};
+
+const characterCache={};
+
+async function loadCharacter(
+name,
+url,
+position,
+scale=1
+){
+
+return new Promise(
+resolve=>{
+
+loader.load(
+url,
+gltf=>{
+
+const root=
+gltf.scene;
+
+root.position.copy(position);
+
+root.scale.setScalar(scale);
+
+root.traverse(
+object=>{
+
+if(object.isMesh){
+
+object.castShadow=true;
+object.receiveShadow=true;
+
+if(object.material){
+object.material.needsUpdate=true;
+}
+
+}
+
+}
+);
+
+if(gltf.animations.length){
+
+root.userData.mixer=
+new THREE.AnimationMixer(root);
+
+root.userData.actions=[];
+
+gltf.animations.forEach(
+clip=>{
+
+const action=
+root.userData.mixer.clipAction(
+clip
+);
+
+action.play();
+
+root.userData.actions.push(
+action
+);
+
+}
+);
+
+}
+
+characterCache[name]=root;
+
+add(characters,root);
+
+resolve(root);
+
+},
+undefined,
+()=>{
+
+resolve(
+createFallbackSilhouette(
+name,
+position,
+scale
+)
+);
+
+}
+);
+
+}
+);
+
+}
+
+/* =========================================================
+   FALLBACK SILHOUETTE
+========================================================= */
+
+function createFallbackSilhouette(
+name,
+position,
+scale
+){
+
+const group=
+new THREE.Group();
+
+group.position.copy(position);
+group.scale.setScalar(scale);
+
+const skin=
+new THREE.MeshStandardMaterial({
+color:
+name==="angel"
+?0xe9eff5
+:0x8c5d50,
+roughness:.72
+});
+
+const cloth=
+new THREE.MeshStandardMaterial({
+color:
+name==="nour"
+?0x07080c
+:0x172235,
+roughness:.82
+});
+
+const head=
+sphere(
+.42,
+skin,
+0,
+1.75,
+0,
+32
+);
+
+group.add(head);
+
+const neck=
+cylinder(
+.16,
+.19,
+.35,
+skin,
+0,
+1.35,
+0,
+20
+);
+
+group.add(neck);
+
+const torso=
+new THREE.Mesh(
+new THREE.CapsuleGeometry(
+.45,
+.9,
+8,
+16
+),
+cloth
+);
+
+torso.position.y=.85;
+
+group.add(torso);
+
+const leftArm=
+new THREE.Mesh(
+new THREE.CapsuleGeometry(
+.13,
+.75,
+6,
+12
+),
+cloth
+);
+
+leftArm.position.set(
+-.55,
+.9,
+0
+);
+
+leftArm.rotation.z=-.15;
+
+group.add(leftArm);
+
+const rightArm=
+leftArm.clone();
+
+rightArm.position.x=.55;
+rightArm.rotation.z=.15;
+
+group.add(rightArm);
+
+const leftLeg=
+new THREE.Mesh(
+new THREE.CapsuleGeometry(
+.16,
+.9,
+6,
+12
+),
+cloth
+);
+
+leftLeg.position.set(
+-.22,
+-.15,
+0
+);
+
+group.add(leftLeg);
+
+const rightLeg=
+leftLeg.clone();
+
+rightLeg.position.x=.22;
+
+group.add(rightLeg);
+
+if(name==="angel"){
+
+const wingMaterial=
+new THREE.MeshBasicMaterial({
+color:0xeaf5ff,
+transparent:true,
+opacity:.32,
+side:THREE.DoubleSide
+});
+
+const wingL=
+new THREE.Mesh(
+new THREE.PlaneGeometry(
+2.7,
+5
+),
+wingMaterial
+);
+
+wingL.position.set(
+-1.2,
+1.2,
+.1
+);
+
+wingL.rotation.z=-.35;
+
+group.add(wingL);
+
+const wingR=
+wingL.clone();
+
+wingR.position.x=1.2;
+wingR.rotation.z=.35;
+
+group.add(wingR);
+
+const halo=
+new THREE.Mesh(
+new THREE.TorusGeometry(
+.65,
+.06,
+10,
+40
+),
+new THREE.MeshBasicMaterial({
+color:0xfff3c7
+})
+);
+
+halo.position.y=2.35;
+
+halo.rotation.x=Math.PI/2;
+
+group.add(halo);
+
+}
+
+add(characters,group);
+
+return group;
+
+}
+
+/* =========================================================
+   CHARACTER SETUP
+========================================================= */
+
+async function setupCharacters(){
+
+if(state.scene==="forest"){
+
+await loadCharacter(
+"angel",
+ASSETS.angel,
+new THREE.Vector3(
+2,
+0,
+-8
+),
+1.4
+);
+
+}
+
+if(state.scene==="chamber"){
+
+await loadCharacter(
+"nour",
+ASSETS.nour,
+new THREE.Vector3(
+-4,
+0,
+-5
+),
+1.2
+);
+
+await loadCharacter(
+"angel",
+ASSETS.angel,
+new THREE.Vector3(
+4,
+0,
+-9
+),
+1.3
+);
+
+}
+
+if(state.scene==="final"){
+
+await loadCharacter(
+"nour",
+ASSETS.nour,
+new THREE.Vector3(
+-3,
+0,
+-15
+),
+1.2
+);
+
+await loadCharacter(
+"randy",
+ASSETS.randy,
+new THREE.Vector3(
+3,
+0,
+-18
+),
+1.2
+);
+
+}
+
+}
+
+/* =========================================================
+   DIALOGUE DATA
+========================================================= */
+
+const dialogues={
+
+forest:[
+{
+name:"THE ANGEL",
+text:"نور... لا تخاف. الليلة مو مثل كل ليلة."
+},
+{
+name:"THE ANGEL",
+text:"الغابة ما جابتك لهنا صدفة."
+},
+{
+name:"THE ANGEL",
+text:"امشِ خلف الضوء... ولا تلتفت."
+},
+{
+name:"THE ANGEL",
+text:"هناك شخص ينتظرك خلف أبواب هذه الليلة."
+}
+],
+
+path:[
+{
+name:"THE NIGHT",
+text:"صوت المطر يختلط بخطواتك."
+},
+{
+name:"THE ANGEL",
+text:"كل حجر هنا يعرف اسماً واحداً."
+},
+{
+name:"THE ANGEL",
+text:"Randy."
+},
+{
+name:"THE ANGEL",
+text:"لكن لا تسأل لماذا... بعد."
+}
+],
+
+ruins:[
+{
+name:"THE ANGEL",
+text:"هنا انتهى الطريق بالنسبة للكثيرين."
+},
+{
+name:"THE ANGEL",
+text:"أما أنت... فقد بدأت قصتك هنا."
+},
+{
+name:"THE ANGEL",
+text:"خذ الرمز."
+},
+{
+name:"THE NIGHT",
+text:"الضوء يزداد."
+}
+],
+
+castle:[
+{
+name:"THE ANGEL",
+text:"انظر أمامك."
+},
+{
+name:"THE ANGEL",
+text:"القلعة لم تكن مهجورة يوماً."
+},
+{
+name:"THE ANGEL",
+text:"كانت تنتظر."
+},
+{
+name:"THE ANGEL",
+text:"وأنت وصلت أخيراً."
+}
+],
+
+gate:[
+{
+name:"THE GATE",
+text:"لا صوت."
+},
+{
+name:"THE ANGEL",
+text:"ضع يدك على الباب."
+},
+{
+name:"THE ANGEL",
+text:"بعض الأبواب لا تُفتح بالقوة."
+},
+{
+name:"THE ANGEL",
+text:"تُفتح عندما تعرف لماذا جئت."
+}
+],
+
+hall:[
+{
+name:"THE HALL",
+text:"ثلاث نبضات تسمعها في الظلام."
+},
+{
+name:"THE ANGEL",
+text:"تذكّر الرقم."
+},
+{
+name:"THE ANGEL",
+text:"ثلاث خطوات... ثلاث نبضات... ثلاثة أرقام."
+},
+{
+name:"THE NIGHT",
+text:"212."
+}
+],
+
+chamber:[
+{
+name:"NOUR",
+text:"أخيراً وصلت."
+},
+{
+name:"NOUR",
+text:"كنت أعرف أنك راح تكمل للنهاية."
+},
+{
+name:"THE ANGEL",
+text:"لكن بقي سؤال واحد."
+},
+{
+name:"NOUR",
+text:"إذا عرفت الإجابة... راح ينفتح الباب الأخير."
+}
+],
+
+final:[
+{
+name:"NOUR",
+text:"كنت أقدر أكتب رسالة."
+},
+{
+name:"NOUR",
+text:"أو أرسل تهنئة."
+},
+{
+name:"NOUR",
+text:"بس حسّيت إن شخص مثلك يستحق ليلة كاملة."
+},
+{
+name:"NOUR",
+text:"وهذه الليلة... كلها إلك."
+}
+]
+
+};
+
+/* =========================================================
+   DIALOGUE ENGINE
+========================================================= */
+
+const dialogueElement=
+document.getElementById("dialogue");
+
+const dialogueName=
+document.getElementById("dialogueName");
+
+const dialogueText=
+document.getElementById("dialogueText");
+
+let typingTimer=null;
+
+function showDialogue(){
+
+const list=
+dialogues[state.scene]||
+[];
+
+if(state.dialogueIndex>=list.length){
+
+hideDialogue();
+
+afterDialogue();
+
+return;
+
+}
+
+const line=
+list[state.dialogueIndex];
+
+dialogueName.textContent=
+line.name;
+
+dialogueText.textContent="";
+
+dialogueElement.classList.add(
+"dialogue-visible"
+);
+
+state.dialogue=true;
+state.typing=true;
+
+let index=0;
+
+clearInterval(typingTimer);
+
+typingTimer=
+setInterval(
+()=>{
+
+dialogueText.textContent=
+line.text.slice(
+0,
+++index
+);
+
+if(index>=line.text.length){
+
+clearInterval(typingTimer);
+
+state.typing=false;
+
+}
+},
+22
+);
+
+}
+
+function advanceDialogue(){
+
+if(!state.dialogue){
+showDialogue();
+return;
+}
+
+if(state.typing){
+
+clearInterval(typingTimer);
+
+const line=
+dialogues[state.scene][
+state.dialogueIndex
+];
+
+dialogueText.textContent=
+line.text;
+
+state.typing=false;
+
+return;
+
+}
+
+state.dialogueIndex++;
+
+showDialogue();
+
+}
+
+function hideDialogue(){
+
+dialogueElement.classList.remove(
+"dialogue-visible"
+);
+
+state.dialogue=false;
+
+}
+
+/* =========================================================
+   AFTER DIALOGUE
+========================================================= */
 
 function afterDialogue(){
 
-    const c=currentChapter;
+if(state.scene==="forest"){
 
-    if(c===1){
+showChoice(
+"تسمع صوتاً من خلف الأشجار.",
+"تتبع الضوء.",
+"تعود إلى الطريق."
+);
 
-        choice(
-            "FOLLOW THE LIGHT",
-            forestToRiver
-        );
+return;
 
-    }else if(c===2){
-
-        choice(
-            "CROSS THE RIVER",
-            riverToCemetery
-        );
-
-    }else if(c===3){
-
-        choice(
-            "ENTER THE CEMETERY",
-            cemeteryToMountain
-        );
-
-    }else if(c===4){
-
-        choice(
-            "CLIMB TOWARD THE CASTLE",
-            mountainToCastle
-        );
-
-    }else if(c===5){
-
-        choice(
-            "ENTER THE CASTLE",
-            enterCastle
-        );
-
-    }else if(c===6){
-
-        choice(
-            "APPROACH RANDY",
-            finalDialogue
-        );
-    }
 }
 
+if(state.scene==="path"){
+
+transitionTo("ruins");
+
+return;
+
+}
+
+if(state.scene==="ruins"){
+
+transitionTo("castle");
+
+return;
+
+}
+
+if(state.scene==="castle"){
+
+transitionTo("gate");
+
+return;
+
+}
+
+if(state.scene==="gate"){
+
+openGate();
+
+return;
+
+}
+
+if(state.scene==="hall"){
+
+openPuzzle();
+
+return;
+
+}
+
+if(state.scene==="chamber"){
+
+openAnswer();
+
+return;
+
+}
+
+if(state.scene==="final"){
+
+setTimeout(
+openLetter,
+900
+);
+
+}
+
+}
 
 /* =========================================================
-   FOREST → RIVER
+   CHOICE
 ========================================================= */
 
-function forestToRiver(){
+const choiceElement=
+document.getElementById("choice");
 
-    chapter(2,"THE SILVER RIVER");
+const choiceText=
+document.getElementById("choiceText");
 
-    cameraTo(
-        0,
-        5,
-        8
-    );
+const choiceA=
+document.getElementById("choiceA");
 
-    actors.angel.position.set(
-        1,
-        3,
-        -25
-    );
+const choiceB=
+document.getElementById("choiceB");
 
-    angelLight.position.copy(
-        actors.angel.position
-    );
+function showChoice(
+text,
+a,
+b
+){
 
-    dialogue([
-        {
-            speaker:"THE ANGEL",
-            text:"Do not be afraid, Noor."
-        },
-        {
-            speaker:"NOOR",
-            text:"Who are you?"
-        },
-        {
-            speaker:"THE ANGEL",
-            text:"A guide."
-        },
-        {
-            speaker:"NOOR",
-            text:"A guide to where?"
-        },
-        {
-            speaker:"THE ANGEL",
-            text:"To the place where someone has been waiting for you."
-        }
-    ]);
+choiceText.textContent=text;
+choiceA.textContent=a;
+choiceB.textContent=b;
+
+choiceElement.style.display="block";
+
+state.choiceOpen=true;
+
 }
 
+choiceA.onclick=()=>{
+choiceElement.style.display="none";
+state.choiceOpen=false;
+transitionTo("path");
+};
+
+choiceB.onclick=()=>{
+choiceElement.style.display="none";
+state.choiceOpen=false;
+shakeCamera(.4);
+transitionTo("path");
+};
 
 /* =========================================================
-   RIVER → CEMETERY
+   PUZZLE
 ========================================================= */
 
-function riverToCemetery(){
+const puzzle=
+document.getElementById("puzzle");
 
-    chapter(3,"THE FORGOTTEN DEAD");
+const puzzleInput=
+document.getElementById("puzzleInput");
 
-    cameraTo(
-        3,
-        4,
-        -20
-    );
+const puzzleButton=
+document.getElementById("puzzleButton");
 
-    actors.angel.position.set(
-        -2,
-        2.8,
-        -38
-    );
+const puzzleError=
+document.getElementById("puzzleError");
 
-    dialogue([
-        {
-            speaker:"NOOR",
-            text:"Why is there a cemetery here?"
-        },
-        {
-            speaker:"THE ANGEL",
-            text:"Because every castle has a history."
-        },
-        {
-            speaker:"NOOR",
-            text:"And every history has something buried inside it."
-        },
-        {
-            speaker:"THE ANGEL",
-            text:"Exactly."
-        }
-    ]);
+function openPuzzle(){
+
+puzzle.style.display="flex";
+
+puzzleInput.value="";
+
+puzzleError.textContent="";
+
+setTimeout(
+()=>{
+puzzleInput.focus();
+},
+100
+);
+
 }
 
+function closePuzzle(){
+
+puzzle.style.display="none";
+
+}
+
+function checkPuzzle(){
+
+if(
+puzzleInput.value.trim()==="212"
+){
+
+state.puzzleSolved=true;
+
+closePuzzle();
+
+playImpact();
+
+transitionTo("chamber");
+
+}else{
+
+puzzleError.textContent=
+"THE DOOR REMAINS CLOSED.";
+
+shakeCamera(.3);
+
+}
+
+}
+
+puzzleButton.onclick=
+checkPuzzle;
+
+puzzleInput.addEventListener(
+"keydown",
+event=>{
+if(event.key==="Enter"){
+checkPuzzle();
+}
+}
+);
 
 /* =========================================================
-   CEMETERY → MOUNTAIN
+   ANSWER
 ========================================================= */
 
-function cemeteryToMountain(){
+const answer=
+document.getElementById("answer");
 
-    chapter(4,"THE MOUNTAIN ROAD");
+const answerInput=
+document.getElementById("answerInput");
 
-    cameraTo(
-        0,
-        7,
-        -48
-    );
+const answerButton=
+document.getElementById("answerButton");
 
-    actors.angel.position.set(
-        3,
-        5,
-        -65
-    );
+const answerMessage=
+document.getElementById("answerMessage");
 
-    angelLight.position.copy(
-        actors.angel.position
-    );
+function openAnswer(){
 
-    dialogue([
-        {
-            speaker:"NOOR",
-            text:"There... I can see something."
-        },
-        {
-            speaker:"THE ANGEL",
-            text:"The castle."
-        },
-        {
-            speaker:"NOOR",
-            text:"Why does it feel like I've seen it before?"
-        },
-        {
-            speaker:"THE ANGEL",
-            text:"Because memories sometimes return before the people who created them."
-        }
-    ]);
+answer.style.display="flex";
+
+answerInput.value="";
+
+answerMessage.textContent="";
+
+setTimeout(
+()=>{
+answerInput.focus();
+},
+100
+);
+
 }
 
+function closeAnswer(){
 
-/* =========================================================
-   MOUNTAIN → CASTLE
-========================================================= */
+answer.style.display="none";
 
-function mountainToCastle(){
-
-    chapter(5,"THE CASTLE OF SILENCE");
-
-    cameraTo(
-        0,
-        8,
-        -77
-    );
-
-    actors.angel.position.set(
-        0,
-        3,
-        -84
-    );
-
-    dialogue([
-        {
-            speaker:"THE ANGEL",
-            text:"We have arrived."
-        },
-        {
-            speaker:"NOOR",
-            text:"You're coming with me?"
-        },
-        {
-            speaker:"THE ANGEL",
-            text:"No."
-        },
-        {
-            speaker:"NOOR",
-            text:"Why?"
-        },
-        {
-            speaker:"THE ANGEL",
-            text:"Because my purpose ends at the door."
-        }
-    ]);
 }
 
+function checkAnswer(){
 
-/* =========================================================
-   ENTER CASTLE
-========================================================= */
+const value=
+answerInput.value
+.trim()
+.toLowerCase();
 
-function enterCastle(){
+if(value==="aiudiwdwu"){
 
-    if(objects.gate){
+state.answerSolved=true;
 
-        objects.gate.rotation.y=-Math.PI/2;
-    }
+closeAnswer();
 
-    actors.angel.visible=false;
+playImpact();
 
-    chapter(6,"THE HALL OF SILENCE");
+transitionTo("final");
 
-    cameraTo(
-        0,
-        5,
-        -88
-    );
+}else{
 
-    dialogue([
-        {
-            speaker:"NOOR",
-            text:"Hello?"
-        },
-        {
-            speaker:"NOOR",
-            text:"Is anyone here?"
-        },
-        {
-            speaker:"RANDY",
-            text:"You finally came."
-        },
-        {
-            speaker:"NOOR",
-            text:"Randy...?"
-        },
-        {
-            speaker:"RANDY",
-            text:"I knew the angel would find you."
-        }
-    ]);
+answerMessage.textContent=
+"THE MEMORY DOES NOT RECOGNIZE THIS.";
+
+shakeCamera(.5);
+
 }
 
-
-/* =========================================================
-   FINAL
-========================================================= */
-
-function finalDialogue(){
-
-    cameraTo(
-        0,
-        4.5,
-        -87,
-        1200
-    );
-
-    actors.randy.position.z=-89;
-
-    dialogue([
-        {
-            speaker:"NOOR",
-            text:"How long have you been waiting?"
-        },
-        {
-            speaker:"RANDY",
-            text:"Long enough to forget what waiting felt like."
-        },
-        {
-            speaker:"NOOR",
-            text:"Then maybe we should stop waiting."
-        }
-    ]);
-
-    setTimeout(()=>{
-
-        document.getElementById("letter")
-        .style.display="flex";
-
-    },5000);
 }
 
+answerButton.onclick=
+checkAnswer;
+
+answerInput.addEventListener(
+"keydown",
+event=>{
+if(event.key==="Enter"){
+checkAnswer();
+}
+}
+);
 
 /* =========================================================
    LETTER
 ========================================================= */
 
-document
-.getElementById("closeLetter")
-.addEventListener("click",()=>{
+const letter=
+document.getElementById("letter");
 
-    document.getElementById("letter")
-    .style.display="none";
+const closeLetter=
+document.getElementById("closeLetter");
 
-    document.getElementById("ending")
-    .style.display="flex";
-});
+function openLetter(){
 
+letter.style.display="flex";
 
-/* =========================================================
-   AUDIO
-========================================================= */
+state.letter=true;
 
-let audioCtx=null;
-let master=null;
-
-function startAudio(){
-
-    if(audioCtx) return;
-
-    audioCtx=
-        new (window.AudioContext||
-        window.webkitAudioContext)();
-
-    master=
-        audioCtx.createGain();
-
-    master.gain.value=.12;
-
-    master.connect(
-        audioCtx.destination
-    );
-
-    const osc=
-        audioCtx.createOscillator();
-
-    const gain=
-        audioCtx.createGain();
-
-    osc.type="sine";
-    osc.frequency.value=48;
-
-    gain.gain.value=.08;
-
-    osc.connect(gain);
-    gain.connect(master);
-
-    osc.start();
-
-    heartbeat();
 }
 
+closeLetter.onclick=()=>{
+
+letter.style.display="none";
+
+state.letter=false;
+
+showFinal();
+
+};
+
+/* =========================================================
+   FINAL
+========================================================= */
+
+function showFinal(){
+
+document.getElementById(
+"final"
+).style.display="flex";
+
+state.final=true;
+
+playFinale();
+
+}
+
+/* =========================================================
+   GATE
+========================================================= */
+
+function openGate(){
+
+playGate();
+
+shakeCamera(.9);
+
+setTimeout(
+()=>{
+transitionTo("hall");
+},
+1400
+);
+
+}
+
+/* =========================================================
+   TRANSITIONS
+========================================================= */
+
+async function transitionTo(
+sceneName
+){
+
+if(state.transition)
+return;
+
+state.transition=true;
+
+const flash=
+document.getElementById("flash");
+
+flash.classList.remove("active");
+
+void flash.offsetWidth;
+
+flash.classList.add("active");
+
+state.scene=sceneName;
+
+state.sceneIndex=
+scenes.indexOf(sceneName);
+
+state.dialogueIndex=0;
+
+updateHUD();
+
+await new Promise(
+resolve=>
+setTimeout(
+resolve,
+500
+)
+);
+
+buildCurrentScene();
+
+await setupCharacters();
+
+state.transition=false;
+
+setTimeout(
+showDialogue,
+700
+);
+
+}
+
+/* =========================================================
+   BUILD CURRENT SCENE
+========================================================= */
+
+function buildCurrentScene(){
+
+if(state.scene==="forest"){
+buildForest();
+return;
+}
+
+if(state.scene==="path"){
+buildPath();
+return;
+}
+
+if(state.scene==="ruins"){
+buildRuins();
+return;
+}
+
+if(state.scene==="castle"){
+buildCastle();
+return;
+}
+
+if(state.scene==="gate"){
+buildGate();
+return;
+}
+
+if(state.scene==="hall"){
+buildHall();
+return;
+}
+
+if(state.scene==="chamber"){
+buildChamber();
+return;
+}
+
+if(state.scene==="final"){
+buildFinalRoom();
+return;
+}
+
+}
+
+/* =========================================================
+   HUD
+========================================================= */
+
+function updateHUD(){
+
+document.getElementById(
+"hudChapter"
+).textContent=
+sceneNames[state.scene];
+
+document.getElementById(
+"hudObjective"
+).textContent=
+sceneObjectives[state.scene];
+
+document.getElementById(
+"hudStatus"
+).textContent=
+state.scene==="final"
+?"THE MEMORY IS COMPLETE"
+:"THE NIGHT IS WATCHING";
+
+const chapter=
+document.getElementById("chapter");
+
+chapter.textContent=
+sceneNames[state.scene];
+
+chapter.style.opacity="1";
+
+chapter.style.transform=
+"translate(-50%,0)";
+
+setTimeout(
+()=>{
+chapter.style.opacity="0";
+chapter.style.transform=
+"translate(-50%,-20px)";
+},
+2200
+);
+
+const objective=
+document.getElementById(
+"objective"
+);
+
+objective.textContent=
+sceneObjectives[state.scene];
+
+objective.style.opacity="1";
+
+setTimeout(
+()=>{
+objective.style.opacity="0";
+},
+3000
+);
+
+}
+
+/* =========================================================
+   AUDIO ENGINE
+========================================================= */
+
+let audioContext;
+let masterGain;
+let ambienceGain;
+let musicGain;
+let heartbeatGain;
+
+const audioNodes=[];
+
+function initAudio(){
+
+if(state.audio)
+return;
+
+state.audio=true;
+
+audioContext=
+new AudioContext();
+
+masterGain=
+audioContext.createGain();
+
+masterGain.gain.value=.72;
+
+masterGain.connect(
+audioContext.destination
+);
+
+ambienceGain=
+audioContext.createGain();
+
+ambienceGain.gain.value=.22;
+
+ambienceGain.connect(
+masterGain
+);
+
+musicGain=
+audioContext.createGain();
+
+musicGain.gain.value=.13;
+
+musicGain.connect(
+masterGain
+);
+
+heartbeatGain=
+audioContext.createGain();
+
+heartbeatGain.gain.value=.0;
+
+heartbeatGain.connect(
+masterGain
+);
+
+createDrone();
+createWind();
+createHeartbeat();
+createChoir();
+
+}
+
+function oscillator(
+type,
+frequency,
+gain,
+destination,
+detune=0
+){
+
+const osc=
+audioContext.createOscillator();
+
+const amp=
+audioContext.createGain();
+
+osc.type=type;
+
+osc.frequency.value=
+frequency;
+
+osc.detune.value=
+detune;
+
+amp.gain.value=
+gain;
+
+osc.connect(amp);
+amp.connect(destination);
+
+osc.start();
+
+audioNodes.push({
+osc,
+amp
+});
+
+return {
+osc,
+amp
+};
+
+}
+
+/* =========================================================
+   DRONE
+========================================================= */
+
+function createDrone(){
+
+const low=
+oscillator(
+"sine",
+38,
+.035,
+musicGain
+);
+
+const sub=
+oscillator(
+"sine",
+57,
+.018,
+musicGain
+);
+
+const mid=
+oscillator(
+"triangle",
+92,
+.008,
+musicGain
+);
+
+low.osc.frequency.exponentialRampToValueAtTime(
+31,
+audioContext.currentTime+8
+);
+
+sub.osc.frequency.exponentialRampToValueAtTime(
+44,
+audioContext.currentTime+12
+);
+
+}
+
+/* =========================================================
+   WIND
+========================================================= */
+
+function createWind(){
+
+const buffer=
+audioContext.createBuffer(
+1,
+audioContext.sampleRate*2,
+audioContext.sampleRate
+);
+
+const data=
+buffer.getChannelData(0);
+
+for(let i=0;i<data.length;i++){
+
+data[i]=
+(Math.random()*2-1)
+*
+.25;
+
+}
+
+const source=
+audioContext.createBufferSource();
+
+source.buffer=buffer;
+source.loop=true;
+
+const filter=
+audioContext.createBiquadFilter();
+
+filter.type="lowpass";
+filter.frequency.value=750;
+
+const gain=
+audioContext.createGain();
+
+gain.gain.value=.05;
+
+source
+.connect(filter)
+.connect(gain)
+.connect(ambienceGain);
+
+source.start();
+
+}
+
+/* =========================================================
+   HEARTBEAT
+========================================================= */
+
+function createHeartbeat(){
+
+setInterval(
+()=>{
+
+if(!state.audio)
+return;
+
+if(
+state.scene==="chamber"||
+state.scene==="final"
+){
+
+heartbeat();
+
+}
+
+},
+2200
+);
+
+}
 
 function heartbeat(){
 
-    if(!audioCtx) return;
+const now=
+audioContext.currentTime;
 
-    const osc=
-        audioCtx.createOscillator();
+const osc=
+audioContext.createOscillator();
 
-    const gain=
-        audioCtx.createGain();
+const gain=
+audioContext.createGain();
 
-    osc.type="sine";
-    osc.frequency.value=65;
+osc.type="sine";
 
-    gain.gain.setValueAtTime(
-        .0001,
-        audioCtx.currentTime
-    );
+osc.frequency.setValueAtTime(
+55,
+now
+);
 
-    gain.gain.exponentialRampToValueAtTime(
-        .18,
-        audioCtx.currentTime+.08
-    );
+gain.gain.setValueAtTime(
+0,
+now
+);
 
-    gain.gain.exponentialRampToValueAtTime(
-        .0001,
-        audioCtx.currentTime+.28
-    );
+gain.gain.linearRampToValueAtTime(
+.16,
+now+.04
+);
 
-    osc.connect(gain);
-    gain.connect(master);
+gain.gain.exponentialRampToValueAtTime(
+.001,
+now+.22
+);
 
-    osc.start();
-    osc.stop(
-        audioCtx.currentTime+.3
-    );
+osc.connect(gain);
+gain.connect(heartbeatGain);
 
-    setTimeout(
-        heartbeat,
-        2400
-    );
+osc.start(now);
+osc.stop(now+.25);
+
+setTimeout(
+()=>{
+const osc2=
+audioContext.createOscillator();
+
+const gain2=
+audioContext.createGain();
+
+osc2.type="sine";
+
+osc2.frequency.value=48;
+
+gain2.gain.setValueAtTime(
+0,
+audioContext.currentTime
+);
+
+gain2.gain.linearRampToValueAtTime(
+.1,
+audioContext.currentTime+.035
+);
+
+gain2.gain.exponentialRampToValueAtTime(
+.001,
+audioContext.currentTime+.18
+);
+
+osc2.connect(gain2);
+gain2.connect(heartbeatGain);
+
+osc2.start();
+osc2.stop(
+audioContext.currentTime+.2
+);
+
+},
+180
+);
+
 }
 
-
 /* =========================================================
-   ANIMATION
+   CHOIR
 ========================================================= */
 
-function animate(){
+function createChoir(){
 
-    requestAnimationFrame(animate);
+const frequencies=[
+220,
+277.18,
+329.63,
+440
+];
 
-    const t=clock.getElapsedTime();
+frequencies.forEach(
+(f,i)=>{
 
-    if(particles.rain){
+const node=
+oscillator(
+"sine",
+f,
+.006,
+musicGain,
+i*3
+);
 
-        const p=
-            particles.rain.geometry
-            .attributes.position;
+node.amp.gain.value=.003;
 
-        const velocity=
-            particles.rain.userData.vel;
+}
+);
 
-        for(
-            let i=0;
-            i<p.count;
-            i++
-        ){
-
-            let y=p.getY(i);
-
-            y-=velocity[i]*.8;
-
-            if(y<0)
-                y=35;
-
-            p.setY(i,y);
-        }
-
-        p.needsUpdate=true;
-    }
-
-    if(particles.fireflies){
-
-        particles.fireflies.rotation.y=
-            t*.015;
-    }
-
-    if(actors.angel){
-
-        actors.angel.position.y+=
-            Math.sin(t*1.5)*.0015;
-
-        actors.angel.rotation.y=
-            Math.sin(t*.35)*.12;
-
-        angelLight.position.copy(
-            actors.angel.position
-        );
-
-        angelLight.position.y+=3;
-    }
-
-    if(actors.nour){
-
-        actors.nour.position.y=
-            Math.sin(t*1.5)*.025;
-    }
-
-    if(actors.randy){
-
-        actors.randy.position.y=
-            Math.sin(t*1.2)*.02;
-    }
-
-    /*
-      Cinematic breathing camera
-    */
-
-    if(!moving){
-
-        camera.position.y+=
-            Math.sin(t*.5)*.0007;
-
-        camera.rotation.z=
-            Math.sin(t*.3)*.0008;
-    }
-
-    renderer.render(
-        scene,
-        camera
-    );
 }
 
-
 /* =========================================================
-   INIT
+   IMPACT
 ========================================================= */
 
-buildForest();
-buildRiver();
-buildCemetery();
-buildMountain();
-castle();
+function playImpact(){
 
-createAngel();
-createNour();
-createRandy();
+if(!state.audio)
+return;
 
-createRain();
-stars();
+const now=
+audioContext.currentTime;
 
-actors.randy.visible=false;
-actors.nour.visible=true;
+const osc=
+audioContext.createOscillator();
 
-document
-.getElementById("begin")
-.addEventListener("click",()=>{
+const gain=
+audioContext.createGain();
 
-    startAudio();
-    startStory();
+osc.type="sawtooth";
 
-    setTimeout(()=>{
-        actors.randy.visible=true;
-    },5000);
-});
+osc.frequency.setValueAtTime(
+110,
+now
+);
 
+osc.frequency.exponentialRampToValueAtTime(
+35,
+now+.55
+);
+
+gain.gain.setValueAtTime(
+.24,
+now
+);
+
+gain.gain.exponentialRampToValueAtTime(
+.001,
+now+.55
+);
+
+osc.connect(gain);
+gain.connect(masterGain);
+
+osc.start(now);
+osc.stop(now+.6);
+
+}
 
 /* =========================================================
-   RESIZE
+   GATE SOUND
 ========================================================= */
 
-addEventListener("resize",()=>{
+function playGate(){
 
-    camera.aspect=
-        innerWidth/innerHeight;
+if(!state.audio)
+return;
 
-    camera.updateProjectionMatrix();
+const now=
+audioContext.currentTime;
 
-    renderer.setSize(
-        innerWidth,
-        innerHeight
-    );
-});
+const osc=
+audioContext.createOscillator();
 
+const gain=
+audioContext.createGain();
+
+osc.type="sawtooth";
+
+osc.frequency.setValueAtTime(
+70,
+now
+);
+
+osc.frequency.exponentialRampToValueAtTime(
+22,
+now+2
+);
+
+gain.gain.setValueAtTime(
+.25,
+now
+);
+
+gain.gain.exponentialRampToValueAtTime(
+.001,
+now+2
+);
+
+osc.connect(gain);
+gain.connect(masterGain);
+
+osc.start(now);
+osc.stop(now+2.1);
+
+}
+
+/* =========================================================
+   FINALE AUDIO
+========================================================= */
+
+function playFinale(){
+
+if(!state.audio)
+return;
+
+const now=
+audioContext.currentTime;
+
+const notes=[
+261.63,
+329.63,
+392,
+523.25
+];
+
+notes.forEach(
+(f,i)=>{
+
+const osc=
+audioContext.createOscillator();
+
+const gain=
+audioContext.createGain();
+
+osc.type="sine";
+
+osc.frequency.value=f;
+
+gain.gain.setValueAtTime(
+0,
+now+i*.16
+);
+
+gain.gain.linearRampToValueAtTime(
+.045,
+now+i*.16+.4
+);
+
+gain.gain.exponentialRampToValueAtTime(
+.001,
+now+i*.16+3
+);
+
+osc.connect(gain);
+gain.connect(musicGain);
+
+osc.start(
+now+i*.16
+);
+
+osc.stop(
+now+i*.16+3
+);
+
+}
+);
+
+}
+
+/* =========================================================
+   CAMERA
+========================================================= */
+
+const cameraTarget=
+new THREE.Vector3();
+
+const cameraLook=
+new THREE.Vector3();
+
+const cameraVelocity=
+new THREE.Vector3();
+
+function setCamera(
+position,
+lookAt
+){
+
+camera.position.copy(position);
+cameraTarget.copy(position);
+cameraLook.copy(lookAt);
+
+camera.lookAt(
+cameraLook
+);
+
+}
+
+function shakeCamera(
+amount
+){
+
+state.shake=
+Math.max(
+state.shake,
+amount
+);
+
+}
+
+/* =========================================================
+   CAMERA PRESETS
+========================================================= */
+
+function updateCamera(delta){
+
+const t=
+state.time;
+
+if(state.scene==="forest"){
+
+const target=
+new THREE.Vector3(
+Math.sin(t*.08)*3,
+4.5+Math.sin(t*.25)*.25,
+10+Math.cos(t*.07)*3
+);
+
+camera.position.lerp(
+target,
+.012
+);
+
+cameraLook.set(
+0,
+3,
+-25
+);
+
+}
+
+if(state.scene==="path"){
+
+const target=
+new THREE.Vector3(
+Math.sin(t*.12)*1.5,
+3.8,
+16-t*1.1
+);
+
+camera.position.lerp(
+target,
+.02
+);
+
+cameraLook.set(
+0,
+2,
+-35
+);
+
+}
+
+if(state.scene==="ruins"){
+
+const target=
+new THREE.Vector3(
+Math.sin(t*.08)*8,
+5+Math.sin(t*.18),
+8+Math.cos(t*.08)*4
+);
+
+camera.position.lerp(
+target,
+.012
+);
+
+cameraLook.set(
+0,
+4,
+-30
+);
+
+}
+
+if(
+state.scene==="castle"||
+state.scene==="gate"
+){
+
+const target=
+new THREE.Vector3(
+Math.sin(t*.035)*2,
+7,
+25
+);
+
+camera.position.lerp(
+target,
+.01
+);
+
+cameraLook.set(
+0,
+12,
+-70
+);
+
+}
+
+if(state.scene==="hall"){
+
+const target=
+new THREE.Vector3(
+Math.sin(t*.04)*1.4,
+5,
+8-t*.6
+);
+
+camera.position.lerp(
+target,
+.014
+);
+
+cameraLook.set(
+0,
+6,
+-45
+);
+
+}
+
+if(state.scene==="chamber"){
+
+const target=
+new THREE.Vector3(
+Math.sin(t*.09)*5,
+7+Math.sin(t*.15)*.3,
+10
+);
+
+camera.position.lerp(
+target,
+.014
+);
+
+cameraLook.set(
+0,
+7,
+-20
+);
+
+}
+
+if(state.scene==="final"){
+
+const target=
+new THREE.Vector3(
+Math.sin(t*.05)*7,
+7,
+5+Math.cos(t*.05)*3
+);
+
+camera.position.lerp(
+target,
+.008
+);
+
+cameraLook.set(
+0,
+7,
+-18
+);
+
+}
+
+if(state.shake>0){
+
+camera.position.x+=
+(Math.random()-.5)
+*
+state.shake;
+
+camera.position.y+=
+(Math.random()-.5)
+*
+state.shake;
+
+state.shake*=
+Math.pow(.001,delta);
+
+if(state.shake<.001)
+state.shake=0;
+
+}
+
+camera.lookAt(
+cameraLook
+);
+
+}
+
+/* =========================================================
+   PARTICLE UPDATE
+========================================================= */
+
+function updateParticles(delta){
+
+if(rain){
+
+const positions=
+rain.geometry.attributes.position.array;
+
+const velocities=
+rain.userData.velocities;
+
+for(let i=0;i<velocities.length;i++){
+
+positions[i*3+1]-=
+velocities[i]*delta*35;
+
+positions[i*3]-=
+delta*2;
+
+if(positions[i*3+1]<0){
+
+positions[i*3+1]=
+45+Math.random()*10;
+
+positions[i*3]=
+(Math.random()-.5)*120;
+
+}
+
+}
+
+rain.geometry.attributes.position.needsUpdate=true;
+
+}
+
+particles.children.forEach(
+object=>{
+
+if(object.userData.fireflies){
+
+const positions=
+object.geometry.attributes.position.array;
+
+const data=
+object.userData.fireflies;
+
+for(let i=0;i<data.length;i++){
+
+const d=data[i];
+
+positions[i*3+1]+=
+Math.sin(
+state.time*d.speed+d.phase
+)
+*.002;
+
+positions[i*3]+=
+Math.cos(
+state.time*d.speed*.7+d.phase
+)
+*.002;
+
+}
+
+object.geometry.attributes.position.needsUpdate=true;
+
+}
+
+if(object.userData.phase!==undefined){
+
+object.rotation.y+=
+delta*
+(object.userData.speed||.2);
+
+object.position.y+=
+Math.sin(
+state.time*
+(object.userData.speed||.5)
++
+object.userData.phase
+)
+*.002;
+
+}
+
+}
+);
+
+bats.forEach(
+bat=>{
+
+bat.position.x+=
+Math.sin(
+state.time*.7+
+bat.userData.phase
+)
+*
+delta*2;
+
+bat.position.y+=
+Math.sin(
+state.time*
+bat.userData.speed
++
+bat.userData.phase
+)
+*
+delta*.7;
+
+const flap=
+Math.sin(
+state.time*
+8+
+bat.userData.phase
+)
+*.5;
+
+if(bat.children[1])
+bat.children[1].rotation.z=
+.25+flap;
+
+if(bat.children[2])
+bat.children[2].rotation.z=
+-.25-flap;
+
+}
+);
+
+}
+
+/* =========================================================
+   LIGHT FLICKER
+========================================================= */
+
+function updateLights(){
+
+lights.children.forEach(
+light=>{
+
+if(
+light.userData.flicker
+){
+
+light.intensity=
+light.userData.baseIntensity||
+light.intensity;
+
+const base=
+light.userData.baseIntensity||
+light.intensity;
+
+light.userData.baseIntensity=
+base;
+
+light.intensity=
+base+
+(
+Math.random()-.5
+)
+*.18;
+
+}
+
+}
+);
+
+}
+
+/* =========================================================
+   CHARACTERS UPDATE
+========================================================= */
+
+function updateCharacters(delta){
+
+characters.children.forEach(
+character=>{
+
+if(character.userData.mixer){
+
+character.userData.mixer.update(
+delta
+);
+
+}
+
+if(
+character.userData.angel
+){
+
+character.position.y=
+Math.sin(state.time*.8)*.15;
+
+}
+
+}
+);
+
+}
+
+/* =========================================================
+   LIGHTNING
+========================================================= */
+
+let lightningTimer=0;
+
+function updateLightning(delta){
+
+lightningTimer-=delta;
+
+if(lightningTimer<=0){
+
+lightningTimer=
+5+
+Math.random()*13;
+
+if(
+state.scene==="forest"||
+state.scene==="path"||
+state.scene==="castle"||
+state.scene==="gate"
+){
+
+triggerLightning();
+
+}
+
+}
+
+}
+
+function triggerLightning(){
+
+const flash=
+document.getElementById("flash");
+
+flash.style.background="#dcecff";
+
+flash.classList.remove("active");
+
+void flash.offsetWidth;
+
+flash.classList.add("active");
+
+const original=
+moonLight.intensity;
+
+moonLight.intensity=
+7;
+
+setTimeout(
+()=>{
+moonLight.intensity=
+original;
+},
+90
+);
+
+if(Math.random()>.45){
+
+setTimeout(
+()=>{
+moonLight.intensity=4;
+setTimeout(
+()=>{
+moonLight.intensity=original;
+},
+100
+);
+},
+130
+);
+
+}
+
+}
 
 /* =========================================================
    START
 ========================================================= */
 
-camera.position.set(
-    0,
-    4,
-    13
+const startButton=
+document.getElementById(
+"startButton"
 );
+
+startButton.onclick=
+async()=>{
+
+initAudio();
+
+await audioContext.resume();
+
+state.started=true;
+
+const title=
+document.getElementById("title");
+
+title.style.opacity="0";
+title.style.transform=
+"translateY(30px)";
+
+document.getElementById(
+"hud"
+).style.opacity="1";
+
+setTimeout(
+()=>{
+title.style.display="none";
+},
+1100
+);
+
+buildCurrentScene();
+
+await setupCharacters();
+
+updateHUD();
+
+setTimeout(
+showDialogue,
+1300
+);
+
+};
+
+/* =========================================================
+   POINTER
+========================================================= */
+
+window.addEventListener(
+"pointerdown",
+event=>{
+
+pointer.x=
+(event.clientX/window.innerWidth)*2-1;
+
+pointer.y=
+-(event.clientY/window.innerHeight)*2+1;
+
+if(
+state.started&&
+!state.choiceOpen&&
+!state.typing
+){
+
+advanceDialogue();
+
+}
+
+}
+);
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+document.getElementById(
+"mobile"
+).onclick=
+()=>{
+
+if(state.started){
+advanceDialogue();
+}
+
+};
+
+/* =========================================================
+   KEYBOARD
+========================================================= */
+
+window.addEventListener(
+"keydown",
+event=>{
+
+if(event.key==="Enter"){
+
+if(
+puzzle.style.display==="flex"
+){
+
+checkPuzzle();
+
+return;
+
+}
+
+if(
+answer.style.display==="flex"
+){
+
+checkAnswer();
+
+return;
+
+}
+
+if(
+state.started&&
+!state.choiceOpen
+){
+
+advanceDialogue();
+
+}
+
+}
+
+if(event.key==="Escape"){
+
+if(
+state.letter
+){
+
+letter.style.display="none";
+
+state.letter=false;
+
+}
+
+}
+
+}
+);
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+window.addEventListener(
+"resize",
+()=>{
+
+camera.aspect=
+window.innerWidth/
+window.innerHeight;
+
+camera.updateProjectionMatrix();
+
+renderer.setSize(
+window.innerWidth,
+window.innerHeight
+);
+
+renderer.setPixelRatio(
+Math.min(
+window.devicePixelRatio,
+2
+)
+);
+
+}
+);
+
+/* =========================================================
+   BOOT
+========================================================= */
+
+setTimeout(
+()=>{
+
+const boot=
+document.getElementById("boot");
+
+boot.style.opacity="0";
+
+setTimeout(
+()=>{
+boot.style.display="none";
+},
+1500
+);
+
+},
+3000
+);
+
+/* =========================================================
+   INITIAL WORLD
+========================================================= */
+
+setupLighting();
+
+setFog(
+0x02030a,
+5,
+150
+);
+
+createStars(
+1200,
+500
+);
+
+createMoon(
+-30,
+48,
+-100,
+1
+);
+
+/* =========================================================
+   MAIN LOOP
+========================================================= */
+
+function animate(){
+
+requestAnimationFrame(
+animate
+);
+
+const delta=
+Math.min(
+clock.getDelta(),
+.05
+);
+
+state.time+=delta;
+
+if(state.started){
+
+updateCamera(delta);
+
+updateParticles(delta);
+
+updateLights();
+
+updateCharacters(delta);
+
+updateLightning(delta);
+
+}
+
+renderer.render(
+world,
+camera
+);
+
+}
 
 animate();
 
+/* =========================================================
+   EXTRA CINEMATIC EFFECTS
+========================================================= */
+
+function cinematicPulse(){
+
+const grade=
+document.getElementById(
+"colorGrade"
+);
+
+grade.animate(
+[
+{
+opacity:.2
+},
+{
+opacity:.65
+},
+{
+opacity:.2
+}
+],
+{
+duration:1600,
+easing:"ease-in-out"
+}
+);
+
+}
+
+function cinematicDarken(){
+
+const veil=
+document.getElementById(
+"vignette"
+);
+
+veil.animate(
+[
+{
+opacity:1
+},
+{
+opacity:.55
+},
+{
+opacity:1
+}
+],
+{
+duration:1200,
+easing:"ease-in-out"
+}
+);
+
+}
+
+setInterval(
+()=>{
+
+if(
+state.started&&
+Math.random()>.55
+){
+
+cinematicPulse();
+
+}
+
+},
+8000
+);
+
+/* =========================================================
+   EXTRA ATMOSPHERIC MOTES
+========================================================= */
+
+function createAtmosphericMotes(){
+
+const geometry=
+new THREE.BufferGeometry();
+
+const count=500;
+
+const positions=
+new Float32Array(count*3);
+
+for(let i=0;i<count;i++){
+
+positions[i*3]=
+(Math.random()-.5)*100;
+
+positions[i*3+1]=
+Math.random()*30;
+
+positions[i*3+2]=
+Math.random()*100-50;
+
+}
+
+geometry.setAttribute(
+"position",
+new THREE.BufferAttribute(
+positions,
+3
+)
+);
+
+const material=
+new THREE.PointsMaterial({
+color:0xc7ddf5,
+size:.035,
+transparent:true,
+opacity:.4
+});
+
+const mote=
+new THREE.Points(
+geometry,
+material
+);
+
+add(particles,mote);
+
+}
+
+createAtmosphericMotes();
+
+/* =========================================================
+   EXTRA FLOATING DUST
+========================================================= */
+
+function createDust(){
+
+for(let i=0;i<100;i++){
+
+const dust=
+sphere(
+.018,
+new THREE.MeshBasicMaterial({
+color:0xdbe8f8,
+transparent:true,
+opacity:.2
+}),
+(Math.random()-.5)*50,
+Math.random()*20,
+Math.random()*80-40,
+8
+);
+
+dust.userData.phase=
+Math.random()*Math.PI*2;
+
+dust.userData.speed=
+.1+Math.random()*.4;
+
+add(particles,dust);
+
+}
+
+}
+
+createDust();
+
+/* =========================================================
+   EXTRA ANGEL AURA
+========================================================= */
+
+function createAngelAura(){
+
+const aura=
+new THREE.Mesh(
+new THREE.SphereGeometry(
+2.5,
+32,
+32
+),
+new THREE.MeshBasicMaterial({
+color:0xcfe6ff,
+transparent:true,
+opacity:.025,
+side:THREE.BackSide
+})
+);
+
+aura.position.set(
+2,
+3,
+-8
+);
+
+add(particles,aura);
+
+}
+
+createAngelAura();
+
+/* =========================================================
+   SECRET ATMOSPHERE
+========================================================= */
+
+function createSecretSigils(){
+
+for(let i=0;i<14;i++){
+
+const ring=
+new THREE.Mesh(
+new THREE.RingGeometry(
+.2,
+.23,
+32
+),
+new THREE.MeshBasicMaterial({
+color:
+i%2===0
+?0x9cc9ff
+:0xd6b96d,
+transparent:true,
+opacity:.22,
+side:THREE.DoubleSide
+})
+);
+
+ring.position.set(
+(Math.random()-.5)*50,
+.02+Math.random()*4,
+-Math.random()*100
+);
+
+ring.rotation.x=
+-Math.PI/2;
+
+ring.userData.phase=
+Math.random()*Math.PI*2;
+
+add(particles,ring);
+
+}
+
+}
+
+createSecretSigils();
+
+/* =========================================================
+   SIGIL ANIMATION
+========================================================= */
+
+function updateSigils(){
+
+particles.children.forEach(
+object=>{
+
+if(
+object.geometry&&
+object.geometry.type==="RingGeometry"&&
+object.userData.phase!==undefined
+){
+
+object.material.opacity=
+.12+
+Math.sin(
+state.time*.7+
+object.userData.phase
+)
+*.08;
+
+object.rotation.z+=.002;
+
+}
+
+}
+);
+
+}
+
+/* =========================================================
+   EXTENDED LOOP HOOK
+========================================================= */
+
+const oldAnimate=animate;
+
+setInterval(
+()=>{
+
+if(state.started){
+
+updateSigils();
+
+}
+
+},
+16
+);
+
+/* =========================================================
+   INTERACTION RAYCAST
+========================================================= */
+
+window.addEventListener(
+"pointermove",
+event=>{
+
+pointer.x=
+(event.clientX/window.innerWidth)*2-1;
+
+pointer.y=
+-(event.clientY/window.innerHeight)*2+1;
+
+if(!state.started)
+return;
+
+raycaster.setFromCamera(
+pointer,
+camera
+);
+
+const hits=
+raycaster.intersectObjects(
+props.children,
+true
+);
+
+if(hits.length){
+
+document.body.style.cursor=
+"pointer";
+
+}else{
+
+document.body.style.cursor=
+"default";
+
+}
+
+}
+);
+
+/* =========================================================
+   GATE INTERACTION
+========================================================= */
+
+window.addEventListener(
+"click",
+event=>{
+
+if(
+!state.started||
+state.scene!=="gate"||
+state.dialogue||
+state.choiceOpen
+)
+return;
+
+raycaster.setFromCamera(
+pointer,
+camera
+);
+
+const hits=
+raycaster.intersectObjects(
+props.children,
+true
+);
+
+for(const hit of hits){
+
+if(hit.object.userData.gate){
+
+openGate();
+
+break;
+
+}
+
+}
+
+}
+);
+
+/* =========================================================
+   SPECIAL NIGHT MODE
+========================================================= */
+
+function nightMode(){
+
+if(!state.started)
+return;
+
+if(state.scene==="final"){
+
+heavenLight.intensity=
+2.8;
+
+world.fog.near=2;
+world.fog.far=90;
+
+}else{
+
+heavenLight.intensity=
+state.scene==="chamber"
+?.9
+:0;
+
+}
+
+}
+
+/* =========================================================
+   SPECIAL CAMERA EVENTS
+========================================================= */
+
+function cameraReveal(){
+
+const original=
+camera.position.clone();
+
+camera.position.set(
+original.x,
+original.y+2,
+original.z+6
+);
+
+setTimeout(
+()=>{
+camera.position.lerp(
+original,
+.08
+);
+},
+400
+);
+
+}
+
+/* =========================================================
+   FINAL REVEAL EVENT
+========================================================= */
+
+function birthdayReveal(){
+
+if(!state.final)
+return;
+
+cinematicPulse();
+
+playFinale();
+
+for(let i=0;i<6;i++){
+
+setTimeout(
+()=>{
+triggerLightning();
+},
+i*350
+);
+
+}
+
+}
+
+/* =========================================================
+   FINAL WATCHER
+========================================================= */
+
+setInterval(
+()=>{
+
+nightMode();
+
+if(
+state.final
+){
+
+birthdayReveal();
+
+}
+
+},
+7000
+);
+
+/* =========================================================
+   ACCESSIBILITY / PERFORMANCE
+========================================================= */
+
+if(
+window.matchMedia(
+"(prefers-reduced-motion: reduce)"
+).matches
+){
+
+document.getElementById(
+"grain"
+).style.animation="none";
+
+}
+
+/* =========================================================
+   PREVENT CONTEXT MENU
+========================================================= */
+
+window.addEventListener(
+"contextmenu",
+event=>{
+event.preventDefault();
+}
+);
+
+/* =========================================================
+   PREVENT SCROLL
+========================================================= */
+
+window.addEventListener(
+"wheel",
+event=>{
+event.preventDefault();
+},
+{
+passive:false
+}
+);
+
+/* =========================================================
+   PREVENT DOUBLE TAP ZOOM
+========================================================= */
+
+let lastTouch=0;
+
+window.addEventListener(
+"touchend",
+event=>{
+
+const now=
+Date.now();
+
+if(
+now-lastTouch<300
+){
+
+event.preventDefault();
+
+}
+
+lastTouch=now;
+
+},
+{
+passive:false
+});
+
+/* =========================================================
+   END OF CORE ENGINE
+========================================================= */
+
+/*
+THE NIGHT REMEMBERS
+
+Scene flow:
+
+FOREST
+↓
+PATH
+↓
+RUINS
+↓
+CASTLE
+↓
+GATE
+↓
+HALL
+↓
+CHAMBER
+↓
+FINAL
+
+Secret code:
+212
+
+Secret answer:
+aiudiwdwu
+
+Final:
+HAPPY BIRTHDAY RANDY
+
+Recommended assets:
+
+assets/nour.glb
+assets/randy.glb
+assets/angel.glb
+
+Optional audio assets can be integrated
+through Web Audio or HTML Audio if desired.
+
+The procedural fallback exists only so the
+experience remains playable if the GLB files
+are unavailable.
+
+For genuinely realistic human characters,
+use high-quality rigged GLB/GLTF characters.
+*/
 </script>
+
 </body>
 </html>
