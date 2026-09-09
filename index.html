@@ -2,4097 +2,2391 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
->
-
-<meta name="theme-color" content="#030204">
-
-<title>Randy — The Castle Remembers</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Randy — The Night Remembers</title>
 
 <style>
-
-/* =========================================================
-   RESET
-========================================================= */
-
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent;
 }
 
-html,
-body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#020104;
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#000;
+  color:#eee;
+  font-family:Georgia,"Times New Roman",serif;
 }
 
-body{
-    color:#eee8df;
-    font-family:
-        Georgia,
-        "Times New Roman",
-        serif;
-    user-select:none;
+button,input{
+  font-family:inherit;
 }
 
-/* =========================================================
-   ROOT
-========================================================= */
-
-:root{
-
-    --black:#020104;
-    --deep:#08050a;
-    --purple:#180d1d;
-    --purple2:#291329;
-
-    --red:#751d32;
-    --blood:#a92c48;
-    --gold:#b99a65;
-    --gold2:#d7bb83;
-
-    --paper:#d8c59c;
-    --ink:#281b18;
-
-    --white:#eee8df;
-
-    --ease:cubic-bezier(.22,1,.36,1);
+#game{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  background:#020203;
 }
 
-/* =========================================================
-   MAIN WORLD
-========================================================= */
+/* =========================
+   CINEMATIC CAMERA
+========================= */
 
-#world{
-
-    position:fixed;
-    inset:0;
-
-    overflow:hidden;
-
-    background:
-        radial-gradient(
-            ellipse at 50% 80%,
-            #211322 0%,
-            #0c0710 38%,
-            #030204 78%
-        );
+#camera{
+  position:absolute;
+  inset:-6%;
+  transition:transform 1.8s cubic-bezier(.2,.7,.2,1);
 }
 
-/* =========================================================
-   CINEMATIC LETTERBOX
-========================================================= */
-
-.letterbox{
-
-    position:fixed;
-
-    left:0;
-    width:100%;
-
-    height:7vh;
-
-    background:#000;
-
-    z-index:900;
-
-    pointer-events:none;
-
-    transition:
-        height 1s var(--ease);
+.zoomIn{
+  transform:scale(1.12);
 }
 
-.letterbox.top{
-    top:0;
+.zoomOut{
+  transform:scale(.96);
 }
 
-.letterbox.bottom{
-    bottom:0;
+.shake{
+  animation:shake .45s linear;
 }
 
-body.open-world .letterbox{
-    height:3vh;
+@keyframes shake{
+  0%,100%{transform:translate(0)}
+  15%{transform:translate(-12px,5px)}
+  30%{transform:translate(10px,-6px)}
+  45%{transform:translate(-7px,-4px)}
+  60%{transform:translate(8px,6px)}
+  75%{transform:translate(-5px,2px)}
 }
 
-/* =========================================================
-   SKY
-========================================================= */
-
-.sky{
-
-    position:absolute;
-    inset:0;
-
-    background:
-
-        radial-gradient(
-            circle at 50% 20%,
-            rgba(83,42,91,.20),
-            transparent 25%
-        ),
-
-        linear-gradient(
-            180deg,
-            #05040a 0%,
-            #0c0711 45%,
-            #160c17 72%,
-            #070508 100%
-        );
-}
-
-/* =========================================================
-   STARS
-========================================================= */
-
-.stars,
-.stars2,
-.stars3{
-
-    position:absolute;
-    inset:-20%;
-
-    pointer-events:none;
-}
-
-.stars{
-
-    opacity:.75;
-
-    background-image:
-
-        radial-gradient(
-            circle,
-            rgba(255,255,255,.9) 0 1px,
-            transparent 1.5px
-        );
-
-    background-size:
-        87px 91px;
-
-    animation:
-        starDrift 80s linear infinite;
-}
-
-.stars2{
-
-    opacity:.42;
-
-    background-image:
-
-        radial-gradient(
-            circle,
-            rgba(255,255,255,.7) 0 1px,
-            transparent 1.7px
-        );
-
-    background-size:
-        151px 137px;
-
-    animation:
-        starDrift 120s linear infinite reverse;
-}
-
-.stars3{
-
-    opacity:.25;
-
-    background-image:
-
-        radial-gradient(
-            circle,
-            rgba(180,150,210,.8) 0 1px,
-            transparent 1.8px
-        );
-
-    background-size:
-        223px 211px;
-
-    animation:
-        starDrift 160s linear infinite;
-}
-
-@keyframes starDrift{
-
-    from{
-        transform:translate3d(0,0,0);
-    }
-
-    to{
-        transform:translate3d(-120px,80px,0);
-    }
-}
-
-/* =========================================================
-   MOON
-========================================================= */
-
-.moon{
-
-    position:absolute;
-
-    width:
-        clamp(90px,15vw,180px);
-
-    height:
-        clamp(90px,15vw,180px);
-
-    right:
-        clamp(7%,13vw,16%);
-
-    top:
-        clamp(9%,11vh,16%);
-
-    border-radius:50%;
-
-    background:
-
-        radial-gradient(
-            circle at 35% 35%,
-            #fffdf1 0%,
-            #e9e1cf 55%,
-            #bcb4a5 100%
-        );
-
-    box-shadow:
-
-        0 0 25px rgba(255,244,214,.28),
-        0 0 80px rgba(255,244,214,.12),
-        0 0 160px rgba(255,244,214,.05);
-
-    animation:
-        moonPulse 7s ease-in-out infinite;
-}
-
-@keyframes moonPulse{
-
-    0%,100%{
-        box-shadow:
-            0 0 25px rgba(255,244,214,.25),
-            0 0 80px rgba(255,244,214,.1);
-    }
-
-    50%{
-        box-shadow:
-            0 0 40px rgba(255,244,214,.35),
-            0 0 110px rgba(255,244,214,.16);
-    }
-}
-
-.moon::before{
-
-    content:"";
-
-    position:absolute;
-
-    width:100%;
-    height:100%;
-
-    border-radius:50%;
-
-    background:
-
-        radial-gradient(
-            circle at 27% 30%,
-            rgba(100,90,80,.15) 0 4%,
-            transparent 5%
-        ),
-
-        radial-gradient(
-            circle at 67% 61%,
-            rgba(100,90,80,.12) 0 7%,
-            transparent 8%
-        ),
-
-        radial-gradient(
-            circle at 44% 72%,
-            rgba(100,90,80,.1) 0 5%,
-            transparent 6%
-        );
-}
-
-/* =========================================================
-   CLOUDS
-========================================================= */
-
-.cloud{
-
-    position:absolute;
-
-    width:70vw;
-    height:18vh;
-
-    border-radius:50%;
-
-    background:
-        rgba(20,13,24,.32);
-
-    filter:blur(22px);
-
-    opacity:.5;
-
-    animation:
-        cloudMove 40s linear infinite;
-}
-
-.cloud.c1{
-    top:20%;
-    left:-70%;
-}
-
-.cloud.c2{
-    top:38%;
-    left:-80%;
-    animation-duration:55s;
-    animation-delay:-22s;
-}
-
-@keyframes cloudMove{
-
-    from{
-        transform:translateX(0);
-    }
-
-    to{
-        transform:translateX(230vw);
-    }
-}
-
-/* =========================================================
-   HORIZON
-========================================================= */
-
-.horizon{
-
-    position:absolute;
-
-    left:0;
-    right:0;
-
-    bottom:24%;
-
-    height:30%;
-
-    background:
-
-        linear-gradient(
-            180deg,
-            transparent,
-            rgba(40,19,44,.25),
-            rgba(4,3,6,.85)
-        );
-}
-
-/* =========================================================
-   CASTLE
-========================================================= */
-
-.castle{
-
-    position:absolute;
-
-    left:50%;
-    bottom:0;
-
-    transform:
-        translateX(-50%);
-
-    width:min(1100px,100vw);
-
-    height:65vh;
-
-    min-height:430px;
-
-    filter:
-        drop-shadow(
-            0 20px 35px rgba(0,0,0,.85)
-        );
-}
-
-/* =========================================================
-   CASTLE MAIN
-========================================================= */
-
-.castle-main{
-
-    position:absolute;
-
-    left:17%;
-    right:17%;
-    bottom:0;
-
-    height:58%;
-
-    background:
-
-        linear-gradient(
-            90deg,
-            #070609,
-            #18131a 45%,
-            #0a080d
-        );
-
-    border-top:
-        4px solid #29222d;
-}
-
-/* =========================================================
-   CASTLE BLOCKS
-========================================================= */
-
-.block-line{
-
-    position:absolute;
-
-    left:0;
-    right:0;
-
-    height:2px;
-
-    background:
-        rgba(72,61,76,.23);
-}
-
-.block-line.l1{top:24%}
-.block-line.l2{top:49%}
-.block-line.l3{top:73%}
-
-/* =========================================================
-   TOWERS
-========================================================= */
-
-.tower{
-
-    position:absolute;
-
-    bottom:0;
-
-    width:
-        clamp(100px,15vw,175px);
-
-    height:86%;
-
-    background:
-
-        linear-gradient(
-            90deg,
-            #050407,
-            #18131a 50%,
-            #050407
-        );
-
-    border-left:
-        2px solid rgba(70,60,72,.3);
-
-    border-right:
-        2px solid rgba(70,60,72,.3);
-}
-
-.tower.left{
-    left:4%;
-}
-
-.tower.right{
-    right:4%;
-}
-
-/* =========================================================
-   TOWER ROOF
-========================================================= */
-
-.roof{
-
-    position:absolute;
-
-    left:-12%;
-
-    width:124%;
-
-    height:80px;
-
-    top:-68px;
-
-    background:#120d15;
-
-    clip-path:
-        polygon(
-            50% 0,
-            100% 100%,
-            0 100%
-        );
-
-    filter:
-        drop-shadow(
-            0 -6px 10px rgba(0,0,0,.5)
-        );
-}
-
-.roof::after{
-
-    content:"";
-
-    position:absolute;
-
-    width:8px;
-    height:45px;
-
-    top:-25px;
-    left:calc(50% - 4px);
-
-    background:#19131c;
-}
-
-/* =========================================================
-   TOWER WINDOWS
-========================================================= */
-
-.tower-window{
-
-    position:absolute;
-
-    left:50%;
-
-    transform:
-        translateX(-50%);
-
-    width:29px;
-    height:68px;
-
-    border-radius:
-        50% 50% 5px 5px;
-
-    background:
-
-        linear-gradient(
-            180deg,
-            #b83b55,
-            #4e1526
-        );
-
-    box-shadow:
-
-        0 0 10px rgba(164,39,64,.55),
-        0 0 35px rgba(164,39,64,.18);
-
-    animation:
-        windowFlicker 5s ease-in-out infinite;
-}
-
-.tower-window.w1{
-    top:23%;
-}
-
-.tower-window.w2{
-    top:43%;
-    animation-delay:-2s;
-}
-
-.tower-window::after{
-
-    content:"";
-
-    position:absolute;
-
-    inset:0;
-
-    border-left:
-        2px solid #281820;
-
-    border-right:
-        2px solid #281820;
-}
-
-@keyframes windowFlicker{
-
-    0%,100%{
-        opacity:.75;
-    }
-
-    50%{
-        opacity:1;
-    }
-}
-
-/* =========================================================
-   CENTRAL WINDOWS
-========================================================= */
-
-.central-window{
-
-    position:absolute;
-
-    width:38px;
-    height:80px;
-
-    top:12%;
-
-    left:50%;
-
-    transform:
-        translateX(-50%);
-
-    border-radius:
-        50% 50% 0 0;
-
-    background:
-        linear-gradient(
-            #8d2940,
-            #35101d
-        );
-
-    box-shadow:
-        0 0 25px rgba(155,35,62,.25);
-}
-
-/* =========================================================
-   CASTLE DOOR
-========================================================= */
-
-.castle-door{
-
-    position:absolute;
-
-    bottom:0;
-
-    left:50%;
-
-    transform:
-        translateX(-50%);
-
-    width:
-        clamp(110px,18vw,190px);
-
-    height:
-        clamp(165px,29vh,270px);
-
-    border-radius:
-        100px 100px 0 0;
-
-    background:
-
-        linear-gradient(
-            90deg,
-            #030304,
-            #211923 45%,
-            #080609
-        );
-
-    border:
-        5px solid #302731;
-
-    box-shadow:
-
-        inset 0 0 50px #000,
-        0 0 30px rgba(0,0,0,.9);
-
-    transform-origin:
-        left center;
-
-    transition:
-        transform 2s var(--ease);
-}
-
-.castle-door.open{
-
-    transform:
-        translateX(-50%)
-        perspective(800px)
-        rotateY(-58deg);
-
-}
-
-/* =========================================================
-   DOOR DETAILS
-========================================================= */
-
-.door-ring{
-
-    position:absolute;
-
-    width:28px;
-    height:28px;
-
-    border:
-        3px solid #9c8051;
-
-    border-radius:50%;
-
-    right:20px;
-    top:53%;
-}
-
-.door-cross{
-
-    position:absolute;
-
-    left:50%;
-    top:15%;
-
-    transform:
-        translateX(-50%);
-
-    width:2px;
-    height:70%;
-
-    background:
-        rgba(100,84,105,.3);
-}
-
-.door-cross::after{
-
-    content:"";
-
-    position:absolute;
-
-    top:35%;
-
-    left:-35px;
-
-    width:72px;
-    height:2px;
-
-    background:
-        rgba(100,84,105,.3);
-}
-
-/* =========================================================
-   FOREGROUND GROUND
-========================================================= */
-
-.ground{
-
-    position:absolute;
-
-    bottom:0;
-
-    left:-10%;
-    right:-10%;
-
-    height:25%;
-
-    background:
-
-        radial-gradient(
-            ellipse at 50% 0%,
-            rgba(56,29,57,.5),
-            transparent 50%
-        ),
-
-        linear-gradient(
-            180deg,
-            transparent,
-            #020204 65%
-        );
-}
-
-/* =========================================================
-   FOG
-========================================================= */
-
-.fog-layer{
-
-    position:absolute;
-
-    left:-20%;
-    bottom:0;
-
-    width:140%;
-    height:38%;
-
-    pointer-events:none;
-
-    background:
-
-        radial-gradient(
-            ellipse at 30% 70%,
-            rgba(196,196,204,.11),
-            transparent 45%
-        ),
-
-        radial-gradient(
-            ellipse at 75% 60%,
-            rgba(190,190,205,.08),
-            transparent 48%
-        );
-
-    filter:blur(15px);
-
-    animation:
-        fogFloat 13s ease-in-out infinite alternate;
-}
-
-@keyframes fogFloat{
-
-    from{
-        transform:translateX(-3%);
-    }
-
-    to{
-        transform:translateX(3%);
-    }
-}
-
-/* =========================================================
-   RAIN
-========================================================= */
-
-#rain{
-
-    position:absolute;
-    inset:0;
-
-    pointer-events:none;
-
-    opacity:.27;
-
-    z-index:5;
-}
-
-.rain-drop{
-
-    position:absolute;
-
-    top:-120px;
-
-    width:1px;
-
-    height:
-        var(--length);
-
-    background:
-        linear-gradient(
-            transparent,
-            rgba(210,215,225,.5)
-        );
-
-    animation:
-        rainFall var(--speed) linear infinite;
-
-    animation-delay:
-        var(--delay);
-}
-
-@keyframes rainFall{
-
-    from{
-        transform:
-            translate3d(0,-120px,0)
-            rotate(8deg);
-    }
-
-    to{
-        transform:
-            translate3d(-80px,120vh,0)
-            rotate(8deg);
-    }
-}
-
-/* =========================================================
-   LIGHTNING
-========================================================= */
-
-#lightning{
-
-    position:absolute;
-    inset:0;
-
-    background:
-        rgba(220,210,255,.75);
-
-    opacity:0;
-
-    pointer-events:none;
-
-    z-index:20;
-}
-
-/* =========================================================
-   BATS
-========================================================= */
-
-.bat{
-
-    position:absolute;
-
-    z-index:8;
-
-    font-size:
-        clamp(15px,2.5vw,28px);
-
-    opacity:0;
-
-    filter:
-        grayscale(1)
-        brightness(.2);
-
-    animation:
-        batFlight var(--duration) linear infinite;
-
-    animation-delay:
-        var(--delay);
-}
-
-@keyframes batFlight{
-
-    0%{
-        left:-10%;
-        top:var(--top);
-        opacity:0;
-        transform:
-            scale(.4)
-            rotate(-5deg);
-    }
-
-    10%{
-        opacity:.75;
-    }
-
-    50%{
-        left:48%;
-        top:calc(var(--top) - 12%);
-        transform:
-            scale(1)
-            rotate(4deg);
-    }
-
-    90%{
-        opacity:.7;
-    }
-
-    100%{
-        left:110%;
-        top:var(--top);
-        opacity:0;
-        transform:
-            scale(.6)
-            rotate(-4deg);
-    }
-}
-
-/* =========================================================
-   PARTICLES
-========================================================= */
-
-#particles{
-
-    position:absolute;
-    inset:0;
-
-    pointer-events:none;
-
-    z-index:30;
-}
-
-.particle{
-
-    position:absolute;
-
-    width:2px;
-    height:2px;
-
-    border-radius:50%;
-
-    background:
-        rgba(220,195,160,.7);
-
-    animation:
-        particleFloat var(--duration) ease-out forwards;
-}
-
-@keyframes particleFloat{
-
-    from{
-        transform:
-            translate(0,0)
-            scale(.4);
-
-        opacity:0;
-    }
-
-    15%{
-        opacity:.8;
-    }
-
-    to{
-        transform:
-            translate(
-                var(--x),
-                var(--y)
-            )
-            scale(1.2);
-
-        opacity:0;
-    }
-}
-
-/* =========================================================
-   VIGNETTE
-========================================================= */
-
-.vignette{
-
-    position:absolute;
-    inset:0;
-
-    pointer-events:none;
-
-    z-index:50;
-
-    background:
-
-        radial-gradient(
-            ellipse at center,
-            transparent 42%,
-            rgba(0,0,0,.35) 72%,
-            rgba(0,0,0,.85) 100%
-        );
-}
-
-/* =========================================================
-   UI
-========================================================= */
-
-#ui{
-
-    position:absolute;
-    inset:0;
-
-    z-index:100;
-
-    pointer-events:none;
-}
+/* =========================
+   WORLD
+========================= */
 
 .scene{
-
-    position:absolute;
-    inset:0;
-
-    display:none;
-
-    align-items:center;
-    justify-content:center;
-
-    padding:
-        7vh 20px;
-
-    text-align:center;
-
-    pointer-events:none;
+  position:absolute;
+  inset:0;
+  display:none;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 25%,#1a1b27 0%,#09090e 38%,#020203 75%);
 }
 
 .scene.active{
-
-    display:flex;
+  display:block;
 }
 
-.scene-content{
+/* =========================
+   SKY
+========================= */
 
-    width:min(780px,95vw);
-
-    pointer-events:auto;
-
-    animation:
-        sceneReveal 1.3s var(--ease);
+.sky{
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 72% 20%,rgba(120,120,160,.12),transparent 20%),
+    linear-gradient(#050509,#090912 48%,#020203);
 }
 
-@keyframes sceneReveal{
-
-    from{
-        opacity:0;
-        transform:
-            translateY(30px)
-            scale(.97);
-        filter:blur(8px);
-    }
-
-    to{
-        opacity:1;
-        transform:
-            translateY(0)
-            scale(1);
-        filter:blur(0);
-    }
+.moon{
+  position:absolute;
+  width:125px;
+  height:125px;
+  border-radius:50%;
+  right:14%;
+  top:10%;
+  background:
+    radial-gradient(circle at 35% 30%,#fff,#c8c8d1 60%,#777 100%);
+  box-shadow:
+    0 0 30px rgba(220,220,255,.25),
+    0 0 100px rgba(130,130,190,.13);
 }
 
-/* =========================================================
-   GLASS PANEL
-========================================================= */
-
-.glass{
-
-    padding:
-        clamp(28px,6vw,55px)
-        clamp(20px,5vw,50px);
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(8,5,11,.84),
-            rgba(20,11,23,.67)
-        );
-
-    border:
-        1px solid rgba(185,154,101,.28);
-
-    box-shadow:
-
-        0 30px 80px rgba(0,0,0,.75),
-
-        inset 0 0 60px
-        rgba(255,255,255,.015);
-
-    backdrop-filter:
-        blur(10px);
-
-    position:relative;
+.moon:after{
+  content:"";
+  position:absolute;
+  inset:12px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 30%,rgba(0,0,0,.12),transparent 8%),
+    radial-gradient(circle at 65% 60%,rgba(0,0,0,.14),transparent 13%);
 }
 
-.glass::before{
+/* =========================
+   STARS
+========================= */
 
-    content:"";
-
-    position:absolute;
-
-    inset:8px;
-
-    border:
-        1px solid rgba(255,255,255,.025);
-
-    pointer-events:none;
+.stars{
+  position:absolute;
+  inset:0;
+  background-image:
+    radial-gradient(circle,#fff 1px,transparent 1px),
+    radial-gradient(circle,#aaa 1px,transparent 1px);
+  background-size:83px 97px,137px 131px;
+  opacity:.35;
+  animation:stars 8s linear infinite;
 }
 
-/* =========================================================
-   TYPOGRAPHY
-========================================================= */
-
-.kicker{
-
-    color:
-        var(--gold);
-
-    text-transform:
-        uppercase;
-
-    letter-spacing:
-        clamp(3px,1vw,6px);
-
-    font-size:
-        10px;
-
-    margin-bottom:20px;
+@keyframes stars{
+  from{transform:translateY(0)}
+  to{transform:translateY(20px)}
 }
 
-.title{
+/* =========================
+   CASTLE
+========================= */
 
-    font-size:
-        clamp(48px,11vw,100px);
-
-    line-height:.95;
-
-    font-weight:
-        normal;
-
-    letter-spacing:
-        2px;
-
-    text-shadow:
-        0 0 35px rgba(255,255,255,.05);
+.castle{
+  position:absolute;
+  bottom:16%;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(800px,90vw);
+  height:52%;
+  background:
+    linear-gradient(90deg,#08080a,#18181d 48%,#070708);
+  border:2px solid #111;
+  box-shadow:
+    0 -20px 70px rgba(0,0,0,.8),
+    inset 0 0 50px #000;
 }
 
-.subtitle{
-
-    margin-top:22px;
-
-    font-size:
-        clamp(14px,3vw,20px);
-
-    line-height:1.8;
-
-    color:
-        #cbc4cc;
+.castle:before,
+.castle:after{
+  content:"";
+  position:absolute;
+  bottom:0;
+  width:23%;
+  height:125%;
+  background:
+    linear-gradient(90deg,#070708,#15151a,#070708);
+  border:2px solid #101015;
 }
 
-.gold{
+.castle:before{left:-17%}
+.castle:after{right:-17%}
 
-    color:
-        var(--gold2);
+.towerTop{
+  position:absolute;
+  width:23%;
+  height:16%;
+  top:-15%;
+  background:#111117;
+  clip-path:polygon(50% 0,100% 100%,0 100%);
 }
 
-.red{
+.towerTop.left{left:-17%}
+.towerTop.right{right:-17%}
 
-    color:
-        #a83a52;
+.window{
+  position:absolute;
+  width:35px;
+  height:72px;
+  background:
+    linear-gradient(#15151a,#09090c);
+  border:2px solid #29292f;
+  border-radius:50% 50% 8px 8px;
+  box-shadow:0 0 15px rgba(130,20,25,.12);
 }
 
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-.btn{
-
-    margin-top:30px;
-
-    min-width:190px;
-
-    padding:15px 26px;
-
-    background:
-        rgba(0,0,0,.25);
-
-    border:
-        1px solid rgba(185,154,101,.7);
-
-    color:
-        #eee5d6;
-
-    font-family:
-        Georgia,
-        "Times New Roman",
-        serif;
-
-    font-size:
-        11px;
-
-    letter-spacing:
-        3px;
-
-    cursor:pointer;
-
-    transition:
-        all .4s var(--ease);
-
-    position:relative;
-
-    overflow:hidden;
+.window.glow{
+  background:#3b1717;
+  box-shadow:0 0 25px rgba(150,20,25,.5);
+  animation:flicker 2s infinite;
 }
 
-.btn::before{
+.w1{left:10%;top:18%}
+.w2{left:27%;top:12%}
+.w3{right:27%;top:12%}
+.w4{right:10%;top:18%}
 
-    content:"";
-
-    position:absolute;
-
-    top:0;
-    left:-120%;
-
-    width:100%;
-    height:100%;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255,255,255,.12),
-            transparent
-        );
-
-    transition:
-        left .7s ease;
+@keyframes flicker{
+  0%,100%{opacity:.7}
+  45%{opacity:.25}
+  55%{opacity:.9}
 }
 
-.btn:hover::before,
-.btn:active::before{
+/* =========================
+   GATE
+========================= */
 
-    left:120%;
+.gate{
+  position:absolute;
+  left:50%;
+  bottom:0;
+  transform:translateX(-50%);
+  width:25%;
+  min-width:150px;
+  height:58%;
+  background:
+    linear-gradient(90deg,#050506,#111115,#050506);
+  border:4px solid #09090b;
+  border-bottom:0;
+  border-radius:100px 100px 0 0;
+  box-shadow:
+    inset 0 0 35px #000,
+    0 0 30px rgba(0,0,0,.8);
 }
 
-.btn:hover,
-.btn:active{
-
-    background:
-        rgba(185,154,101,.15);
-
-    box-shadow:
-        0 0 30px rgba(185,154,101,.15);
-
-    letter-spacing:
-        4px;
+.gateBars{
+  position:absolute;
+  inset:10% 10% 0;
+  display:flex;
+  justify-content:space-around;
 }
 
-/* =========================================================
-   BLOOD LINE
-========================================================= */
-
-.blood-line{
-
-    width:0;
-
-    height:1px;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            #a13b51,
-            transparent
-        );
-
-    margin:
-        25px auto 0;
-
-    transition:
-        width 1.5s var(--ease);
+.gateBars span{
+  width:5px;
+  height:100%;
+  background:#29292c;
+  box-shadow:0 0 4px #000;
 }
 
-.scene.active .blood-line{
-
-    width:
-        min(350px,70vw);
+.gateCross{
+  position:absolute;
+  top:45%;
+  left:8%;
+  right:8%;
+  height:7px;
+  background:#29292c;
 }
 
-/* =========================================================
-   SECRET INPUT
-========================================================= */
-
-.secret-box{
-
-    margin-top:30px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
+.rune{
+  position:absolute;
+  left:50%;
+  top:27%;
+  transform:translate(-50%,-50%);
+  font-size:32px;
+  color:#54181d;
+  text-shadow:0 0 15px #8b1822;
 }
 
-.secret-input{
+/* =========================
+   GROUND
+========================= */
 
-    width:
-        min(320px,85vw);
-
-    padding:16px;
-
-    background:
-        rgba(0,0,0,.5);
-
-    border:
-        1px solid #4a3d50;
-
-    outline:none;
-
-    color:#fff;
-
-    text-align:center;
-
-    font-family:
-        Georgia,
-        serif;
-
-    font-size:20px;
-
-    letter-spacing:8px;
-
-    transition:
-        .35s;
+.ground{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:22%;
+  background:
+    linear-gradient(#09090b,#020203);
+  clip-path:polygon(
+    0 20%,10% 12%,20% 20%,30% 8%,40% 19%,
+    50% 7%,60% 19%,70% 9%,80% 18%,90% 8%,100% 20%,
+    100% 100%,0 100%
+  );
 }
 
-.secret-input:focus{
+/* =========================
+   FOG
+========================= */
 
-    border-color:
-        var(--gold);
-
-    box-shadow:
-        0 0 25px rgba(185,154,101,.12);
+.fog{
+  position:absolute;
+  width:140%;
+  height:25%;
+  left:-20%;
+  bottom:15%;
+  background:radial-gradient(ellipse,rgba(180,180,190,.1),transparent 65%);
+  filter:blur(14px);
+  animation:fogMove 12s ease-in-out infinite alternate;
 }
 
-.error{
-
-    color:
-        #a83a52;
-
-    font-size:
-        12px;
-
-    margin-top:
-        15px;
-
-    min-height:
-        18px;
+.fog.two{
+  bottom:30%;
+  opacity:.5;
+  animation-duration:17s;
 }
 
-/* =========================================================
-   STORY
-========================================================= */
-
-.story-text{
-
-    min-height:
-        100px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    font-size:
-        clamp(17px,4vw,25px);
-
-    line-height:
-        1.8;
-
-    font-style:
-        italic;
-
-    color:
-        #e1d9df;
-
-    transition:
-        opacity .5s;
+@keyframes fogMove{
+  from{transform:translateX(-8%)}
+  to{transform:translateX(8%)}
 }
 
-/* =========================================================
+/* =========================
+   RAIN
+========================= */
+
+.rain{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.35;
+  background-image:
+    repeating-linear-gradient(
+      105deg,
+      transparent 0,
+      transparent 8px,
+      rgba(190,200,220,.18) 9px,
+      transparent 10px
+    );
+  background-size:22px 22px;
+  animation:rain .35s linear infinite;
+}
+
+@keyframes rain{
+  from{background-position:0 0}
+  to{background-position:-20px 70px}
+}
+
+/* =========================
+   BAT
+========================= */
+
+.bat{
+  position:absolute;
+  width:45px;
+  height:22px;
+  z-index:20;
+  opacity:.8;
+  animation:fly 8s linear infinite;
+}
+
+.bat:before,
+.bat:after{
+  content:"";
+  position:absolute;
+  width:27px;
+  height:18px;
+  background:#020202;
+  top:0;
+}
+
+.bat:before{
+  left:0;
+  clip-path:polygon(100% 50%,0 0,15% 100%);
+}
+
+.bat:after{
+  right:0;
+  clip-path:polygon(0 50%,100% 0,85% 100%);
+}
+
+.bat:nth-child(2){
+  animation-duration:11s;
+  animation-delay:-4s;
+  top:20%;
+}
+
+.bat:nth-child(3){
+  animation-duration:9s;
+  animation-delay:-6s;
+  top:35%;
+}
+
+@keyframes fly{
+  from{left:-10%;transform:translateY(0) scale(.7)}
+  30%{transform:translateY(-40px) scale(1)}
+  60%{transform:translateY(20px) scale(.8)}
+  to{left:110%;transform:translateY(-20px) scale(.6)}
+}
+
+/* =========================
+   CHARACTERS
+========================= */
+
+.character{
+  position:absolute;
+  bottom:15%;
+  width:80px;
+  height:180px;
+  z-index:30;
+  transition:
+    left 1.8s ease,
+    right 1.8s ease,
+    transform 1.8s ease,
+    opacity .8s ease;
+}
+
+.nour{
+  left:18%;
+}
+
+.randy{
+  right:15%;
+  display:none;
+}
+
+/* head */
+
+.head{
+  position:absolute;
+  top:0;
+  left:19px;
+  width:43px;
+  height:49px;
+  border-radius:48% 48% 45% 45%;
+  background:linear-gradient(90deg,#b7a4a4,#eee,#a48f8f);
+  box-shadow:0 0 12px rgba(255,255,255,.1);
+}
+
+.hair{
+  position:absolute;
+  left:11px;
+  top:-9px;
+  width:58px;
+  height:34px;
+  background:#090909;
+  border-radius:60% 60% 20% 20%;
+}
+
+.eye{
+  position:absolute;
+  top:22px;
+  width:6px;
+  height:4px;
+  border-radius:50%;
+  background:#8d0c16;
+  box-shadow:0 0 9px #d21b29;
+}
+
+.eye.left{left:10px}
+.eye.right{right:10px}
+
+.body{
+  position:absolute;
+  top:45px;
+  left:11px;
+  width:58px;
+  height:110px;
+  background:
+    linear-gradient(90deg,#050505,#17151a,#050505);
+  clip-path:polygon(28% 0,72% 0,100% 100%,0 100%);
+}
+
+.cape{
+  position:absolute;
+  top:43px;
+  left:-3px;
+  width:86px;
+  height:125px;
+  background:#070709;
+  clip-path:polygon(35% 0,65% 0,100% 100%,50% 82%,0 100%);
+  z-index:-1;
+  filter:drop-shadow(0 0 8px #000);
+}
+
+.arm{
+  position:absolute;
+  width:15px;
+  height:90px;
+  background:#111;
+  top:55px;
+  border-radius:20px;
+  transform-origin:top;
+}
+
+.arm.left{
+  left:3px;
+  transform:rotate(13deg);
+}
+
+.arm.right{
+  right:3px;
+  transform:rotate(-13deg);
+}
+
+.vampireFangs{
+  position:absolute;
+  top:37px;
+  left:17px;
+  color:white;
+  font-size:8px;
+}
+
+.wolf .head{
+  background:linear-gradient(90deg,#4b4747,#aaa,#403c3c);
+  border-radius:50% 50% 40% 40%;
+}
+
+.wolf .hair{
+  background:#292626;
+  clip-path:polygon(0 100%,10% 15%,25% 40%,50% 0,75% 40%,90% 15%,100% 100%);
+}
+
+.wolf .eye{
+  background:#f0b000;
+  box-shadow:0 0 15px #ffae00;
+}
+
+.wolf .body{
+  background:linear-gradient(90deg,#111,#332d2d,#0b0b0b);
+}
+
+.wolf .cape{
+  display:none;
+}
+
+.walk{
+  animation:walk 1s ease-in-out infinite alternate;
+}
+
+@keyframes walk{
+  from{transform:translateY(0)}
+  to{transform:translateY(-5px)}
+}
+
+/* =========================
+   DIALOGUE
+========================= */
+
+#dialogue{
+  position:absolute;
+  left:5%;
+  right:5%;
+  bottom:5%;
+  z-index:100;
+  display:none;
+}
+
+.dialogueBox{
+  background:
+    linear-gradient(90deg,rgba(5,5,7,.97),rgba(20,18,22,.94));
+  border:1px solid #4d3437;
+  box-shadow:
+    0 0 40px rgba(0,0,0,.8),
+    inset 0 0 25px rgba(130,20,30,.05);
+  padding:20px 22px;
+  border-radius:4px;
+}
+
+.name{
+  color:#b72a35;
+  letter-spacing:3px;
+  font-size:13px;
+  margin-bottom:9px;
+  text-transform:uppercase;
+}
+
+.text{
+  font-size:18px;
+  line-height:1.55;
+  color:#eee;
+  min-height:55px;
+}
+
+.continue{
+  margin-top:12px;
+  text-align:right;
+  color:#8e7779;
+  font-size:11px;
+  letter-spacing:2px;
+}
+
+/* =========================
+   UI
+========================= */
+
+#ui{
+  position:absolute;
+  inset:0;
+  z-index:200;
+  pointer-events:none;
+}
+
+#chapter{
+  position:absolute;
+  top:7%;
+  left:50%;
+  transform:translateX(-50%);
+  color:#a18c8f;
+  font-size:11px;
+  letter-spacing:5px;
+  text-transform:uppercase;
+  opacity:.7;
+}
+
+#subtitle{
+  position:absolute;
+  top:13%;
+  left:50%;
+  transform:translateX(-50%);
+  width:90%;
+  text-align:center;
+  font-size:clamp(20px,4vw,35px);
+  letter-spacing:4px;
+  text-shadow:0 0 15px #000;
+}
+
+#buttonArea{
+  position:absolute;
+  bottom:10%;
+  left:50%;
+  transform:translateX(-50%);
+  pointer-events:auto;
+  width:90%;
+  text-align:center;
+}
+
+.mainBtn{
+  border:1px solid #6b3439;
+  background:rgba(8,5,7,.85);
+  color:#ddd;
+  padding:15px 30px;
+  letter-spacing:4px;
+  font-size:12px;
+  cursor:pointer;
+  box-shadow:
+    0 0 25px rgba(110,20,30,.15),
+    inset 0 0 15px rgba(110,20,30,.08);
+  transition:.3s;
+}
+
+.mainBtn:hover{
+  background:#250e12;
+  border-color:#a34b54;
+  box-shadow:0 0 35px rgba(150,30,40,.35);
+  transform:scale(1.04);
+}
+
+/* =========================
+   TITLE
+========================= */
+
+#titleScreen{
+  position:absolute;
+  inset:0;
+  z-index:300;
+  background:#000;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  transition:opacity 2s;
+}
+
+#titleScreen.hidden{
+  opacity:0;
+  pointer-events:none;
+}
+
+.bloodTitle{
+  color:#eee;
+  font-size:clamp(30px,7vw,75px);
+  letter-spacing:8px;
+  text-shadow:
+    0 0 15px rgba(200,0,20,.25),
+    0 0 50px #000;
+}
+
+.smallTitle{
+  margin-top:15px;
+  color:#80696c;
+  letter-spacing:6px;
+  font-size:11px;
+}
+
+#start{
+  margin-top:45px;
+  pointer-events:auto;
+}
+
+/* =========================
+   BLACKOUT
+========================= */
+
+#blackout{
+  position:absolute;
+  inset:0;
+  background:#000;
+  z-index:500;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 1.2s;
+}
+
+#blackout.on{
+  opacity:1;
+}
+
+/* =========================
+   FLASH
+========================= */
+
+#flash{
+  position:absolute;
+  inset:0;
+  background:white;
+  z-index:450;
+  opacity:0;
+  pointer-events:none;
+}
+
+.flashNow{
+  animation:flash .35s;
+}
+
+@keyframes flash{
+  0%{opacity:.8}
+  100%{opacity:0}
+}
+
+/* =========================
+   HEART
+========================= */
+
+.heart{
+  position:absolute;
+  color:#7e1018;
+  font-size:18px;
+  pointer-events:none;
+  animation:heartFloat 4s linear forwards;
+  z-index:120;
+}
+
+@keyframes heartFloat{
+  from{
+    transform:translateY(0) scale(.5);
+    opacity:0;
+  }
+  20%{opacity:.8}
+  to{
+    transform:translateY(-180px) scale(1.3);
+    opacity:0;
+  }
+}
+
+/* =========================
    LETTER
-========================================================= */
+========================= */
 
-.letter-wrapper{
+#letterScene{
+  position:absolute;
+  inset:0;
+  z-index:350;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle,rgba(90,20,25,.12),transparent 40%),
+    #030304;
+}
 
-    width:
-        min(820px,94vw);
-
-    max-height:
-        76vh;
-
-    overflow-y:
-        auto;
-
-    scrollbar-width:
-        thin;
-
-    scrollbar-color:
-        #806640 transparent;
+#letterScene.show{
+  display:flex;
 }
 
 .letter{
-
-    position:relative;
-
-    padding:
-        clamp(28px,6vw,55px);
-
-    text-align:left;
-
-    color:
-        var(--ink);
-
-    background:
-
-        radial-gradient(
-            ellipse at 50% 50%,
-            #e2d0a7,
-            #c7ae7c
-        );
-
-    border:
-        1px solid #8d7048;
-
-    box-shadow:
-        0 30px 80px rgba(0,0,0,.9),
-
-        inset 0 0 80px
-        rgba(90,55,20,.15);
+  width:min(650px,88vw);
+  max-height:78vh;
+  overflow:auto;
+  padding:35px;
+  background:
+    linear-gradient(135deg,#d7c5a4,#c6af88,#dfcfb0);
+  color:#201817;
+  box-shadow:
+    0 0 70px rgba(0,0,0,.9),
+    0 0 15px rgba(160,20,20,.15);
+  transform:rotate(-1deg) scale(.85);
+  animation:letterOpen 1.5s forwards;
+  scrollbar-width:none;
 }
 
-.letter::before{
+.letter::-webkit-scrollbar{display:none}
 
-    content:"";
-
-    position:absolute;
-
-    inset:12px;
-
-    border:
-        1px solid rgba(83,55,29,.2);
-
-    pointer-events:none;
+@keyframes letterOpen{
+  to{transform:rotate(-1deg) scale(1)}
 }
 
 .letter h2{
-
-    color:
-        #281b16;
-
-    font-size:
-        clamp(27px,6vw,44px);
-
-    font-weight:
-        normal;
-
-    margin-bottom:
-        28px;
+  text-align:center;
+  font-size:27px;
+  margin-bottom:22px;
 }
 
 .letter p{
-
-    color:
-        #35251d;
-
-    font-size:
-        clamp(14px,2.8vw,17px);
-
-    line-height:
-        1.9;
-
-    margin-bottom:
-        20px;
-}
-
-/* =========================================================
-   TYPEWRITER
-========================================================= */
-
-.typewriter{
-
-    white-space:
-        pre-wrap;
-
-    text-align:
-        left;
-}
-
-/* =========================================================
-   FINAL SCENE
-========================================================= */
-
-.final-symbol{
-
-    font-size:
-        clamp(55px,12vw,100px);
-
-    margin-bottom:
-        15px;
-
-    animation:
-        finalPulse 3s ease-in-out infinite;
-}
-
-@keyframes finalPulse{
-
-    0%,100%{
-        transform:
-            scale(1);
-        filter:
-            drop-shadow(
-                0 0 10px rgba(169,44,72,.15)
-            );
-    }
-
-    50%{
-        transform:
-            scale(1.06);
-        filter:
-            drop-shadow(
-                0 0 30px rgba(169,44,72,.35)
-            );
-    }
-}
-
-.final-title{
-
-    font-size:
-        clamp(42px,9vw,85px);
-
-    font-weight:
-        normal;
-
-    color:
-        #eee5d9;
-}
-
-.final-sub{
-
-    margin-top:
-        25px;
-
-    font-size:
-        clamp(17px,4vw,23px);
-
-    color:
-        #c7bbc5;
-
-    line-height:
-        1.7;
+  font-size:16px;
+  line-height:1.8;
+  margin-bottom:14px;
 }
 
 .signature{
-
-    margin-top:
-        35px;
-
-    color:
-        var(--gold2);
-
-    letter-spacing:
-        6px;
-
-    font-size:
-        13px;
+  text-align:right;
+  font-size:22px;
+  margin-top:25px;
+  font-style:italic;
 }
 
-/* =========================================================
-   LITTLE VAMPIRE
-========================================================= */
+/* =========================
+   FINAL
+========================= */
 
-.nour{
-
-    position:absolute;
-
-    left:50%;
-
-    bottom:
-        clamp(14%,18vh,25%);
-
-    transform:
-        translateX(-50%);
-
-    width:
-        90px;
-
-    height:
-        130px;
-
-    z-index:40;
-
-    pointer-events:none;
-
-    transition:
-        opacity .7s,
-        transform .7s;
+#final{
+  position:absolute;
+  inset:0;
+  z-index:400;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  text-align:center;
+  background:
+    radial-gradient(circle at center,rgba(70,10,15,.2),transparent 45%),
+    #020203;
 }
 
-.nour.hidden{
-
-    opacity:0;
-
-    transform:
-        translateX(-50%)
-        translateY(30px)
-        scale(.7);
+#final.show{
+  display:flex;
+  animation:fadeIn 3s;
 }
 
-/* HEAD */
-
-.nour-head{
-
-    position:absolute;
-
-    width:55px;
-    height:55px;
-
-    left:50%;
-    top:12px;
-
-    transform:
-        translateX(-50%);
-
-    border-radius:50%;
-
-    background:
-        linear-gradient(
-            135deg,
-            #e9d8d4,
-            #b99ea0
-        );
-
-    box-shadow:
-        0 0 20px rgba(0,0,0,.5);
+@keyframes fadeIn{
+  from{opacity:0}
+  to{opacity:1}
 }
 
-/* HAIR */
-
-.nour-hair{
-
-    position:absolute;
-
-    width:63px;
-    height:42px;
-
-    left:50%;
-    top:4px;
-
-    transform:
-        translateX(-50%);
-
-    background:
-        #09070b;
-
-    border-radius:
-        50% 50% 35% 35%;
+.finalSmall{
+  color:#775c61;
+  letter-spacing:6px;
+  font-size:10px;
+  margin-bottom:20px;
 }
 
-/* EYES */
-
-.nour-eye{
-
-    position:absolute;
-
-    width:8px;
-    height:5px;
-
-    top:34px;
-
-    background:
-        #9f2945;
-
-    border-radius:50%;
-
-    box-shadow:
-        0 0 7px #a92c48;
+.finalBig{
+  font-size:clamp(28px,7vw,70px);
+  letter-spacing:7px;
+  color:#eee;
+  text-shadow:
+    0 0 25px rgba(160,20,30,.3),
+    0 0 80px #000;
 }
 
-.nour-eye.left{
-    left:14px;
+.finalLove{
+  margin-top:25px;
+  color:#a12a34;
+  letter-spacing:8px;
+  font-size:14px;
 }
 
-.nour-eye.right{
-    right:14px;
+.finalName{
+  margin-top:40px;
+  color:#bca7a9;
+  letter-spacing:5px;
+  font-size:11px;
 }
 
-/* BODY */
+/* =========================
+   VIGNETTE
+========================= */
 
-.nour-body{
-
-    position:absolute;
-
-    width:70px;
-    height:72px;
-
-    left:50%;
-    top:61px;
-
-    transform:
-        translateX(-50%);
-
-    background:
-        linear-gradient(
-            90deg,
-            #08060a,
-            #211722,
-            #08060a
-        );
-
-    border-radius:
-        35px 35px 8px 8px;
+#vignette{
+  position:absolute;
+  inset:0;
+  z-index:180;
+  pointer-events:none;
+  background:
+    radial-gradient(circle,transparent 30%,rgba(0,0,0,.28) 65%,rgba(0,0,0,.85) 100%);
 }
 
-/* CAPE */
+/* =========================
+   SECRET INPUT
+========================= */
 
-.nour-cape{
-
-    position:absolute;
-
-    width:88px;
-    height:78px;
-
-    left:50%;
-    top:58px;
-
-    transform:
-        translateX(-50%);
-
-    background:
-        #0a070c;
-
-    clip-path:
-        polygon(
-            50% 0,
-            100% 100%,
-            0 100%
-        );
-
-    z-index:-1;
+#puzzle{
+  position:absolute;
+  inset:0;
+  z-index:250;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  background:rgba(0,0,0,.7);
 }
 
-/* FANGS */
-
-.nour-fang{
-
-    position:absolute;
-
-    width:4px;
-    height:8px;
-
-    background:white;
-
-    top:52px;
-
-    z-index:5;
-
-    clip-path:
-        polygon(
-            0 0,
-            100% 0,
-            50% 100%
-        );
+#puzzle.show{
+  display:flex;
 }
 
-.nour-fang.left{
-    left:25px;
+.puzzleText{
+  color:#9b7c80;
+  letter-spacing:4px;
+  font-size:11px;
+  margin-bottom:18px;
 }
 
-.nour-fang.right{
-    right:25px;
+#codeInput{
+  width:170px;
+  background:#08080a;
+  border:1px solid #533237;
+  color:#ddd;
+  padding:14px;
+  text-align:center;
+  outline:none;
+  font-size:22px;
+  letter-spacing:8px;
 }
 
-/* =========================================================
-   UI SOUND
-========================================================= */
-
-.sound-control{
-
-    position:fixed;
-
-    top:16px;
-    right:16px;
-
-    z-index:950;
-
-    pointer-events:auto;
-
-    width:42px;
-    height:42px;
-
-    border-radius:50%;
-
-    border:
-        1px solid rgba(185,154,101,.4);
-
-    background:
-        rgba(0,0,0,.45);
-
-    color:
-        #d6c8b5;
-
-    cursor:pointer;
-
-    backdrop-filter:
-        blur(6px);
+#error{
+  margin-top:15px;
+  color:#a51f2a;
+  opacity:0;
+  font-size:12px;
 }
 
-/* =========================================================
-   FLASH
-========================================================= */
-
-#flash{
-
-    position:fixed;
-    inset:0;
-
-    z-index:850;
-
-    pointer-events:none;
-
-    background:white;
-
-    opacity:0;
+#error.show{
+  animation:error .5s;
 }
 
-/* =========================================================
-   BLACK TRANSITION
-========================================================= */
-
-#transition{
-
-    position:fixed;
-    inset:0;
-
-    z-index:800;
-
-    background:#000;
-
-    opacity:0;
-
-    pointer-events:none;
-
-    transition:
-        opacity .8s ease;
+@keyframes error{
+  0%,100%{opacity:0}
+  50%{opacity:1}
 }
 
-#transition.active{
-
-    opacity:1;
-}
-
-/* =========================================================
-   BLOOD DRIP
-========================================================= */
-
-.blood-drip{
-
-    position:absolute;
-
-    top:-30px;
-
-    width:2px;
-
-    background:
-        linear-gradient(
-            #a72e48,
-            transparent
-        );
-
-    border-radius:0 0 4px 4px;
-
-    animation:
-        drip 4s ease-in forwards;
-}
-
-@keyframes drip{
-
-    from{
-        height:0;
-    }
-
-    to{
-        height:var(--height);
-    }
-}
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
+/* =========================
+   MOBILE
+========================= */
 
 @media(max-width:600px){
 
-    .castle{
+  .moon{
+    width:90px;
+    height:90px;
+    right:10%;
+  }
 
-        height:57vh;
+  .castle{
+    bottom:18%;
+    width:75%;
+    height:43%;
+  }
 
-        min-height:350px;
-    }
+  .gate{
+    width:34%;
+    height:58%;
+  }
 
-    .castle-main{
+  .character{
+    transform:scale(.8);
+    transform-origin:bottom;
+  }
 
-        left:13%;
-        right:13%;
-    }
+  .nour{left:7%}
+  .randy{right:4%}
 
-    .tower.left{
-        left:1%;
-    }
+  .dialogueBox{
+    padding:16px;
+  }
 
-    .tower.right{
-        right:1%;
-    }
+  .text{
+    font-size:15px;
+  }
 
-    .nour{
+  .letter{
+    padding:24px;
+  }
 
-        transform:
-            translateX(-50%)
-            scale(.82);
-    }
-
-    .nour.hidden{
-
-        transform:
-            translateX(-50%)
-            translateY(30px)
-            scale(.6);
-    }
-
-    .glass{
-
-        max-height:
-            78vh;
-
-        overflow:
-            auto;
-    }
-
-    .letter-wrapper{
-
-        max-height:
-            70vh;
-    }
-
+  .letter p{
+    font-size:14px;
+  }
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- =====================================================
-     WORLD
-===================================================== -->
+<div id="game">
 
-<div id="world">
+  <div id="camera">
 
-    <div class="sky"></div>
+    <!-- SCENE 1 -->
+    <section class="scene active" id="scene1">
+      <div class="sky"></div>
+      <div class="stars"></div>
+      <div class="moon"></div>
 
-    <div class="stars"></div>
-    <div class="stars2"></div>
-    <div class="stars3"></div>
+      <div class="castle">
+        <div class="towerTop left"></div>
+        <div class="towerTop right"></div>
+        <div class="window glow w1"></div>
+        <div class="window w2"></div>
+        <div class="window glow w3"></div>
+        <div class="window w4"></div>
 
-    <div class="moon"></div>
-
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-
-    <div class="horizon"></div>
-
-    <!-- CASTLE -->
-
-    <div class="castle">
-
-        <div class="castle-main">
-
-            <div class="block-line l1"></div>
-            <div class="block-line l2"></div>
-            <div class="block-line l3"></div>
-
-            <div class="central-window"></div>
-
+        <div class="gate">
+          <div class="rune">†</div>
+          <div class="gateBars">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+          </div>
+          <div class="gateCross"></div>
         </div>
+      </div>
 
-        <!-- LEFT TOWER -->
+      <div class="ground"></div>
+      <div class="fog"></div>
+      <div class="fog two"></div>
+      <div class="rain"></div>
 
-        <div class="tower left">
+      <div class="bat"></div>
+      <div class="bat"></div>
+      <div class="bat"></div>
 
-            <div class="roof"></div>
-
-            <div class="tower-window w1"></div>
-            <div class="tower-window w2"></div>
-
+      <div class="character nour walk" id="nour1">
+        <div class="cape"></div>
+        <div class="head">
+          <div class="hair"></div>
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+          <div class="vampireFangs">∨ ∨</div>
         </div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+      </div>
+    </section>
 
-        <!-- RIGHT TOWER -->
+    <!-- SCENE 2 -->
+    <section class="scene" id="scene2">
+      <div class="sky"></div>
+      <div class="stars"></div>
 
-        <div class="tower right">
+      <div class="castle" style="bottom:5%;height:90%;width:100%;">
+        <div class="window glow w1"></div>
+        <div class="window glow w2"></div>
+        <div class="window glow w3"></div>
+        <div class="window w4"></div>
 
-            <div class="roof"></div>
-
-            <div class="tower-window w1"></div>
-            <div class="tower-window w2"></div>
-
+        <div class="gate" id="mainDoor" style="height:72%;">
+          <div class="rune">N</div>
+          <div class="gateBars">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+          </div>
+          <div class="gateCross"></div>
         </div>
+      </div>
 
-        <!-- DOOR -->
+      <div class="fog"></div>
+      <div class="rain"></div>
 
-        <div
-            class="castle-door"
-            id="castleDoor"
-        >
-
-            <div class="door-cross"></div>
-            <div class="door-ring"></div>
-
+      <div class="character nour" id="nour2">
+        <div class="cape"></div>
+        <div class="head">
+          <div class="hair"></div>
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+          <div class="vampireFangs">∨ ∨</div>
         </div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+      </div>
+    </section>
 
+    <!-- SCENE 3 -->
+    <section class="scene" id="scene3">
+      <div class="sky" style="background:#030305"></div>
+
+      <div style="
+        position:absolute;
+        inset:0;
+        background:
+        repeating-linear-gradient(
+          90deg,
+          #07070a 0,
+          #07070a 9%,
+          #16161b 10%,
+          #07070a 11%
+        );
+      "></div>
+
+      <div style="
+        position:absolute;
+        left:50%;
+        top:15%;
+        transform:translateX(-50%);
+        width:50%;
+        height:70%;
+        border:5px solid #15151a;
+        border-bottom:0;
+        border-radius:200px 200px 0 0;
+        box-shadow:inset 0 0 80px #000,0 0 40px #000;
+      "></div>
+
+      <div style="
+        position:absolute;
+        left:50%;
+        top:43%;
+        transform:translate(-50%,-50%);
+        font-size:100px;
+        color:#54141b;
+        opacity:.4;
+        text-shadow:0 0 40px #8d101b;
+      ">☩</div>
+
+      <div class="fog"></div>
+
+      <div class="character nour" id="nour3">
+        <div class="cape"></div>
+        <div class="head">
+          <div class="hair"></div>
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+          <div class="vampireFangs">∨ ∨</div>
+        </div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+      </div>
+    </section>
+
+    <!-- SCENE 4 -->
+    <section class="scene" id="scene4">
+      <div class="sky"></div>
+      <div class="moon"></div>
+
+      <div style="
+        position:absolute;
+        inset:0;
+        background:
+        linear-gradient(90deg,#030304 0%,transparent 20%,transparent 80%,#030304),
+        linear-gradient(#08080c,#020203);
+      "></div>
+
+      <div style="
+        position:absolute;
+        left:10%;
+        bottom:0;
+        width:80%;
+        height:70%;
+        border-left:8px solid #151519;
+        border-right:8px solid #151519;
+        box-shadow:inset 0 0 100px #000;
+      "></div>
+
+      <div style="
+        position:absolute;
+        left:25%;
+        top:25%;
+        width:50%;
+        height:48%;
+        border:3px solid #19191d;
+        border-radius:50% 50% 0 0;
+      "></div>
+
+      <div class="fog"></div>
+
+      <div class="character nour" id="nour4">
+        <div class="cape"></div>
+        <div class="head">
+          <div class="hair"></div>
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+          <div class="vampireFangs">∨ ∨</div>
+        </div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+      </div>
+
+      <div class="character randy wolf" id="randy4">
+        <div class="head">
+          <div class="hair"></div>
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+        </div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+      </div>
+    </section>
+
+    <!-- SCENE 5 -->
+    <section class="scene" id="scene5">
+      <div class="sky"></div>
+      <div class="moon"></div>
+      <div class="stars"></div>
+
+      <div style="
+        position:absolute;
+        left:50%;
+        bottom:10%;
+        transform:translateX(-50%);
+        width:70%;
+        height:15%;
+        background:#0b0b0d;
+        border:3px solid #17171b;
+        box-shadow:0 20px 30px #000;
+      "></div>
+
+      <div style="
+        position:absolute;
+        left:50%;
+        bottom:24%;
+        transform:translateX(-50%);
+        width:20px;
+        height:55px;
+        background:#3c271c;
+      "></div>
+
+      <div style="
+        position:absolute;
+        left:calc(50% - 9px);
+        bottom:36%;
+        width:18px;
+        height:24px;
+        background:#d4b477;
+        border-radius:50%;
+        box-shadow:0 0 35px 15px rgba(220,160,70,.15);
+        animation:flicker 1.2s infinite;
+      "></div>
+
+      <div class="fog"></div>
+
+      <div class="character nour" id="nour5">
+        <div class="cape"></div>
+        <div class="head">
+          <div class="hair"></div>
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+          <div class="vampireFangs">∨ ∨</div>
+        </div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+      </div>
+
+      <div class="character randy wolf" id="randy5">
+        <div class="head">
+          <div class="hair"></div>
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+        </div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <div id="vignette"></div>
+  <div id="flash"></div>
+  <div id="blackout"></div>
+
+  <!-- TITLE -->
+  <div id="titleScreen">
+
+    <div class="bloodTitle">
+      RANDY
     </div>
 
-    <div class="ground"></div>
-
-    <div class="fog-layer"></div>
-
-    <div id="rain"></div>
-
-    <div
-        id="lightning"
-    ></div>
-
-    <div id="particles"></div>
-
-    <div class="vignette"></div>
-
-    <!-- BATS -->
-
-    <div
-        class="bat"
-        style="
-            --top:18%;
-            --duration:13s;
-            --delay:-3s;
-        "
-    >🦇</div>
-
-    <div
-        class="bat"
-        style="
-            --top:31%;
-            --duration:18s;
-            --delay:-10s;
-        "
-    >🦇</div>
-
-    <div
-        class="bat"
-        style="
-            --top:12%;
-            --duration:21s;
-            --delay:-16s;
-        "
-    >🦇</div>
-
-    <div
-        class="bat"
-        style="
-            --top:43%;
-            --duration:16s;
-            --delay:-7s;
-        "
-    >🦇</div>
-
-    <div
-        class="bat"
-        style="
-            --top:25%;
-            --duration:24s;
-            --delay:-20s;
-        "
-    >🦇</div>
-
-
-    <!-- LITTLE NOUR -->
-
-    <div
-        class="nour"
-        id="nour"
-    >
-
-        <div class="nour-cape"></div>
-
-        <div class="nour-body"></div>
-
-        <div class="nour-hair"></div>
-
-        <div class="nour-head">
-
-            <div class="nour-eye left"></div>
-            <div class="nour-eye right"></div>
-
-            <div class="nour-fang left"></div>
-            <div class="nour-fang right"></div>
-
-        </div>
-
+    <div class="smallTitle">
+      AN INVITATION FROM THE NIGHT
     </div>
 
-</div>
-
-
-<!-- =====================================================
-     UI
-===================================================== -->
-
-<div id="ui">
-
-    <button
-        class="sound-control"
-        id="soundButton"
-        onclick="toggleSound()"
-        aria-label="Toggle sound"
-    >
-        🔊
+    <button class="mainBtn" id="start">
+      ENTER THE CASTLE
     </button>
 
+  </div>
 
-    <!-- =================================================
-         SCENE 1
-    ================================================= -->
+  <!-- UI -->
+  <div id="ui">
 
-    <section
-        class="scene active"
-        id="scene1"
+    <div id="chapter">
+      CHAPTER I
+    </div>
+
+    <div id="subtitle">
+      The castle remembers your name.
+    </div>
+
+    <div id="buttonArea"></div>
+
+  </div>
+
+  <!-- DIALOGUE -->
+  <div id="dialogue">
+    <div class="dialogueBox">
+      <div class="name" id="speaker"></div>
+      <div class="text" id="dialogueText"></div>
+      <div class="continue">
+        TAP TO CONTINUE
+      </div>
+    </div>
+  </div>
+
+  <!-- PUZZLE -->
+  <div id="puzzle">
+
+    <div class="puzzleText">
+      THE CASTLE ASKS FOR THE NUMBER YOU KNOW
+    </div>
+
+    <input
+      id="codeInput"
+      inputmode="numeric"
+      maxlength="3"
+      placeholder="•••"
     >
 
-        <div class="scene-content glass">
-
-            <div class="kicker">
-                September • The Night
-            </div>
-
-            <div class="title">
-                Randy
-            </div>
-
-            <div class="blood-line"></div>
-
-            <div class="subtitle">
-
-                There is a castle beyond the ordinary world.
-
-                <br>
-
-                And tonight...
-
-                <br>
-
-                <span class="gold">
-                    it remembers your name.
-                </span>
-
-            </div>
-
-            <button
-                class="btn"
-                onclick="beginNight()"
-            >
-                ENTER THE CASTLE
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
-         SCENE 2 — GATE
-    ================================================= -->
-
-    <section
-        class="scene"
-        id="scene2"
+    <button
+      class="mainBtn"
+      id="unlock"
+      style="margin-top:20px;"
     >
+      BREAK THE SEAL
+    </button>
+
+    <div id="error">
+      WRONG. THE CASTLE IS WATCHING.
+    </div>
+
+  </div>
+
+  <!-- LETTER -->
+  <div id="letterScene">
+
+    <div class="letter">
+
+      <h2>My Dearest Randy,</h2>
+
+      <p>
+        If this letter had been written a hundred years ago,
+        I would have sealed it with red wax and hidden it somewhere
+        inside the oldest room of this castle, waiting for you to find it.
+      </p>
+
+      <p>
+        I still cannot believe how lucky I was that our paths crossed.
+        Somehow, you became a beautiful part of my life — something
+        I never planned for, but never want to lose.
+      </p>
+
+      <p>
+        You, the werewolf. Me, the vampire.
+        An impossible little story living inside an ancient castle.
+      </p>
+
+      <p>
+        And maybe that is exactly why I love it.
+        Because if eternity were real, I would still choose you.
+      </p>
+
+      <p>
+        I remember the enormous old castle you once dreamed about:
+        endless halls, ancient windows, cold moonlight,
+        and two people who keep choosing each other,
+        night after night.
+      </p>
+
+      <p>
+        I hope one day that fantasy becomes something more than a dream.
+        I hope the castle becomes a home, the story becomes our life,
+        and the promise becomes marriage — not for a night,
+        but for as long as we are given.
+      </p>
+
+      <p>
+        I treasure the closeness we have shared,
+        the private moments that belong only to us,
+        and every little piece of intimacy that made our bond feel real.
+      </p>
+
+      <p>
+        You are one of the rare people I feel incredibly lucky to have found.
+      </p>
+
+      <p>
+        Happy Birthday, Randy.
+        May the night be kind to you,
+        and may I always find my way back to you.
+      </p>
+
+      <div class="signature">
+        Forever yours,<br>
+        Nour 🩸
+      </div>
+
+      <div style="text-align:center;margin-top:25px;">
+        <button class="mainBtn" id="closeLetter">
+          CLOSE THE LETTER
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- FINAL -->
+  <div id="final">
+
+    <div class="finalSmall">
+      THE NIGHT HAS FINALLY SPOKEN
+    </div>
+
+    <div class="finalBig">
+      THE VAMPIRE<br>
+      HAS FOUND HIS WEREWOLF
+    </div>
+
+    <div class="finalLove">
+      NOUR ♡ RANDY
+    </div>
+
+    <div class="finalName">
+      HAPPY BIRTHDAY, RANDY
+    </div>
 
-        <div class="scene-content glass">
-
-            <div class="kicker">
-                The Castle Gate
-            </div>
-
-            <div class="title">
-                Come closer.
-            </div>
-
-            <div class="subtitle">
-
-                The night has been waiting for you.
-
-                <br>
-
-                But the old castle does not open
-                for everyone.
-
-            </div>
-
-            <button
-                class="btn"
-                onclick="openGate()"
-            >
-                OPEN THE GATE
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
-         SCENE 3 — SECRET
-    ================================================= -->
-
-    <section
-        class="scene"
-        id="scene3"
-    >
-
-        <div class="scene-content glass">
-
-            <div class="kicker">
-                First Seal
-            </div>
-
-            <div class="title">
-                212
-            </div>
-
-            <div class="subtitle">
-
-                The number that opens
-                what was never meant to be opened.
-
-            </div>
-
-            <div class="secret-box">
-
-                <input
-                    id="secretInput"
-                    class="secret-input"
-                    maxlength="3"
-                    inputmode="numeric"
-                    placeholder="•••"
-                >
-
-                <button
-                    class="btn"
-                    onclick="checkSecret()"
-                >
-                    BREAK THE SEAL
-                </button>
-
-                <div
-                    class="error"
-                    id="secretError"
-                ></div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
-         SCENE 4 — QUESTION
-    ================================================= -->
-
-    <section
-        class="scene"
-        id="scene4"
-    >
-
-        <div class="scene-content glass">
-
-            <div class="kicker">
-                The Second Seal
-            </div>
-
-            <div
-                class="title"
-                style="font-size:clamp(28px,7vw,65px)"
-            >
-                aiugiwgwu
-            </div>
-
-            <div class="subtitle">
-
-                A question written in a language
-                only two people were supposed to understand.
-
-                <br><br>
-
-                Give the castle its answer.
-
-            </div>
-
-            <div class="secret-box">
-
-                <input
-                    id="answerInput"
-                    class="secret-input"
-                    maxlength="20"
-                    autocomplete="off"
-                    placeholder="answer"
-                    style="letter-spacing:3px"
-                >
-
-                <button
-                    class="btn"
-                    onclick="checkAnswer()"
-                >
-                    ANSWER
-                </button>
-
-                <div
-                    class="error"
-                    id="answerError"
-                ></div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
-         SCENE 5 — STORY
-    ================================================= -->
-
-    <section
-        class="scene"
-        id="scene5"
-    >
-
-        <div class="scene-content glass">
-
-            <div class="kicker">
-                The Story
-            </div>
-
-            <div
-                class="story-text"
-                id="storyText"
-            ></div>
-
-            <button
-                class="btn"
-                onclick="nextStory()"
-            >
-                CONTINUE
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
-         SCENE 6 — PROMISE
-    ================================================= -->
-
-    <section
-        class="scene"
-        id="scene6"
-    >
-
-        <div class="scene-content glass">
-
-            <div class="kicker">
-                An Old Promise
-            </div>
-
-            <div class="title">
-                The Werewolf
-            </div>
-
-            <div class="subtitle">
-
-                You once told me you wanted
-                to become a werewolf.
-
-                <br><br>
-
-                And marry your vampire
-                inside an enormous ancient castle.
-
-                <br><br>
-
-                Maybe some dreams are too beautiful
-                to remain dreams.
-
-            </div>
-
-            <button
-                class="btn"
-                onclick="openLetter()"
-            >
-                READ MY LETTER
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
-         SCENE 7 — LETTER
-    ================================================= -->
-
-    <section
-        class="scene"
-        id="scene7"
-    >
-
-        <div class="scene-content letter-wrapper">
-
-            <div class="letter">
-
-                <h2>
-                    My dearest Randy,
-                </h2>
-
-                <p>
-                    If this letter had been written
-                    a hundred years ago, I would have
-                    sealed it with red wax and hidden it
-                    somewhere inside the oldest room
-                    of this castle, waiting for you
-                    to find it.
-                </p>
-
-                <p>
-                    I still cannot believe how lucky
-                    I was that our paths crossed.
-                    Somehow, you became a beautiful
-                    part of my life — something I never
-                    planned for, but never want to lose.
-                </p>
-
-                <p>
-                    You, the werewolf.
-                    Me, the vampire.
-                    An impossible little story living
-                    inside an ancient castle.
-                </p>
-
-                <p>
-                    And maybe that is exactly why
-                    I love it.
-                    Because if eternity were real,
-                    I would still choose you.
-                </p>
-
-                <p>
-                    I imagine that enormous old castle
-                    you always dreamed about:
-                    endless halls, ancient windows,
-                    cold moonlight, and two people
-                    who keep choosing each other,
-                    night after night.
-                </p>
-
-                <p>
-                    I hope one day that fantasy becomes
-                    something more than a dream.
-                    I hope the castle becomes a home,
-                    the story becomes our life,
-                    and the promise becomes marriage —
-                    not for a night, but for as long
-                    as we are given.
-                </p>
-
-                <p>
-                    I treasure the closeness we have
-                    shared, the private moments that
-                    belong only to us, and every little
-                    piece of intimacy that made our bond
-                    feel more real.
-                </p>
-
-                <p>
-                    You are one of the rare people
-                    I feel incredibly lucky to have found.
-                </p>
-
-                <p>
-                    Happy Birthday, Randy.
-                    May the night be kind to you,
-                    and may I always find my way back
-                    to you.
-                </p>
-
-                <p>
-                    Forever yours,
-                    <br><br>
-                    <strong>
-                        Nour 🩸
-                    </strong>
-                </p>
-
-                <div style="text-align:center">
-
-                    <button
-                        class="btn"
-                        onclick="finale()"
-                    >
-                        TURN THE PAGE
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
-         SCENE 8 — FINAL
-    ================================================= -->
-
-    <section
-        class="scene"
-        id="scene8"
-    >
-
-        <div class="scene-content glass">
-
-            <div class="final-symbol">
-                🩸
-            </div>
-
-            <div class="kicker">
-                The End Of The Night
-            </div>
-
-            <div class="final-title">
-                Randy ♡ Nour
-            </div>
-
-            <div class="blood-line"></div>
-
-            <div class="final-sub">
-
-                The castle keeps our secret.
-
-                <br><br>
-
-                If eternity had a choice,
-                mine would still lead me back to you.
-
-                <br><br>
-
-                <span class="gold">
-                    Happy Birthday, Randy.
-                </span>
-
-            </div>
-
-            <div class="signature">
-                NOUR ♡ RANDY
-            </div>
-
-            <div
-                style="
-                    margin-top:20px;
-                    font-size:11px;
-                    color:#766a75;
-                    letter-spacing:2px;
-                "
-            >
-                THE VAMPIRE HAS FINALLY FOUND HIS WEREWOLF.
-            </div>
-
-        </div>
-
-    </section>
+  </div>
 
 </div>
 
-
-<!-- =====================================================
-     TRANSITIONS
-===================================================== -->
-
-<div id="transition"></div>
-
-<div id="flash"></div>
-
-<div class="letterbox top"></div>
-<div class="letterbox bottom"></div>
-
-
 <script>
-
-/* =========================================================
-   STATE
-========================================================= */
-
-let soundEnabled = true;
-
-let audioContext = null;
-
-let masterGain = null;
-
-let storyIndex = 0;
-
-let sceneBusy = false;
-
 
 /* =========================================================
    AUDIO ENGINE
 ========================================================= */
 
-function initAudio(){
+let audioCtx=null;
 
-    if(!soundEnabled){
-        return;
-    }
-
-    if(!audioContext){
-
-        audioContext =
-            new (
-                window.AudioContext ||
-                window.webkitAudioContext
-            )();
-
-        masterGain =
-            audioContext.createGain();
-
-        masterGain.gain.value =
-            0.65;
-
-        masterGain.connect(
-            audioContext.destination
-        );
-    }
-
-    if(
-        audioContext.state ===
-        "suspended"
-    ){
-
-        audioContext.resume();
-
-    }
+function audioInit(){
+  if(!audioCtx){
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  }
 }
 
+function sound(freq=220,duration=.2,type="sine",volume=.04){
 
-/* =========================================================
-   SYNTH SOUND
-========================================================= */
+  if(!audioCtx)return;
 
-function synth(
-    frequency,
-    duration,
-    type="sine",
-    volume=.04,
-    delay=0
-){
+  const osc=audioCtx.createOscillator();
+  const gain=audioCtx.createGain();
 
-    if(!soundEnabled){
-        return;
-    }
+  osc.type=type;
+  osc.frequency.value=freq;
 
-    initAudio();
+  gain.gain.setValueAtTime(volume,audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(
+    .001,
+    audioCtx.currentTime+duration
+  );
 
-    if(!audioContext){
-        return;
-    }
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
 
-    const osc =
-        audioContext.createOscillator();
-
-    const gain =
-        audioContext.createGain();
-
-    osc.type =
-        type;
-
-    osc.frequency.setValueAtTime(
-        frequency,
-        audioContext.currentTime + delay
-    );
-
-    gain.gain.setValueAtTime(
-        .0001,
-        audioContext.currentTime + delay
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        volume,
-        audioContext.currentTime +
-        delay +
-        .02
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        .0001,
-        audioContext.currentTime +
-        delay +
-        duration
-    );
-
-    osc.connect(gain);
-
-    gain.connect(
-        masterGain
-    );
-
-    osc.start(
-        audioContext.currentTime +
-        delay
-    );
-
-    osc.stop(
-        audioContext.currentTime +
-        delay +
-        duration +
-        .05
-    );
+  osc.start();
+  osc.stop(audioCtx.currentTime+duration);
 }
-
-
-/* =========================================================
-   DOOR SOUND
-========================================================= */
-
-function doorSound(){
-
-    synth(
-        42,
-        .8,
-        "sawtooth",
-        .045
-    );
-
-    synth(
-        58,
-        .6,
-        "triangle",
-        .04,
-        .12
-    );
-
-    synth(
-        85,
-        .7,
-        "sine",
-        .025,
-        .3
-    );
-
-}
-
-
-/* =========================================================
-   CLICK
-========================================================= */
-
-function clickSound(){
-
-    synth(
-        420,
-        .06,
-        "sine",
-        .035
-    );
-
-}
-
-
-/* =========================================================
-   UNLOCK
-========================================================= */
-
-function unlockSound(){
-
-    synth(
-        260,
-        .12,
-        "triangle",
-        .035
-    );
-
-    synth(
-        390,
-        .16,
-        "triangle",
-        .04,
-        .12
-    );
-
-    synth(
-        560,
-        .25,
-        "sine",
-        .045,
-        .25
-    );
-
-    synth(
-        800,
-        .4,
-        "sine",
-        .025,
-        .4
-    );
-
-}
-
-
-/* =========================================================
-   WRONG
-========================================================= */
-
-function wrongSound(){
-
-    synth(
-        95,
-        .28,
-        "sawtooth",
-        .05
-    );
-
-    synth(
-        65,
-        .38,
-        "sawtooth",
-        .035,
-        .08
-    );
-
-}
-
-
-/* =========================================================
-   HEARTBEAT
-========================================================= */
 
 function heartbeat(){
 
-    if(!soundEnabled){
-        return;
+  sound(55,.18,"sine",.12);
+
+  setTimeout(()=>{
+    sound(45,.2,"sine",.1);
+  },180);
+
+}
+
+function horrorBoom(){
+
+  sound(40,.8,"sawtooth",.18);
+
+  setTimeout(()=>{
+    sound(27,1,"sine",.13);
+  },100);
+
+}
+
+function doorSound(){
+
+  sound(90,1.2,"sawtooth",.1);
+
+  setTimeout(()=>{
+    sound(55,.8,"triangle",.08);
+  },300);
+
+}
+
+function whisperSound(){
+
+  sound(160,.6,"sine",.025);
+
+  setTimeout(()=>{
+    sound(120,.9,"sine",.02);
+  },200);
+
+}
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const title=document.getElementById("titleScreen");
+const start=document.getElementById("start");
+const camera=document.getElementById("camera");
+const dialogue=document.getElementById("dialogue");
+const speaker=document.getElementById("speaker");
+const dialogueText=document.getElementById("dialogueText");
+const subtitle=document.getElementById("subtitle");
+const chapter=document.getElementById("chapter");
+const buttonArea=document.getElementById("buttonArea");
+const puzzle=document.getElementById("puzzle");
+const codeInput=document.getElementById("codeInput");
+const error=document.getElementById("error");
+const flash=document.getElementById("flash");
+const blackout=document.getElementById("blackout");
+const letterScene=document.getElementById("letterScene");
+const final=document.getElementById("final");
+
+let currentScene=1;
+let dialogueIndex=0;
+let dialogueList=[];
+let busy=false;
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+function flashScreen(){
+  flash.classList.remove("flashNow");
+  void flash.offsetWidth;
+  flash.classList.add("flashNow");
+}
+
+function shake(){
+  camera.classList.remove("shake");
+  void camera.offsetWidth;
+  camera.classList.add("shake");
+}
+
+function blackoutOn(){
+  blackout.classList.add("on");
+}
+
+function blackoutOff(){
+  blackout.classList.remove("on");
+}
+
+function hearts(){
+
+  for(let i=0;i<12;i++){
+
+    const h=document.createElement("div");
+
+    h.className="heart";
+    h.innerHTML="♥";
+
+    h.style.left=Math.random()*100+"%";
+    h.style.bottom=(15+Math.random()*30)+"%";
+    h.style.animationDelay=Math.random()*2+"s";
+
+    document.getElementById("game").appendChild(h);
+
+    setTimeout(()=>h.remove(),5000);
+  }
+}
+
+/* =========================================================
+   SCENE MANAGER
+========================================================= */
+
+function scene(id){
+
+  document.querySelectorAll(".scene")
+    .forEach(s=>s.classList.remove("active"));
+
+  document.getElementById("scene"+id)
+    .classList.add("active");
+
+  currentScene=id;
+}
+
+/* =========================================================
+   DIALOGUE ENGINE
+========================================================= */
+
+function showDialogue(list){
+
+  dialogueList=list;
+  dialogueIndex=0;
+
+  dialogue.style.display="block";
+
+  nextDialogue();
+}
+
+function nextDialogue(){
+
+  if(dialogueIndex>=dialogueList.length){
+
+    dialogue.style.display="none";
+
+    afterDialogue();
+
+    return;
+  }
+
+  const line=dialogueList[dialogueIndex++];
+
+  speaker.textContent=line.name;
+  dialogueText.textContent="";
+
+  let i=0;
+
+  whisperSound();
+
+  const timer=setInterval(()=>{
+
+    dialogueText.textContent+=line.text[i]||"";
+
+    i++;
+
+    if(i>=line.text.length){
+      clearInterval(timer);
     }
 
-    synth(
-        65,
-        .11,
-        "sine",
-        .1
-    );
-
-    synth(
-        53,
-        .11,
-        "sine",
-        .085,
-        .17
-    );
-
+  },28);
 }
 
+function afterDialogue(){
+
+  if(currentScene===1){
+
+    buttonArea.innerHTML=`
+      <button class="mainBtn" id="openGate">
+        APPROACH THE GATE
+      </button>
+    `;
+
+    document.getElementById("openGate")
+      .onclick=enterGate;
+
+  }
+
+  else if(currentScene===2){
+
+    buttonArea.innerHTML=`
+      <button class="mainBtn" id="door">
+        OPEN THE DOOR
+      </button>
+    `;
+
+    document.getElementById("door")
+      .onclick=openDoor;
+
+  }
+
+  else if(currentScene===3){
+
+    puzzle.classList.add("show");
+
+    setTimeout(()=>{
+      codeInput.focus();
+    },400);
+
+  }
+
+  else if(currentScene===4){
+
+    buttonArea.innerHTML=`
+      <button class="mainBtn" id="question">
+        ANSWER THE QUESTION
+      </button>
+    `;
+
+    document.getElementById("question")
+      .onclick=question;
+
+  }
+
+  else if(currentScene===5){
+
+    setTimeout(()=>{
+      letterScene.classList.add("show");
+      heartbeat();
+    },800);
+
+  }
+
+}
 
 /* =========================================================
-   DOUBLE HEARTBEAT
+   START
 ========================================================= */
 
-function doubleHeartbeat(){
+start.onclick=()=>{
 
-    heartbeat();
+  audioInit();
 
-    setTimeout(
-        heartbeat,
-        520
-    );
+  if(audioCtx.state==="suspended"){
+    audioCtx.resume();
+  }
 
-}
+  title.classList.add("hidden");
 
+  horrorBoom();
+
+  setTimeout(()=>{
+
+    chapter.textContent="PROLOGUE";
+
+    subtitle.textContent=
+      "September, 2026…";
+
+  },900);
+
+  setTimeout(()=>{
+
+    subtitle.textContent=
+      "Some doors should never be opened.";
+
+    showDialogue([
+      {
+        name:"NOUR",
+        text:"Randy..."
+      },
+      {
+        name:"NOUR",
+        text:"You finally came."
+      },
+      {
+        name:"NOUR",
+        text:"I was beginning to think the night had swallowed you."
+      },
+      {
+        name:"NOUR",
+        text:"Come closer."
+      }
+    ]);
+
+  },2500);
+
+};
 
 /* =========================================================
-   WHISPER ATMOSPHERE
+   GATE
 ========================================================= */
 
-function whisperAtmosphere(){
+function enterGate(){
 
-    synth(
-        120,
-        1.7,
-        "triangle",
-        .012
-    );
+  busy=true;
 
-    synth(
-        145,
-        2,
-        "sine",
-        .008,
-        .4
-    );
+  buttonArea.innerHTML="";
+
+  camera.classList.add("zoomIn");
+
+  scene(2);
+
+  chapter.textContent="CHAPTER I";
+  subtitle.textContent="THE CASTLE GATE";
+
+  const n=document.getElementById("nour2");
+
+  n.style.left="35%";
+
+  setTimeout(()=>{
+
+    n.classList.add("walk");
+
+    n.style.left="50%";
+
+  },700);
+
+  setTimeout(()=>{
+
+    n.classList.remove("walk");
+
+    showDialogue([
+      {
+        name:"NOUR",
+        text:"This castle has waited a very long time."
+      },
+      {
+        name:"NOUR",
+        text:"But tonight, it remembers your name."
+      },
+      {
+        name:"NOUR",
+        text:"And there is one thing it wants from you."
+      }
+    ]);
+
+    busy=false;
+
+  },2800);
 
 }
-
 
 /* =========================================================
-   QUESTION SOUND
+   DOOR
 ========================================================= */
 
-function questionSound(){
-
-    synth(
-        170,
-        .3,
-        "triangle",
-        .035
-    );
-
-    synth(
-        215,
-        .5,
-        "triangle",
-        .025,
-        .2
-    );
-
-}
-
-
-/* =========================================================
-   PAGE TURN
-========================================================= */
-
-function pageTurn(){
-
-    synth(
-        700,
-        .08,
-        "triangle",
-        .025
-    );
-
-    synth(
-        950,
-        .1,
-        "triangle",
-        .018,
-        .09
-    );
-
-}
-
-
-/* =========================================================
-   FINAL SOUND
-========================================================= */
-
-function finalSound(){
-
-    synth(
-        180,
-        .2,
-        "sine",
-        .035
-    );
-
-    synth(
-        240,
-        .25,
-        "sine",
-        .04,
-        .16
-    );
+function openDoor(){
 
-    synth(
-        330,
-        .35,
-        "sine",
-        .04,
-        .35
-    );
+  buttonArea.innerHTML="";
 
-    synth(
-        440,
-        .45,
-        "sine",
-        .035,
-        .58
-    );
-
-    synth(
-        660,
-        .8,
-        "sine",
-        .025,
-        .85
-    );
-
-}
-
-
-/* =========================================================
-   SOUND TOGGLE
-========================================================= */
-
-function toggleSound(){
-
-    soundEnabled =
-        !soundEnabled;
-
-    const button =
-        document.getElementById(
-            "soundButton"
-        );
+  doorSound();
 
-    button.textContent =
-        soundEnabled
-        ? "🔊"
-        : "🔇";
+  flashScreen();
 
-    if(soundEnabled){
+  const door=document.getElementById("mainDoor");
 
-        initAudio();
+  door.style.transform="translateX(-50%) perspective(400px) rotateY(-70deg)";
+  door.style.transformOrigin="left center";
 
-        synth(
-            420,
-            .12,
-            "sine",
-            .04
-        );
+  setTimeout(()=>{
 
-    }
+    blackoutOn();
 
-}
+  },800);
 
+  setTimeout(()=>{
 
-/* =========================================================
-   FLASH
-========================================================= */
+    scene(3);
 
-function flash(
-    intensity=.75,
-    duration=400
-){
+    blackoutOff();
 
-    const element =
-        document.getElementById(
-            "flash"
-        );
+    camera.classList.remove("zoomIn");
+    camera.classList.add("zoomOut");
 
-    element.style.opacity =
-        intensity;
+    chapter.textContent="CHAPTER II";
+    subtitle.textContent="THE HALL OF SILENCE";
 
-    setTimeout(
-        ()=>{
-            element.style.transition =
-                `opacity ${duration}ms ease`;
+    const n=document.getElementById("nour3");
 
-            element.style.opacity =
-                0;
-        },
-        30
-    );
+    n.style.left="45%";
 
-}
+    setTimeout(()=>{
 
+      n.classList.add("walk");
+      n.style.left="70%";
 
-/* =========================================================
-   LIGHTNING
-========================================================= */
+    },500);
 
-function lightning(){
+    setTimeout(()=>{
 
-    const element =
-        document.getElementById(
-            "lightning"
-        );
+      n.classList.remove("walk");
 
-    element.style.opacity =
-        ".55";
-
-    setTimeout(
-        ()=>{
-            element.style.opacity =
-                "0";
-        },
-        80
-    );
-
-    setTimeout(
-        ()=>{
-            element.style.opacity =
-                ".25";
-
-            setTimeout(
-                ()=>{
-                    element.style.opacity =
-                        "0";
-                },
-                60
-            );
-
-        },
-        150
-    );
-
-}
-
-
-/* =========================================================
-   RANDOM LIGHTNING
-========================================================= */
-
-function randomLightning(){
-
-    const delay =
-        7000 +
-        Math.random()*15000;
-
-    setTimeout(
-        ()=>{
-            lightning();
-
-            if(soundEnabled){
-
-                synth(
-                    48,
-                    .8,
-                    "sawtooth",
-                    .018
-                );
-
-            }
-
-            randomLightning();
-
-        },
-        delay
-    );
-
-}
-
-
-/* =========================================================
-   RAIN GENERATOR
-========================================================= */
-
-function createRain(){
-
-    const container =
-        document.getElementById(
-            "rain"
-        );
-
-    const count =
-        window.innerWidth < 600
-        ? 90
-        : 150;
-
-    for(
-        let i=0;
-        i<count;
-        i++
-    ){
-
-        const drop =
-            document.createElement(
-                "div"
-            );
-
-        drop.className =
-            "rain-drop";
-
-        drop.style.left =
-            Math.random()*110 +
-            "vw";
-
-        drop.style.setProperty(
-            "--length",
-            (35 +
-            Math.random()*75) +
-            "px"
-        );
-
-        drop.style.setProperty(
-            "--speed",
-            (.45 +
-            Math.random()*.8) +
-            "s"
-        );
-
-        drop.style.setProperty(
-            "--delay",
-            (-Math.random()*3) +
-            "s"
-        );
-
-        container.appendChild(
-            drop
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PARTICLES
-========================================================= */
-
-function particles(
-    amount=25
-){
-
-    const container =
-        document.getElementById(
-            "particles"
-        );
-
-    for(
-        let i=0;
-        i<amount;
-        i++
-    ){
-
-        const p =
-            document.createElement(
-                "div"
-            );
-
-        p.className =
-            "particle";
-
-        p.style.left =
-            (40 +
-            Math.random()*20) +
-            "vw";
-
-        p.style.top =
-            (45 +
-            Math.random()*25) +
-            "vh";
-
-        p.style.setProperty(
-            "--x",
-            (-180 +
-            Math.random()*360) +
-            "px"
-        );
-
-        p.style.setProperty(
-            "--y",
-            (-80 -
-            Math.random()*250) +
-            "px"
-        );
-
-        p.style.setProperty(
-            "--duration",
-            (1.5 +
-            Math.random()*2) +
-            "s"
-        );
-
-        container.appendChild(
-            p
-        );
-
-        setTimeout(
-            ()=>{
-                p.remove();
-            },
-            4000
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   HEARTS
-========================================================= */
-
-function hearts(
-    amount=15
-){
-
-    for(
-        let i=0;
-        i<amount;
-        i++
-    ){
-
-        setTimeout(
-            ()=>{
-                createHeart();
-            },
-            i*100
-        );
-
-    }
-
-}
-
-
-function createHeart(){
-
-    const heart =
-        document.createElement(
-            "div"
-        );
-
-    heart.textContent =
-        "♥";
-
-    heart.style.position =
-        "fixed";
-
-    heart.style.left =
-        Math.random()*100 +
-        "vw";
-
-    heart.style.bottom =
-        (-20 +
-        Math.random()*25) +
-        "vh";
-
-    heart.style.color =
-        Math.random()>.5
-        ? "#96334d"
-        : "#b99a65";
-
-    heart.style.fontSize =
-        (10 +
-        Math.random()*25) +
-        "px";
-
-    heart.style.zIndex =
-        "700";
-
-    heart.style.pointerEvents =
-        "none";
-
-    const duration =
-        3 +
-        Math.random()*3;
-
-    heart.animate(
-        [
-            {
-                transform:
-                    "translateY(0) scale(.4) rotate(0deg)",
-                opacity:0
-            },
-            {
-                transform:
-                    "translateY(-70px) scale(1) rotate(8deg)",
-                opacity:.9
-            },
-            {
-                transform:
-                    "translateY(-320px) scale(1.2) rotate(-12deg)",
-                opacity:0
-            }
-        ],
+      showDialogue([
         {
-            duration:
-                duration*1000,
-            easing:
-                "ease-out"
+          name:"NOUR",
+          text:"Do not be afraid."
+        },
+        {
+          name:"NOUR",
+          text:"The shadows only become dangerous when they know you are afraid."
+        },
+        {
+          name:"NOUR",
+          text:"There is a seal ahead."
+        },
+        {
+          name:"NOUR",
+          text:"Only someone who remembers the number may pass."
         }
-    );
+      ]);
 
-    document.body.appendChild(
-        heart
-    );
+    },2700);
 
-    setTimeout(
-        ()=>{
-            heart.remove();
-        },
-        duration*1000+100
-    );
+  },1800);
 
 }
 
-
 /* =========================================================
-   BLOOD DRIPS
+   SECRET CODE
 ========================================================= */
 
-function bloodDrips(){
+document.getElementById("unlock").onclick=unlock;
 
-    for(
-        let i=0;
-        i<8;
-        i++
-    ){
+codeInput.addEventListener("keydown",e=>{
+  if(e.key==="Enter")unlock();
+});
 
-        const drip =
-            document.createElement(
-                "div"
-            );
+function unlock(){
 
-        drip.className =
-            "blood-drip";
+  const value=codeInput.value.trim();
 
-        drip.style.left =
-            Math.random()*100 +
-            "%";
+  if(value==="212"){
 
-        drip.style.setProperty(
-            "--height",
-            (20 +
-            Math.random()*80) +
-            "px"
-        );
+    puzzle.classList.remove("show");
 
-        document.getElementById(
-            "world"
-        ).appendChild(
-            drip
-        );
+    sound(330,.15,"triangle",.08);
+    sound(440,.4,"sine",.08);
 
-        setTimeout(
-            ()=>{
-                drip.remove();
-            },
-            4500
-        );
+    flashScreen();
 
-    }
+    setTimeout(()=>{
+
+      scene(4);
+
+      chapter.textContent="CHAPTER III";
+      subtitle.textContent="THE ROOM BEYOND THE SEAL";
+
+      const n=document.getElementById("nour4");
+
+      n.style.left="18%";
+
+      setTimeout(()=>{
+
+        n.classList.add("walk");
+        n.style.left="42%";
+
+      },300);
+
+      setTimeout(()=>{
+
+        n.classList.remove("walk");
+
+        showDialogue([
+          {
+            name:"NOUR",
+            text:"Good."
+          },
+          {
+            name:"NOUR",
+            text:"I knew you would remember."
+          },
+          {
+            name:"NOUR",
+            text:"But there is something else."
+          },
+          {
+            name:"NOUR",
+            text:"Something I have been waiting to ask you."
+          }
+        ]);
+
+      },2500);
+
+    },900);
+
+  }else{
+
+    error.classList.remove("show");
+
+    void error.offsetWidth;
+
+    error.classList.add("show");
+
+    shake();
+
+    horrorBoom();
+
+  }
 
 }
 
-
 /* =========================================================
-   SCENE SYSTEM
+   QUESTION
 ========================================================= */
 
-function showScene(
-    number,
-    sound=true
-){
+function question(){
 
-    if(sceneBusy){
-        return;
-    }
+  buttonArea.innerHTML="";
 
-    sceneBusy =
-        true;
+  subtitle.textContent=
+    "aiugiwgwu";
 
-    const transition =
-        document.getElementById(
-            "transition"
-        );
+  heartbeat();
 
-    transition.classList.add(
-        "active"
-    );
+  setTimeout(()=>{
 
-    setTimeout(
-        ()=>{
+    buttonArea.innerHTML=`
+      <input
+        id="answerInput"
+        maxlength="10"
+        autocomplete="off"
+        style="
+          width:220px;
+          background:#08080a;
+          border:1px solid #533237;
+          color:#ddd;
+          padding:14px;
+          text-align:center;
+          outline:none;
+          letter-spacing:2px;
+          font-size:16px;
+        "
+        placeholder="YOUR ANSWER"
+      >
+      <br><br>
+      <button class="mainBtn" id="answerBtn">
+        SPEAK
+      </button>
+    `;
 
-            document
-                .querySelectorAll(
-                    ".scene"
-                )
-                .forEach(
-                    scene=>{
-                        scene.classList.remove(
-                            "active"
-                        );
-                    }
-                );
+    document.getElementById("answerBtn")
+      .onclick=checkAnswer;
 
-            const target =
-                document.getElementById(
-                    "scene"+number
-                );
-
-            if(target){
-
-                target.classList.add(
-                    "active"
-                );
-
-            }
-
-            setTimeout(
-                ()=>{
-                    transition.classList.remove(
-                        "active"
-                    );
-
-                    sceneBusy =
-                        false;
-                },
-                700
-            );
-
-        },
-        650
-    );
-
-    if(sound){
-        clickSound();
-    }
+  },700);
 
 }
-
-
-/* =========================================================
-   BEGIN NIGHT
-========================================================= */
-
-function beginNight(){
-
-    initAudio();
-
-    document.body.classList.add(
-        "open-world"
-    );
-
-    doorSound();
-
-    heartbeat();
-
-    whisperAtmosphere();
-
-    particles(30);
-
-    const nour =
-        document.getElementById(
-            "nour"
-        );
-
-    nour.classList.remove(
-        "hidden"
-    );
-
-    setTimeout(
-        ()=>{
-            showScene(2,false);
-        },
-        800
-    );
-
-}
-
-
-/* =========================================================
-   OPEN GATE
-========================================================= */
-
-function openGate(){
-
-    initAudio();
-
-    doorSound();
-
-    const door =
-        document.getElementById(
-            "castleDoor"
-        );
-
-    door.classList.add(
-        "open"
-    );
-
-    flash(
-        .35,
-        800
-    );
-
-    particles(35);
-
-    setTimeout(
-        ()=>{
-            showScene(3,false);
-        },
-        1200
-    );
-
-}
-
-
-/* =========================================================
-   SECRET
-========================================================= */
-
-function checkSecret(){
-
-    initAudio();
-
-    const input =
-        document.getElementById(
-            "secretInput"
-        );
-
-    const error =
-        document.getElementById(
-            "secretError"
-        );
-
-    const value =
-        input.value.trim();
-
-    if(value === "212"){
-
-        unlockSound();
-
-        particles(45);
-
-        hearts(8);
-
-        error.textContent =
-            "";
-
-        setTimeout(
-            ()=>{
-                showScene(4,false);
-                questionSound();
-            },
-            650
-        );
-
-    }else{
-
-        wrongSound();
-
-        error.textContent =
-            "The castle does not recognize you.";
-
-        input.animate(
-            [
-                {
-                    transform:"translateX(-8px)"
-                },
-                {
-                    transform:"translateX(8px)"
-                },
-                {
-                    transform:"translateX(-6px)"
-                },
-                {
-                    transform:"translateX(6px)"
-                },
-                {
-                    transform:"translateX(0)"
-                }
-            ],
-            {
-                duration:350
-            }
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   ANSWER
-========================================================= */
 
 function checkAnswer(){
 
-    initAudio();
+  const input=
+    document.getElementById("answerInput")
+      .value.trim().toLowerCase();
 
-    const input =
-        document.getElementById(
-            "answerInput"
-        );
+  if(input==="aifudiwdwu"){
 
-    const error =
-        document.getElementById(
-            "answerError"
-        );
+    flashScreen();
 
-    const value =
-        input.value
-        .trim()
-        .toLowerCase();
+    sound(520,.4,"sine",.08);
 
-    if(
-        value ===
-        "aifudiwdwu"
-    ){
+    buttonArea.innerHTML="";
 
-        unlockSound();
+    subtitle.textContent=
+      "The castle accepts your answer.";
 
-        particles(55);
+    setTimeout(()=>{
 
-        setTimeout(
-            ()=>{
-                showScene(5,false);
-
-                storyIndex=0;
-
-                updateStory();
-
-            },
-            700
-        );
-
-    }else{
-
-        wrongSound();
-
-        error.textContent =
-            "No. The night remembers another answer.";
-
-    }
-
-}
-
-
-/* =========================================================
-   STORY DATA
-========================================================= */
-
-const storyLines = [
-
-    "I remember the little moments that made you special to me.",
-
-    "Somewhere along the way, talking to you stopped feeling like a coincidence.",
-
-    "You became someone I never wanted to lose.",
-
-    "You, the werewolf. Me, the vampire. An impossible little story inside an ancient castle.",
-
-    "And somehow, that impossible story became one of my favorite dreams."
-
-];
-
-
-/* =========================================================
-   STORY UPDATE
-========================================================= */
-
-function updateStory(){
-
-    const element =
-        document.getElementById(
-            "storyText"
-        );
-
-    element.style.opacity =
-        "0";
-
-    setTimeout(
-        ()=>{
-
-            element.textContent =
-                storyLines[
-                    storyIndex
-                ];
-
-            element.animate(
-                [
-                    {
-                        opacity:0,
-                        transform:
-                            "translateY(18px)"
-                    },
-                    {
-                        opacity:1,
-                        transform:
-                            "translateY(0)"
-                    }
-                ],
-                {
-                    duration:900,
-                    easing:
-                        "cubic-bezier(.22,1,.36,1)",
-                    fill:"forwards"
-                }
-            );
-
+      showDialogue([
+        {
+          name:"NOUR",
+          text:"Yes."
         },
-        300
-    );
-
-}
-
-
-/* =========================================================
-   NEXT STORY
-========================================================= */
-
-function nextStory(){
-
-    pageTurn();
-
-    storyIndex++;
-
-    if(
-        storyIndex <
-        storyLines.length
-    ){
-
-        updateStory();
-
-        if(
-            storyIndex === 2
-        ){
-            heartbeat();
+        {
+          name:"NOUR",
+          text:"That was the answer."
+        },
+        {
+          name:"NOUR",
+          text:"Now I can finally show you what I kept hidden."
         }
+      ]);
 
-    }else{
+    },1000);
 
-        showScene(6,false);
+  }else{
 
-        particles(20);
+    shake();
+    horrorBoom();
 
-    }
+    subtitle.textContent=
+      "No... that isn't it.";
+
+  }
 
 }
-
 
 /* =========================================================
-   OPEN LETTER
+   AFTER QUESTION
 ========================================================= */
 
-function openLetter(){
+function continueToLetter(){
 
-    pageTurn();
+  scene(5);
 
-    setTimeout(
-        ()=>{
-            showScene(7,false);
-        },
-        400
-    );
+  chapter.textContent="CHAPTER IV";
+  subtitle.textContent="THE ROOM OF OLD PROMISES";
+
+  const n=document.getElementById("nour5");
+  const r=document.getElementById("randy5");
+
+  n.style.left="15%";
+  r.style.display="block";
+  r.style.right="12%";
+
+  setTimeout(()=>{
+
+    n.classList.add("walk");
+    n.style.left="38%";
+
+    r.classList.add("walk");
+    r.style.right="38%";
+
+  },500);
+
+  setTimeout(()=>{
+
+    n.classList.remove("walk");
+    r.classList.remove("walk");
+
+    showDialogue([
+      {
+        name:"NOUR",
+        text:"Do you remember what you once wished for?"
+      },
+      {
+        name:"RANDY",
+        text:"..."
+      },
+      {
+        name:"NOUR",
+        text:"A werewolf."
+      },
+      {
+        name:"NOUR",
+        text:"A vampire."
+      },
+      {
+        name:"NOUR",
+        text:"And a huge ancient castle."
+      },
+      {
+        name:"NOUR",
+        text:"Maybe some wishes are not meant to disappear."
+      }
+    ]);
+
+  },2800);
 
 }
 
+function afterDialogueOverride(){
+
+  letterScene.classList.add("show");
+
+}
 
 /* =========================================================
-   FINALE
+   CLOSE LETTER
 ========================================================= */
 
-function finale(){
+document.getElementById("closeLetter").onclick=()=>{
 
-    pageTurn();
+  letterScene.classList.remove("show");
 
-    setTimeout(
-        ()=>{
+  blackoutOn();
 
-            flash(
-                .8,
-                1000
-            );
+  setTimeout(()=>{
 
-            finalSound();
+    final.classList.add("show");
 
-            hearts(35);
+    blackoutOff();
 
-            particles(80);
+    hearts();
 
-            bloodDrips();
+    heartbeat();
 
-            doubleHeartbeat();
+    setInterval(heartbeat,5000);
 
-            setTimeout(
-                ()=>{
-                    showScene(8,false);
-                },
-                900
-            );
+  },1500);
 
-        },
-        500
-    );
+};
+
+/* =========================================================
+   SPECIAL DIALOGUE HANDLING
+========================================================= */
+
+const originalAfterDialogue=afterDialogue;
+
+afterDialogue=function(){
+
+  if(currentScene===4){
+
+    buttonArea.innerHTML=`
+      <button class="mainBtn" id="question">
+        ANSWER THE QUESTION
+      </button>
+    `;
+
+    document.getElementById("question")
+      .onclick=question;
+
+    return;
+  }
+
+  if(currentScene===5){
+
+    letterScene.classList.add("show");
+
+    heartbeat();
+
+    return;
+  }
+
+  originalAfterDialogue();
+
+};
+
+/* =========================================================
+   QUESTION SUCCESS -> SCENE 5
+========================================================= */
+
+const originalCheckAnswer=checkAnswer;
+
+/* =========================================================
+   PATCH SUCCESS
+========================================================= */
+
+function goToFinalStory(){
+
+  blackoutOn();
+
+  setTimeout(()=>{
+
+    blackoutOff();
+
+    continueToLetter();
+
+  },1200);
 
 }
 
+/* redefine answer */
+
+window.checkAnswer=function(){
+
+  const input=
+    document.getElementById("answerInput")
+      ?.value.trim().toLowerCase();
+
+  if(input==="aifudiwdwu"){
+
+    flashScreen();
+    sound(520,.4,"sine",.08);
+
+    buttonArea.innerHTML="";
+
+    subtitle.textContent=
+      "The castle accepts your answer.";
+
+    setTimeout(()=>{
+
+      continueToLetter();
+
+    },1800);
+
+  }else{
+
+    shake();
+    horrorBoom();
+
+    subtitle.textContent=
+      "No... that isn't it.";
+
+  }
+
+};
+
+/* =========================================================
+   RANDOM HORROR EVENTS
+========================================================= */
+
+function randomHorror(){
+
+  if(Math.random()<.35){
+
+    flashScreen();
+
+    setTimeout(()=>{
+      heartbeat();
+    },100);
+
+  }
+
+}
+
+setInterval(()=>{
+
+  if(
+    !title.classList.contains("hidden") ||
+    final.classList.contains("show")
+  )return;
+
+  randomHorror();
+
+},12000);
+
+/* =========================================================
+   TOUCH
+========================================================= */
+
+document.addEventListener("touchstart",()=>{
+
+  if(!audioCtx){
+    audioInit();
+  }
+
+  if(audioCtx.state==="suspended"){
+    audioCtx.resume();
+  }
+
+},{once:true});
+
+/* =========================================================
+   DYNAMIC BLOOD DRIPS
+========================================================= */
+
+function bloodDrop(){
+
+  const d=document.createElement("div");
+
+  d.style.position="absolute";
+  d.style.top="0";
+  d.style.left=Math.random()*100+"%";
+  d.style.width="2px";
+  d.style.height=(20+Math.random()*60)+"px";
+  d.style.background="#681019";
+  d.style.opacity=".35";
+  d.style.zIndex="160";
+  d.style.pointerEvents="none";
+
+  document.getElementById("game").appendChild(d);
+
+  setTimeout(()=>{
+
+    d.style.height="120px";
+    d.style.opacity="0";
+
+  },100);
+
+  setTimeout(()=>d.remove(),1500);
+}
+
+setInterval(()=>{
+
+  if(currentScene>=3){
+    bloodDrop();
+  }
+
+},5000);
+
+/* =========================================================
+   FIX STORY FLOW
+========================================================= */
+
+document.addEventListener("click",e=>{
+
+  if(
+    dialogue.style.display==="block" &&
+    !e.target.closest(".mainBtn") &&
+    !e.target.closest("input")
+  ){
+
+    nextDialogue();
+
+  }
+
+});
 
 /* =========================================================
    FINAL ATMOSPHERE
 ========================================================= */
 
-function finalAtmosphere(){
+setInterval(()=>{
 
-    hearts(1);
+  if(final.classList.contains("show")){
 
-}
+    const h=document.createElement("div");
 
+    h.className="heart";
+    h.innerHTML="♥";
 
-/* =========================================================
-   KEYBOARD
-========================================================= */
+    h.style.left=(35+Math.random()*30)+"%";
+    h.style.bottom="25%";
 
-document.addEventListener(
-    "keydown",
-    event=>{
+    document.getElementById("game").appendChild(h);
 
-        if(
-            event.key !==
-            "Enter"
-        ){
-            return;
-        }
+    setTimeout(()=>h.remove(),4500);
 
-        const active =
-            document.querySelector(
-                ".scene.active"
-            );
+  }
 
-        if(!active){
-            return;
-        }
-
-        if(
-            active.id ===
-            "scene3"
-        ){
-            checkSecret();
-        }
-
-        if(
-            active.id ===
-            "scene4"
-        ){
-            checkAnswer();
-        }
-
-    }
-);
-
-
-/* =========================================================
-   TOUCH EFFECT
-========================================================= */
-
-document.addEventListener(
-    "touchstart",
-    event=>{
-
-        if(!soundEnabled){
-            return;
-        }
-
-        if(
-            !audioContext
-        ){
-            initAudio();
-        }
-
-    },
-    {
-        passive:true,
-        once:true
-    }
-);
-
-
-/* =========================================================
-   INITIALIZATION
-========================================================= */
-
-createRain();
-
-randomLightning();
-
-
-/* =========================================================
-   PERIODIC ATMOSPHERE
-========================================================= */
-
-setInterval(
-    ()=>{
-        particles(
-            3
-        );
-    },
-    3500
-);
-
-
-setInterval(
-    ()=>{
-        finalAtmosphere();
-    },
-    4200
-);
-
-
-/* =========================================================
-   RANDOM HEARTBEAT IN FINAL SCENE
-========================================================= */
-
-setInterval(
-    ()=>{
-
-        const finalScene =
-            document.getElementById(
-                "scene8"
-            );
-
-        if(
-            finalScene.classList.contains(
-                "active"
-            )
-        ){
-
-            heartbeat();
-
-        }
-
-    },
-    7000
-);
+},900);
 
 </script>
 
