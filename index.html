@@ -1,355 +1,220 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Randy — The Night Remembers</title>
-
-<style>
-:root {
-  --x: 50vw;
-  --y: 50vh;
-}
-
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#020203;
-  color:#eee;
-  font-family:Georgia,"Times New Roman",serif;
-}
-
-/* خلفية الإضاءة (الشمعة) التفاعلية */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 10;
-  background: radial-gradient(circle 300px at var(--x) var(--y), rgba(180, 30, 40, 0.15), transparent 80%);
-}
-
-canvas {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-#game{
-  position:fixed;
-  inset:0;
-  z-index: 2;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.panel {
-  position: absolute;
-  width: min(90%, 650px);
-  padding: 30px;
-  background: linear-gradient(135deg, rgba(15,10,12,0.95), rgba(5,5,7,0.98));
-  border: 1px solid #4d3437;
-  box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(130,20,30,0.15);
-  border-radius: 8px;
-  text-align: center;
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.95);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  z-index: 5;
-}
-
-.panel.active {
-  opacity: 1;
-  pointer-events: auto;
-  transform: scale(1);
-}
-
-h1, h2 {
-  color: #c92a37;
-  letter-spacing: 2px;
-  margin-bottom: 15px;
-  text-shadow: 0 0 10px rgba(200, 0, 20, 0.4);
-}
-
-p {
-  font-size: 16px;
-  line-height: 1.8;
-  color: #ccc;
-  margin-bottom: 20px;
-}
-
-input {
-  width: 200px;
-  background: #08080a;
-  border: 1px solid #533237;
-  color: #fff;
-  padding: 12px;
-  text-align: center;
-  outline: none;
-  font-size: 18px;
-  letter-spacing: 3px;
-  border-radius: 4px;
-  margin-bottom: 15px;
-}
-
-.mainBtn {
-  border: 1px solid #6b3439;
-  background: rgba(20, 10, 12, 0.9);
-  color: #ddd;
-  padding: 12px 28px;
-  font-size: 14px;
-  cursor: pointer;
-  letter-spacing: 2px;
-  border-radius: 4px;
-  transition: 0.3s;
-}
-
-.mainBtn:hover {
-  background: #4a1217;
-  border-color: #a34b54;
-  box-shadow: 0 0 20px rgba(160, 30, 40, 0.5);
-}
-
-.error-msg {
-  color: #e63946;
-  font-size: 14px;
-  margin-top: 10px;
-  min-height: 20px;
-}
-
-/* الرسالة النهائية */
-.letter-box {
-  background: linear-gradient(135deg, #d7c5a4, #c6af88);
-  color: #1a1212;
-  padding: 25px;
-  border-radius: 4px;
-  text-align: right;
-  max-height: 60vh;
-  overflow-y: auto;
-  box-shadow: 0 0 30px rgba(0,0,0,0.8);
-}
-
-.letter-box h2 { color: #5a0e14; text-align: center; }
-.letter-box p { color: #2a1a1c; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D World — Interactive Night Castle</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #020204;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    /* UI Title Overlay */
+    #ui {
+      position: absolute;
+      top: 20px;
+      width: 100%;
+      text-align: center;
+      color: #fff;
+      z-index: 10;
+      pointer-events: none;
+    }
+    #ui h1 {
+      font-size: 24px;
+      letter-spacing: 3px;
+      color: #b32424;
+      text-shadow: 0 0 10px rgba(179, 36, 36, 0.6);
+    }
+    #ui p {
+      font-size: 13px;
+      color: #888;
+      margin-top: 5px;
+    }
+  </style>
+  <!-- Three.js Library & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
 
-<div id="game">
-
-  <!-- الشاشة الأولى: البداية -->
-  <div class="panel active" id="p1">
-    <h1>RANDY</h1>
-    <p>دعوة من طيات الليل والقلعة القديمة...</p>
-    <button class="mainBtn" onclick="advanceToStage(2)">دخول القلعة</button>
+  <div id="ui">
+    <h1>عالم 3D تفاعلي</h1>
+    <p>اسحب بالماوس للتدوير | اسحب بالإصبعين للتقريب والتبعيد</p>
   </div>
 
-  <!-- الشاشة الثانية: الختم الأول -->
-  <div class="panel" id="p2">
-    <h2>الختم الأول</h2>
-    <p>أدخل الرقم الذي تتذكره القلعة لكسر القفل:</p>
-    <input type="text" id="code1" placeholder="•••" maxlength="3">
-    <br>
-    <button class="mainBtn" onclick="checkCode1()">كسر الختم</button>
-    <div class="error-msg" id="err1"></div>
-  </div>
+  <div id="canvas-container"></div>
 
-  <!-- الشاشة الثالثة: التعويذة الأخيرة -->
-  <div class="panel" id="p3">
-    <h2>غرفة الهمسات</h2>
-    <p>اكتب تعويذة العبور للانتقال إلى السر المخبأ:</p>
-    <input type="text" id="code2" placeholder="التعويذة" style="width: 240px;">
-    <br>
-    <button class="mainBtn" onclick="checkCode2()">نطق التعويذة</button>
-    <div class="error-msg" id="err2"></div>
-  </div>
-
-  <!-- الشاشة الرابعة: الرسالة -->
-  <div class="panel" id="p4">
-    <div class="letter-box">
-      <h2>عزيزي راندي،</h2>
-      <p>لو كُتبت هذه الرسالة قبل مئة عام، لخُتمت بالشمع الأحمر وأُخفيت في أقدم غرف هذه القلعة...</p>
-      <p>أنت المستذئب، وأنا مصاص الدماء. قصة غريبة تعيش داخل قلعة عتيقة، ورغم كل شيء نختار بعضنا ليلة بعد ليلة.</p>
-      <p>عيد ميلاد سعيد يا راندي. أتمنى أن يظل الليل رقيقاً عليك دائماً.</p>
-      <p style="text-align: left; font-weight: bold; margin-top: 15px;">— Nour 🩸</p>
-    </div>
-    <br>
-    <button class="mainBtn" onclick="sealFinalRitual()">إغلاق الرسالة</button>
-  </div>
-
-  <!-- الشاشة الخامسة: النهاية -->
-  <div class="panel" id="p5">
-    <h1>النهاية</h1>
-    <h2>NOUR ♡ RANDY</h2>
-    <p>HAPPY BIRTHDAY, RANDY</p>
-  </div>
-
-</div>
-
-<script>
-// 1. نظام جزيئات الغبار وتتبع الشمعة
-document.addEventListener("DOMContentLoaded", () => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    document.body.appendChild(canvas);
+  <script>
+    // 1. Scene, Camera, Renderer Setup
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
     
-    let particles = Array.from({length: 60}, () => ({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        size: Math.random() * 2 + 0.5,
-        vy: -Math.random() * 0.4 - 0.1,
-        alpha: Math.random() * 0.5 + 0.1
-    }));
+    // Atmospheric Fog
+    scene.background = new THREE.Color(0x030307);
+    scene.fog = new THREE.FogExp2(0x05050a, 0.02);
 
-    function renderCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => {
-            p.y += p.vy;
-            if (p.y < 0) p.y = canvas.height;
-            ctx.fillStyle = `rgba(160, 30, 50, ${p.alpha})`;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fill();
-        });
-        requestAnimationFrame(renderCanvas);
-    }
-    renderCanvas();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 8, 30);
 
-    window.addEventListener("pointermove", (e) => {
-        document.documentElement.style.setProperty("--x", e.clientX + "px");
-        document.documentElement.style.setProperty("--y", e.clientY + "px");
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // 2. Orbit Controls (Mouse & Touch Interaction)
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 - 0.01; // Prevents camera going below ground
+    controls.minDistance = 10;
+    controls.maxDistance = 60;
+
+    // 3. Lighting
+    const ambientLight = new THREE.AmbientLight(0x1a1a2e, 0.4);
+    scene.add(ambientLight);
+
+    // Moonlight
+    const moonLight = new THREE.DirectionalLight(0x7890b0, 1.0);
+    moonLight.position.set(20, 40, -20);
+    moonLight.castShadow = true;
+    moonLight.shadow.mapSize.width = 1024;
+    moonLight.shadow.mapSize.height = 1024;
+    scene.add(moonLight);
+
+    // Castle Door Red Glow
+    const redGlow = new THREE.PointLight(0xff1122, 2, 15);
+    redGlow.position.set(0, 2, 5);
+    scene.add(redGlow);
+
+    // 4. Ground (3D Terrain)
+    const groundGeo = new THREE.PlaneGeometry(100, 100);
+    const groundMat = new THREE.MeshStandardMaterial({ 
+      color: 0x0f0f14, 
+      roughness: 0.4, 
+      metalness: 0.1 
     });
-});
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
 
-// 2. محرك الصوت البرمجي
-let audioCtx = null;
+    // 5. Building 3D Castle Structure
+    const castleGroup = new THREE.Group();
+    const stoneMaterial = new THREE.MeshStandardMaterial({ color: 0x1a1a22, roughness: 0.8 });
+    const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x0a0a0d, roughness: 0.5 });
+    const windowMaterial = new THREE.MeshBasicMaterial({ color: 0xff3300 });
 
-function triggerAudio(type) {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === "suspended") audioCtx.resume();
+    // Central Tower
+    const mainBuildingGeo = new THREE.BoxGeometry(10, 16, 10);
+    const mainBuilding = new THREE.Mesh(mainBuildingGeo, stoneMaterial);
+    mainBuilding.position.y = 8;
+    mainBuilding.castShadow = true;
+    mainBuilding.receiveShadow = true;
+    castleGroup.add(mainBuilding);
 
-    if (type === "thunder") {
-        let bufferSize = audioCtx.sampleRate * 2;
-        let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        let data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    // Left and Right Towers
+    const createSideTower = (x, z) => {
+      const tower = new THREE.Group();
+      const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.5, 20, 16), stoneMaterial);
+      cylinder.position.y = 10;
+      cylinder.castShadow = true;
 
-        let noise = audioCtx.createBufferSource();
-        noise.buffer = buffer;
-        let filter = audioCtx.createBiquadFilter();
-        filter.type = "lowpass";
-        filter.frequency.setValueAtTime(120, audioCtx.currentTime);
-        filter.frequency.linearRampToValueAtTime(20, audioCtx.currentTime + 1.8);
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(3.2, 6, 16), roofMaterial);
+      cone.position.y = 23;
+      cone.castShadow = true;
 
-        let gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.8);
+      tower.add(cylinder, cone);
+      tower.position.set(x, 0, z);
+      return tower;
+    };
 
-        noise.connect(filter);
-        filter.connect(gain);
-        gain.connect(audioCtx.destination);
-        noise.start();
-    } else if (type === "success") {
-        let osc = audioCtx.createOscillator();
-        let gain = audioCtx.createGain();
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(520, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.7);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.7);
-    } else if (type === "error") {
-        let osc = audioCtx.createOscillator();
-        let gain = audioCtx.createGain();
-        osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(80, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.3);
+    castleGroup.add(createSideTower(-7, 3));
+    castleGroup.add(createSideTower(7, 3));
+
+    // Glowing Window
+    const winGeo = new THREE.PlaneGeometry(1, 2);
+    const window1 = new THREE.Mesh(winGeo, windowMaterial);
+    window1.position.set(-2.5, 11, 5.01);
+    const window2 = window1.clone();
+    window2.position.set(2.5, 11, 5.01);
+    castleGroup.add(window1, window2);
+
+    scene.add(castleGroup);
+
+    // 6. 3D Particle Rain System
+    const rainCount = 4000;
+    const rainGeo = new THREE.BufferGeometry();
+    const rainPos = new Float32Array(rainCount * 3);
+
+    for (let i = 0; i < rainCount * 3; i += 3) {
+      rainPos[i] = (Math.random() - 0.5) * 60;
+      rainPos[i + 1] = Math.random() * 40;
+      rainPos[i + 2] = (Math.random() - 0.5) * 60;
     }
-}
 
-// 3. التنقل ومصادقة الألغاز
-function triggerLightningFlash() {
-    let flash = document.getElementById("flash") || document.createElement("div");
-    flash.id = "flash";
-    flash.style.cssText = "position:fixed;inset:0;background:#fff;opacity:0.7;pointer-events:none;z-index:999;transition:opacity 0.25s;";
-    document.body.appendChild(flash);
-    triggerAudio("thunder");
-    setTimeout(() => flash.style.opacity = "0", 250);
-}
+    rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
+    const rainMat = new THREE.PointsMaterial({
+      color: 0x8899aa,
+      size: 0.1,
+      transparent: true,
+      opacity: 0.7
+    });
 
-function advanceToStage(stageNumber) {
-    triggerLightningFlash();
-    document.querySelectorAll(".panel").forEach(panel => panel.classList.remove("active"));
-    setTimeout(() => {
-        const targetPanel = document.getElementById("p" + stageNumber);
-        if (targetPanel) targetPanel.classList.add("active");
-    }, 350);
-}
+    const rainParticles = new THREE.Points(rainGeo, rainMat);
+    scene.add(rainParticles);
 
-function checkCode1() {
-    const val = document.getElementById("code1").value;
-    const res = validateFirstSeal(val);
-    if (res !== true) {
-        document.getElementById("err1").innerText = res;
+    // 7. Render Loop & Animations
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = clock.getDelta();
+
+      // Rain Animation Loop
+      const positions = rainGeo.attributes.position.array;
+      for (let i = 1; i < rainCount * 3; i += 3) {
+        positions[i] -= 30 * delta;
+        if (positions[i] < 0) positions[i] = 40;
+      }
+      rainGeo.attributes.position.needsUpdate = true;
+
+      // Lightning Flash Effect (Random)
+      if (Math.random() < 0.005) {
+        moonLight.intensity = 3.5;
+        setTimeout(() => { moonLight.intensity = 1.0; }, 60);
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
     }
-}
 
-function checkCode2() {
-    const val = document.getElementById("code2").value;
-    const res = validateFinalSpell(val);
-    if (res !== true) {
-        document.getElementById("err2").innerText = res;
-    }
-}
+    animate();
 
-function validateFirstSeal(inputCode) {
-    if (String(inputCode).trim() === "212") {
-        triggerAudio("success");
-        advanceToStage(3);
-        return true;
-    } else {
-        triggerAudio("error");
-        return "الختم يرفض هذا الرقم.. القلعة تتذكر السر الصحيح فقط.";
-    }
-}
-
-function validateFinalSpell(inputSpell) {
-    if (String(inputSpell).trim().toLowerCase() === "aiudiwdwu") {
-        triggerAudio("success");
-        advanceToStage(4);
-        return true;
-    } else {
-        triggerAudio("error");
-        return "التعويذة خاطئة.. القلعة ترفضك.";
-    }
-}
-
-function sealFinalRitual() {
-    triggerLightningFlash();
-    setTimeout(() => triggerLightningFlash(), 500);
-    advanceToStage(5);
-}
-</script>
+    // Responsive Window Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
 </body>
 </html>
