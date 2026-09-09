@@ -2,925 +2,385 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<meta name="theme-color" content="#02030a">
-<title>THE NIGHT REMEMBERS — Randy</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RANDY — The Last Letter</title>
 
 <style>
-:root{
---black:#010208;
---night:#030611;
---blue:#b9d9ff;
---white:#f4f7ff;
---gold:#e9cf88;
---red:#8d1833;
---muted:#8994ad;
---glass:rgba(5,8,17,.72);
---border:rgba(220,235,255,.17);
-}
-*{
-box-sizing:border-box;
-margin:0;
-padding:0;
-}
-html,
-body{
-width:100%;
-height:100%;
-overflow:hidden;
-background:#010208;
-color:var(--white);
-font-family:Georgia,"Times New Roman",serif;
-}
-body{
-user-select:none;
--webkit-user-select:none;
-}
-canvas{
-position:fixed;
-inset:0;
-width:100%;
-height:100%;
-display:block;
-}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02030a;font-family:Arial,sans-serif}
+body{color:#fff;user-select:none}
+
 #game{
-position:fixed;
-inset:0;
-overflow:hidden;
-background:#010208;
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:#02030a;
 }
+
+canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+}
+
 #cinematic{
-position:fixed;
-inset:0;
-pointer-events:none;
-z-index:10;
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:10;
+    background:
+        radial-gradient(circle at 50% 40%,transparent 20%,rgba(0,0,0,.18) 55%,rgba(0,0,0,.85) 100%);
 }
+
 #vignette{
-position:absolute;
-inset:0;
-background:
-radial-gradient(
-circle at 50% 45%,
-transparent 25%,
-rgba(0,0,0,.12) 48%,
-rgba(0,0,0,.72) 100%
-);
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(ellipse at center,transparent 38%,rgba(0,0,0,.8) 100%);
+    pointer-events:none;
 }
-#colorGrade{
-position:absolute;
-inset:0;
-background:
-linear-gradient(
-180deg,
-rgba(90,130,190,.035),
-transparent 35%,
-rgba(20,0,10,.18)
-);
-mix-blend-mode:screen;
-}
-#scanlines{
-position:absolute;
-inset:0;
-opacity:.025;
-background:
-repeating-linear-gradient(
-180deg,
-rgba(255,255,255,.5) 0px,
-rgba(255,255,255,.5) 1px,
-transparent 1px,
-transparent 4px
-);
-}
+
 #grain{
-position:absolute;
-inset:-60%;
-opacity:.045;
-background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-animation:noise .13s steps(2) infinite;
+    position:absolute;
+    inset:-50%;
+    opacity:.055;
+    pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+    animation:grain .15s steps(2) infinite;
 }
-@keyframes noise{
-0%{transform:translate(0,0)}
-25%{transform:translate(2%,1%)}
-50%{transform:translate(-1%,2%)}
-75%{transform:translate(1%,-2%)}
-100%{transform:translate(-2%,1%)}
+
+@keyframes grain{
+    0%{transform:translate(0,0)}
+    25%{transform:translate(3%,-2%)}
+    50%{transform:translate(-2%,3%)}
+    75%{transform:translate(2%,2%)}
+    100%{transform:translate(-3%,-3%)}
 }
-#letterboxTop,
-#letterboxBottom{
-position:absolute;
-left:0;
-right:0;
-height:6vh;
-background:#000;
+
+#topBar{
+    position:absolute;
+    top:24px;
+    left:30px;
+    right:30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    z-index:20;
+    opacity:0;
+    transition:1s;
 }
-#letterboxTop{top:0}
-#letterboxBottom{bottom:0}
-#boot{
-position:fixed;
-inset:0;
-z-index:100;
-display:grid;
-place-items:center;
-background:#010208;
-transition:opacity 1.4s ease;
-}
-.boot-content{
-width:min(700px,86vw);
-text-align:center;
-}
-.boot-symbol{
-font-size:76px;
-color:#dcecff;
-text-shadow:
-0 0 20px #dcecff,
-0 0 60px rgba(170,210,255,.7);
-animation:float 3s ease-in-out infinite;
-}
-.boot-title{
-margin-top:20px;
-font-size:11px;
-letter-spacing:.55em;
-color:#a9b8d1;
-}
-.boot-line{
-height:1px;
-width:300px;
-max-width:70vw;
-margin:28px auto;
-background:#172338;
-overflow:hidden;
-}
-.boot-line span{
-display:block;
-width:0%;
-height:100%;
-background:#e9f3ff;
-box-shadow:0 0 20px #fff;
-animation:bootload 2.7s forwards;
-}
-.boot-small{
-font-size:10px;
-letter-spacing:.22em;
-color:#56627b;
-}
-@keyframes bootload{
-to{width:100%}
-}
-@keyframes float{
-0%,100%{transform:translateY(0)}
-50%{transform:translateY(-10px)}
-}
-#title{
-position:fixed;
-inset:0;
-z-index:80;
-display:flex;
-align-items:flex-end;
-justify-content:center;
-padding:7vh 6vw 10vh;
-text-align:center;
-background:
-linear-gradient(
-180deg,
-transparent 15%,
-rgba(1,2,7,.2) 45%,
-rgba(1,2,7,.88) 88%,
-#010208 100%
-);
-transition:
-opacity 1s ease,
-transform 1s ease;
-}
-.title-inner{
-width:min(1000px,94vw);
-}
-.title-eyebrow{
-font-size:10px;
-letter-spacing:.55em;
-color:#b5c7df;
-margin-bottom:25px;
-}
-.title-main{
-font-size:
-clamp(48px,10vw,125px);
-font-weight:400;
-line-height:.82;
-letter-spacing:-.055em;
-text-shadow:
-0 5px 25px rgba(0,0,0,.9),
-0 0 55px rgba(180,210,255,.16);
-}
-.title-divider{
-height:1px;
-width:150px;
-margin:32px auto;
-background:
-linear-gradient(
-90deg,
-transparent,
-#dcecff,
-transparent
-);
-box-shadow:0 0 20px #dcecff;
-}
-.title-sub{
-font-size:
-clamp(13px,2vw,21px);
-line-height:1.8;
-color:#cbd2df;
-max-width:720px;
-margin:auto;
-}
-.title-warning{
-margin-top:24px;
-font-size:9px;
-letter-spacing:.3em;
-color:#6e7890;
-}
-#startButton{
-margin-top:32px;
-}
-button{
-font-family:Georgia,"Times New Roman",serif;
-font-size:11px;
-letter-spacing:.2em;
-text-transform:uppercase;
-color:#edf4ff;
-background:rgba(5,8,17,.74);
-border:1px solid rgba(225,239,255,.25);
-padding:15px 28px;
-cursor:pointer;
-border-radius:2px;
-transition:
-transform .25s ease,
-box-shadow .25s ease,
-border-color .25s ease,
-background .25s ease;
-backdrop-filter:blur(12px);
-}
-button:hover{
-transform:translateY(-2px);
-border-color:#e6f0ff;
-box-shadow:
-0 0 25px rgba(205,228,255,.15),
-0 0 60px rgba(205,228,255,.08);
-}
-button:active{
-transform:translateY(0);
-}
-button.primary{
-border-color:rgba(220,237,255,.62);
-background:
-linear-gradient(
-180deg,
-rgba(220,237,255,.15),
-rgba(220,237,255,.035)
-);
-box-shadow:
-0 0 30px rgba(210,230,255,.08);
-}
-button.danger{
-border-color:rgba(150,35,58,.6);
-}
-#hud{
-position:fixed;
-z-index:50;
-top:0;
-left:0;
-right:0;
-padding:
-calc(18px + env(safe-area-inset-top))
-24px
-18px;
-display:flex;
-justify-content:space-between;
-align-items:flex-start;
-pointer-events:none;
-opacity:0;
-transition:opacity .8s ease;
-}
-.hud-block{
-display:flex;
-flex-direction:column;
-gap:5px;
-}
-.hud-block.right{
-text-align:right;
-}
-.hud-kicker{
-font-size:9px;
-letter-spacing:.38em;
-color:#8e9bb3;
-text-transform:uppercase;
-}
-.hud-location{
-font-size:17px;
-color:#eef4ff;
-}
-.hud-status{
-font-size:10px;
-letter-spacing:.2em;
-color:#68758e;
-}
-#objective{
-position:fixed;
-z-index:50;
-left:50%;
-top:18%;
-transform:translateX(-50%);
-font-size:10px;
-letter-spacing:.35em;
-color:#a9b9d0;
-text-align:center;
-opacity:0;
-transition:opacity .7s ease;
-pointer-events:none;
-text-transform:uppercase;
-}
+
 #chapter{
-position:fixed;
-z-index:51;
-left:50%;
-top:10%;
-transform:translate(-50%,-20px);
-opacity:0;
-font-size:11px;
-letter-spacing:.6em;
-color:#dcecff;
-text-align:center;
-pointer-events:none;
-text-transform:uppercase;
-transition:
-opacity .8s ease,
-transform .8s ease;
-text-shadow:0 0 25px rgba(220,236,255,.4);
+    font-size:12px;
+    letter-spacing:5px;
+    color:#d8d2ff;
+    text-shadow:0 0 15px #9e8cff;
 }
+
+#objective{
+    font-size:12px;
+    color:#aaa;
+    letter-spacing:2px;
+}
+
 #dialogue{
-position:fixed;
-z-index:60;
-left:50%;
-bottom:
-calc(34px + env(safe-area-inset-bottom));
-transform:translateX(-50%) translateY(25px);
-width:min(940px,90vw);
-opacity:0;
-pointer-events:none;
-transition:
-opacity .4s ease,
-transform .4s ease;
+    position:absolute;
+    left:6%;
+    right:6%;
+    bottom:7%;
+    min-height:150px;
+    padding:28px 35px;
+    z-index:30;
+    opacity:0;
+    transform:translateY(30px);
+    transition:.6s;
+    background:
+        linear-gradient(90deg,rgba(8,8,20,.96),rgba(14,12,30,.88),rgba(8,8,20,.96));
+    border:1px solid rgba(210,198,255,.28);
+    box-shadow:0 0 50px rgba(80,50,180,.18);
+    backdrop-filter:blur(10px);
 }
-.dialogue-visible{
-opacity:1!important;
-transform:translateX(-50%) translateY(0)!important;
-pointer-events:auto!important;
+
+#speaker{
+    color:#d9cfff;
+    font-size:13px;
+    letter-spacing:4px;
+    margin-bottom:13px;
 }
-.dialogue-box{
-position:relative;
-padding:
-22px 28px
-22px 28px;
-background:
-linear-gradient(
-180deg,
-rgba(6,10,19,.82),
-rgba(3,5,12,.92)
-);
-border:1px solid var(--border);
-box-shadow:
-0 25px 80px rgba(0,0,0,.5),
-inset 0 1px rgba(255,255,255,.035);
-backdrop-filter:blur(14px);
+
+#text{
+    font-size:18px;
+    line-height:1.9;
+    color:#f1efff;
+    min-height:60px;
 }
-.dialogue-box::before{
-content:"";
-position:absolute;
-left:0;
-top:0;
-bottom:0;
-width:2px;
-background:
-linear-gradient(
-180deg,
-transparent,
-#dcecff,
-transparent
-);
-box-shadow:0 0 20px rgba(220,236,255,.45);
+
+#continue{
+    position:absolute;
+    bottom:14px;
+    left:20px;
+    font-size:10px;
+    color:#888;
+    letter-spacing:3px;
 }
-.dialogue-name{
-font-size:10px;
-letter-spacing:.3em;
-color:#b8c7dc;
-margin-bottom:12px;
-text-transform:uppercase;
+
+#choices{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:24%;
+    z-index:40;
+    display:none;
+    gap:15px;
 }
-.dialogue-text{
-font-size:
-clamp(15px,2vw,21px);
-line-height:1.75;
-color:#f0f3f8;
-min-height:38px;
+
+.choice{
+    min-width:230px;
+    padding:15px 25px;
+    color:#eee;
+    border:1px solid rgba(220,210,255,.35);
+    background:rgba(8,7,20,.9);
+    cursor:pointer;
+    transition:.3s;
+    text-align:center;
 }
-.dialogue-hint{
-margin-top:12px;
-font-size:9px;
-letter-spacing:.2em;
-color:#65728a;
+
+.choice:hover{
+    border-color:#fff;
+    box-shadow:0 0 30px rgba(170,140,255,.4);
+    transform:translateY(-4px);
 }
-#choice{
-position:fixed;
-z-index:65;
-left:50%;
-top:50%;
-transform:translate(-50%,-50%);
-width:min(560px,88vw);
-padding:25px;
-background:rgba(3,6,13,.9);
-border:1px solid var(--border);
-box-shadow:
-0 35px 120px rgba(0,0,0,.75),
-0 0 80px rgba(180,215,255,.06);
-backdrop-filter:blur(18px);
-display:none;
-text-align:center;
+
+#start{
+    position:absolute;
+    inset:0;
+    z-index:100;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    background:
+        radial-gradient(circle at center,rgba(42,27,83,.25),#010208 65%);
+    transition:2s;
 }
-.choice-title{
-font-size:10px;
-letter-spacing:.4em;
-color:#94a2bb;
-margin-bottom:18px;
+
+#start .small{
+    font-size:10px;
+    letter-spacing:8px;
+    color:#888;
+    margin-bottom:30px;
 }
-.choice-text{
-font-size:19px;
-line-height:1.6;
-margin-bottom:18px;
+
+#start h1{
+    margin:0;
+    font-size:clamp(42px,9vw,105px);
+    font-weight:300;
+    letter-spacing:18px;
+    text-shadow:
+        0 0 20px rgba(190,170,255,.5),
+        0 0 70px rgba(110,70,255,.25);
 }
-.choice-actions{
-display:flex;
-flex-wrap:wrap;
-justify-content:center;
-gap:4px;
+
+#start p{
+    color:#777;
+    letter-spacing:4px;
+    font-size:12px;
+    margin-top:25px;
 }
-#puzzle{
-position:fixed;
-z-index:75;
-inset:0;
-display:none;
-align-items:center;
-justify-content:center;
-background:rgba(0,0,0,.62);
-backdrop-filter:blur(10px);
+
+#startButton{
+    margin-top:55px;
+    padding:17px 60px;
+    background:transparent;
+    color:#fff;
+    border:1px solid rgba(220,210,255,.45);
+    letter-spacing:7px;
+    cursor:pointer;
+    transition:.4s;
 }
-.puzzle-card{
-width:min(580px,88vw);
-padding:36px;
-background:
-linear-gradient(
-180deg,
-rgba(8,12,23,.96),
-rgba(2,4,10,.98)
-);
-border:1px solid rgba(220,236,255,.2);
-box-shadow:
-0 40px 150px rgba(0,0,0,.8);
-text-align:center;
+
+#startButton:hover{
+    background:rgba(220,210,255,.08);
+    box-shadow:0 0 50px rgba(160,130,255,.3);
+    letter-spacing:10px;
 }
-.puzzle-symbol{
-font-size:46px;
-color:#dcecff;
-text-shadow:0 0 35px #b8d7ff;
-margin-bottom:16px;
+
+#fade{
+    position:absolute;
+    inset:0;
+    z-index:90;
+    background:#000;
+    opacity:0;
+    pointer-events:none;
+    transition:1.2s;
 }
-.puzzle-title{
-font-size:12px;
-letter-spacing:.4em;
-color:#c4d2e7;
-}
-.puzzle-question{
-font-size:18px;
-line-height:1.7;
-color:#eef2fa;
-margin:20px 0;
-}
-.puzzle-input{
-width:180px;
-height:58px;
-font-family:Georgia,serif;
-font-size:25px;
-text-align:center;
-letter-spacing:.4em;
-color:#fff;
-background:#02040a;
-border:1px solid rgba(220,236,255,.3);
-outline:none;
-}
-.puzzle-input:focus{
-border-color:#dcecff;
-box-shadow:0 0 25px rgba(220,236,255,.12);
-}
-.puzzle-error{
-height:20px;
-margin-top:12px;
-font-size:10px;
-letter-spacing:.15em;
-color:#b64b62;
-}
-#answer{
-position:fixed;
-z-index:75;
-inset:0;
-display:none;
-align-items:center;
-justify-content:center;
-background:rgba(0,0,0,.66);
-backdrop-filter:blur(12px);
-}
-.answer-card{
-width:min(650px,90vw);
-padding:40px 30px;
-background:
-radial-gradient(
-circle at 50% 0%,
-rgba(180,215,255,.09),
-transparent 45%
-),
-rgba(3,6,14,.96);
-border:1px solid rgba(220,236,255,.2);
-box-shadow:0 40px 150px rgba(0,0,0,.85);
-text-align:center;
-}
-.answer-title{
-font-size:11px;
-letter-spacing:.5em;
-color:#9eacc3;
-}
-.answer-question{
-font-size:22px;
-margin:22px 0;
-line-height:1.6;
-}
-.answer-input{
-width:min(430px,80vw);
-height:55px;
-padding:0 18px;
-font-family:Georgia,serif;
-font-size:18px;
-text-align:center;
-color:#fff;
-background:#02040a;
-border:1px solid rgba(220,236,255,.25);
-outline:none;
-}
-.answer-input:focus{
-border-color:#dcecff;
-box-shadow:0 0 30px rgba(220,236,255,.13);
-}
-.answer-message{
-min-height:22px;
-margin-top:10px;
-font-size:10px;
-letter-spacing:.12em;
-color:#aeb9cc;
-}
+
 #letter{
-position:fixed;
-z-index:90;
-inset:0;
-display:none;
-align-items:center;
-justify-content:center;
-background:rgba(0,0,0,.75);
-backdrop-filter:blur(14px);
+    position:absolute;
+    inset:0;
+    z-index:80;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.78);
+    backdrop-filter:blur(12px);
 }
-.letter-paper{
-width:min(760px,88vw);
-max-height:82vh;
-overflow:auto;
-padding:50px 55px;
-background:
-linear-gradient(
-135deg,
-#eee8d9,
-#d9d0bc
-);
-color:#211f1b;
-box-shadow:
-0 40px 160px rgba(0,0,0,.85),
-0 0 0 1px rgba(255,255,255,.2);
-transform:rotate(-.5deg);
+
+.paper{
+    width:min(700px,88vw);
+    max-height:80vh;
+    overflow:auto;
+    padding:55px;
+    color:#241e30;
+    background:
+        linear-gradient(135deg,#f8f2df,#e8dfc5);
+    box-shadow:
+        0 0 80px rgba(190,170,255,.3),
+        0 20px 80px rgba(0,0,0,.8);
+    transform:scale(.8) rotate(-1deg);
+    animation:letterIn 1.2s forwards;
 }
-.letter-small{
-font-size:10px;
-letter-spacing:.3em;
-color:#6e6659;
+
+@keyframes letterIn{
+    to{transform:scale(1) rotate(0)}
 }
-.letter-title{
-font-size:clamp(27px,5vw,48px);
-font-weight:400;
-margin:20px 0 28px;
+
+.paper .date{
+    text-align:left;
+    font-size:11px;
+    color:#756b7e;
+    letter-spacing:3px;
 }
-.letter-text{
-font-size:
-clamp(15px,2vw,20px);
-line-height:2;
-white-space:pre-line;
+
+.paper h2{
+    text-align:center;
+    font-weight:400;
+    letter-spacing:5px;
+    margin:25px 0 40px;
 }
-.letter-sign{
-margin-top:35px;
-font-size:24px;
-font-style:italic;
+
+.paper p{
+    line-height:2.1;
+    font-size:17px;
+    white-space:pre-line;
 }
+
+.signature{
+    text-align:left;
+    margin-top:40px;
+    font-size:24px;
+    font-style:italic;
+}
+
 #final{
-position:fixed;
-z-index:100;
-inset:0;
-display:none;
-align-items:center;
-justify-content:center;
-text-align:center;
-background:
-radial-gradient(
-circle at 50% 45%,
-rgba(185,217,255,.12),
-transparent 35%
-),
-rgba(1,2,7,.94);
+    position:absolute;
+    inset:0;
+    z-index:110;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    background:
+        radial-gradient(circle,rgba(55,30,105,.3),rgba(0,0,0,.95) 75%);
 }
-.final-inner{
-width:min(1000px,90vw);
+
+#final h1{
+    font-size:clamp(32px,7vw,80px);
+    font-weight:200;
+    letter-spacing:10px;
+    margin:0;
+    text-shadow:0 0 40px #bba8ff;
 }
-.final-overline{
-font-size:10px;
-letter-spacing:.6em;
-color:#9eabc0;
-margin-bottom:25px;
+
+#final h2{
+    font-size:18px;
+    font-weight:300;
+    letter-spacing:6px;
+    color:#c9bee9;
 }
-.final-main{
-font-size:
-clamp(42px,9vw,115px);
-line-height:.85;
-font-weight:400;
-letter-spacing:-.04em;
-text-shadow:
-0 0 30px rgba(220,236,255,.4),
-0 0 100px rgba(220,236,255,.15);
+
+#final span{
+    margin-top:30px;
+    color:#777;
+    letter-spacing:3px;
 }
-.final-name{
-margin-top:30px;
-font-size:
-clamp(18px,3vw,30px);
-letter-spacing:.45em;
-color:#e7d08d;
+
+#skip{
+    position:absolute;
+    top:25px;
+    right:30px;
+    z-index:50;
+    color:#666;
+    font-size:10px;
+    letter-spacing:2px;
+    cursor:pointer;
+    display:none;
 }
-.final-sub{
-margin-top:25px;
-font-size:14px;
-color:#aeb8ca;
-letter-spacing:.2em;
-}
-.final-heart{
-margin-top:35px;
-font-size:30px;
-color:#c03a56;
-text-shadow:0 0 30px rgba(190,50,80,.6);
-animation:heart 1.6s infinite;
-}
-@keyframes heart{
-0%,100%{transform:scale(1)}
-15%{transform:scale(1.16)}
-30%{transform:scale(1)}
-45%{transform:scale(1.08)}
-60%{transform:scale(1)}
-}
-#flash{
-position:fixed;
-z-index:95;
-inset:0;
-background:#fff;
-opacity:0;
-pointer-events:none;
-}
-#flash.active{
-animation:flash .45s ease-out;
-}
-@keyframes flash{
-0%{opacity:.9}
-100%{opacity:0}
-}
-#hint{
-position:fixed;
-z-index:55;
-bottom:12%;
-left:50%;
-transform:translateX(-50%);
-font-size:9px;
-letter-spacing:.28em;
-color:#66748d;
-opacity:0;
-transition:opacity .5s;
-pointer-events:none;
-text-align:center;
-}
-#mobile{
-display:none;
-left:50%;
-bottom:28px;
-transform:translateX(-50%);
-z-index:70;
-}
+
 @media(max-width:700px){
-#hud{
-padding-left:14px;
-padding-right:14px;
-}
-.hud-location{
-font-size:14px;
-}
-.dialogue-box{
-padding:18px 20px;
-}
-.dialogue-text{
-font-size:15px;
-}
-.letter-paper{
-padding:34px 25px;
-}
-}
-@media(pointer:coarse){
-#mobile{
-display:block;
-}
-}
-.hidden{
-display:none!important;
+    #dialogue{
+        left:3%;
+        right:3%;
+        bottom:4%;
+        padding:20px;
+    }
+    #text{font-size:15px}
+    #objective{display:none}
+    .choice{min-width:170px}
 }
 </style>
 </head>
 
 <body>
 
-<div id="game">
-<canvas id="scene"></canvas>
-</div>
+<div id="game"></div>
 
 <div id="cinematic">
-<div id="vignette"></div>
-<div id="colorGrade"></div>
-<div id="scanlines"></div>
-<div id="grain"></div>
-<div id="letterboxTop"></div>
-<div id="letterboxBottom"></div>
+    <div id="vignette"></div>
+    <div id="grain"></div>
 </div>
 
-<div id="boot">
-<div class="boot-content">
-<div class="boot-symbol">✦</div>
-<div class="boot-title">INITIALIZING THE NIGHT</div>
-<div class="boot-line"><span></span></div>
-<div class="boot-small">MEMORY • MOONLIGHT • BLOOD • LIGHT</div>
-</div>
+<div id="fade"></div>
+
+<div id="topBar">
+    <div id="chapter">PROLOGUE</div>
+    <div id="objective">THE FOREST IS LISTENING</div>
 </div>
 
-<div id="title">
-<div class="title-inner">
-<div class="title-eyebrow">AN INTERACTIVE NIGHT</div>
-<div class="title-main">THE NIGHT<br>REMEMBERS</div>
-<div class="title-divider"></div>
-<div class="title-sub">
-بعض الليالي لا تنتهي عندما تشرق الشمس...
-بعضها تبقى تنتظر الشخص الصحيح.
-</div>
-<div class="title-warning">
-HEADPHONES RECOMMENDED
-</div>
-<br>
-<button id="startButton" class="primary">ENTER THE NIGHT</button>
-</div>
-</div>
-
-<div id="hud">
-<div class="hud-block">
-<div class="hud-kicker">Chapter</div>
-<div id="hudChapter" class="hud-location">THE FOREST</div>
-<div id="hudObjective" class="hud-status">FOLLOW THE LIGHT</div>
-</div>
-<div class="hud-block right">
-<div class="hud-kicker">Night</div>
-<div id="hudTime" class="hud-location">00:00</div>
-<div id="hudStatus" class="hud-status">THE STORY IS WAITING</div>
-</div>
-</div>
-
-<div id="chapter">THE FOREST</div>
-
-<div id="objective">FOLLOW THE LIGHT</div>
+<div id="skip">SKIP SCENE</div>
 
 <div id="dialogue">
-<div class="dialogue-box">
-<div id="dialogueName" class="dialogue-name">UNKNOWN</div>
-<div id="dialogueText" class="dialogue-text"></div>
-<div class="dialogue-hint">CLICK TO CONTINUE</div>
-</div>
+    <div id="speaker">UNKNOWN</div>
+    <div id="text"></div>
+    <div id="continue">CLICK / SPACE TO CONTINUE</div>
 </div>
 
-<div id="choice">
-<div class="choice-title">THE PATH DIVIDES</div>
-<div id="choiceText" class="choice-text"></div>
-<div class="choice-actions">
-<button id="choiceA"></button>
-<button id="choiceB"></button>
-</div>
-</div>
+<div id="choices"></div>
 
-<div id="puzzle">
-<div class="puzzle-card">
-<div class="puzzle-symbol">☽</div>
-<div class="puzzle-title">THE HALL OF SILENCE</div>
-<div class="puzzle-question">
-ثلاث خطوات إلى الباب.<br>
-ثلاث نبضات.<br>
-والرقم الذي لم تنسه الليلة.
-</div>
-<input
-id="puzzleInput"
-class="puzzle-input"
-maxlength="3"
-inputmode="numeric"
-autocomplete="off"
->
-<div id="puzzleError" class="puzzle-error"></div>
-<button id="puzzleButton" class="primary">UNLOCK</button>
-</div>
-</div>
-
-<div id="answer">
-<div class="answer-card">
-<div class="answer-title">THE LAST QUESTION</div>
-<div class="answer-question">
-من الشخص الذي كانت الليلة تقودك إليه؟
-</div>
-<input
-id="answerInput"
-class="answer-input"
-type="text"
-autocomplete="off"
-spellcheck="false"
-placeholder="TYPE THE NAME OF THE SECRET"
->
-<div id="answerMessage" class="answer-message"></div>
-<button id="answerButton" class="primary">OPEN THE FINAL DOOR</button>
-</div>
+<div id="start">
+    <div class="small">AN ANIME CINEMATIC EXPERIENCE</div>
+    <h1>RANDY</h1>
+    <p>THE NIGHT REMEMBERS</p>
+    <button id="startButton">ENTER THE NIGHT</button>
 </div>
 
 <div id="letter">
-<div class="letter-paper">
-<div class="letter-small">A LETTER LEFT BEHIND</div>
-<div class="letter-title">إلى Randy...</div>
-<div class="letter-text">
-إذا وصلت إلى هذه الرسالة،
-فمعنى هذا أنك عبرت الغابة،
-ومشيت في الطريق،
-ووقفت أمام القلعة،
-ولم تخف من الباب.
-
-لكن الحقيقة...
-لم تكن القلعة هي الشيء الذي كنت أبحث عنه.
-
-كنت أبحث عن لحظة
-تستحق أن أتذكرها.
-
-عن شخص
-يستحق أن تُكتب له ليلة كاملة.
-
-وهذه الليلة...
-كانت لك.
-
-من نور،
-إلى Randy.
-
-كل عام وأنت بخير.
-</div>
-<div class="letter-sign">Forever yours — Nour ♡</div>
-<br>
-<button id="closeLetter">CONTINUE</button>
-</div>
+    <div class="paper">
+        <div class="date">THE LAST ROOM — 00:00</div>
+        <h2>إلى رندي...</h2>
+        <p id="letterText"></p>
+        <div class="signature">— نور</div>
+    </div>
 </div>
 
 <div id="final">
-<div class="final-inner">
-<div class="final-overline">THE NIGHT HAS REMEMBERED</div>
-<div class="final-main">HAPPY<br>BIRTHDAY</div>
-<div class="final-name">RANDY</div>
-<div class="final-sub">NOOR ♡ RANDY</div>
-<div class="final-heart">♥</div>
+    <h1>HAPPY BIRTHDAY</h1>
+    <h2>RANDY</h2>
+    <span>بعض الرسائل لا تصل بالبريد...</span>
+    <span>بل تنتظر أن تجديها.</span>
 </div>
-</div>
-
-<div id="flash"></div>
-
-<div id="hint">THE LIGHT IS WAITING</div>
-
-<button id="mobile">CONTINUE</button>
 
 <script type="module">
 
@@ -930,6207 +390,3234 @@ import * as THREE from
 import {GLTFLoader} from
 "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js";
 
-/* =========================================================
+
+/* ============================================================
    CORE
-========================================================= */
+============================================================ */
 
-const canvas =
-document.getElementById("scene");
+const game=document.getElementById("game");
 
-const renderer =
-new THREE.WebGLRenderer({
-canvas,
-antialias:true,
-alpha:false,
-powerPreference:"high-performance"
+const renderer=new THREE.WebGLRenderer({
+    antialias:true,
+    alpha:false,
+    powerPreference:"high-performance"
 });
 
-renderer.setPixelRatio(
-Math.min(window.devicePixelRatio,2)
-);
-
-renderer.setSize(
-window.innerWidth,
-window.innerHeight
-);
-
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.15;
 
-renderer.shadowMap.type=
-THREE.PCFSoftShadowMap;
+game.appendChild(renderer.domElement);
 
-renderer.outputColorSpace=
-THREE.SRGBColorSpace;
 
-renderer.toneMapping=
-THREE.ACESFilmicToneMapping;
+const scene=new THREE.Scene();
 
-renderer.toneMappingExposure=1.08;
+scene.background=new THREE.Color(0x02030a);
 
-const camera=
-new THREE.PerspectiveCamera(
-52,
-window.innerWidth/window.innerHeight,
-.05,
-3000
+const camera=new THREE.PerspectiveCamera(
+    55,
+    innerWidth/innerHeight,
+    .05,
+    600
 );
 
-camera.position.set(
-0,
-4,
-18
-);
+camera.position.set(0,3,12);
 
-const world=
-new THREE.Scene();
 
-world.background=
-new THREE.Color("#02030a");
+const clock=new THREE.Clock();
 
-const clock=
-new THREE.Clock();
 
-const raycaster=
-new THREE.Raycaster();
-
-const pointer=
-new THREE.Vector2();
-
-const loader=
-new GLTFLoader();
+/* ============================================================
+   STATE
+============================================================ */
 
 const state={
-started:false,
-scene:"forest",
-sceneIndex:0,
-time:0,
-dialogue:false,
-dialogueIndex:0,
-typing:false,
-choiceOpen:false,
-puzzleSolved:false,
-answerSolved:false,
-final:false,
-letter:false,
-audio:false,
-lightning:0,
-shake:0,
-cameraMode:"cinematic",
-transition:false,
-transitionProgress:0
+    started:false,
+    scene:"forest",
+    sceneIndex:0,
+    time:0,
+    dialogue:false,
+    dialogueIndex:0,
+    typing:false,
+    currentLines:[],
+    lineTimer:null,
+    choice:false,
+    puzzle:false,
+    puzzleSolved:false,
+    answerSolved:false,
+    final:false,
+    transition:false,
+    rain:false,
+    lightning:0,
+    shake:0,
+    cameraTarget:new THREE.Vector3(),
+    playerTarget:new THREE.Vector3(),
+    musicStarted:false
 };
+
 
 const scenes=[
-"forest",
-"path",
-"ruins",
-"castle",
-"gate",
-"hall",
-"chamber",
-"final"
+    "forest",
+    "path",
+    "shrine",
+    "castle",
+    "gate",
+    "hall",
+    "chamber",
+    "final"
 ];
 
-const sceneNames={
-forest:"THE FOREST",
-path:"THE MISTY PATH",
-ruins:"THE FORGOTTEN SHRINE",
-castle:"THE CASTLE",
-gate:"THE IRON GATE",
-hall:"THE HALL OF SILENCE",
-chamber:"THE SEALED CHAMBER",
-final:"THE LAST ROOM"
-};
 
-const sceneObjectives={
-forest:"FOLLOW THE LIGHT",
-path:"KEEP WALKING",
-ruins:"FIND WHAT WAS LEFT",
-castle:"APPROACH THE CASTLE",
-gate:"OPEN THE GATE",
-hall:"FIND THE NUMBER",
-chamber:"ANSWER THE LAST QUESTION",
-final:"REMEMBER THIS NIGHT"
-};
+/* ============================================================
+   LIGHTS
+============================================================ */
 
-/* =========================================================
-   GROUPS
-========================================================= */
-
-let environment=
-new THREE.Group();
-
-let props=
-new THREE.Group();
-
-let particles=
-new THREE.Group();
-
-let characters=
-new THREE.Group();
-
-let lights=
-new THREE.Group();
-
-world.add(environment);
-world.add(props);
-world.add(particles);
-world.add(characters);
-world.add(lights);
-
-/* =========================================================
-   MATERIALS
-========================================================= */
-
-const materials={};
-
-materials.black=
-new THREE.MeshStandardMaterial({
-color:0x020307,
-roughness:.95,
-metalness:.05
-});
-
-materials.darkStone=
-new THREE.MeshStandardMaterial({
-color:0x171b25,
-roughness:.92,
-metalness:.02
-});
-
-materials.stone=
-new THREE.MeshStandardMaterial({
-color:0x343947,
-roughness:.9,
-metalness:.04
-});
-
-materials.oldStone=
-new THREE.MeshStandardMaterial({
-color:0x262b35,
-roughness:1
-});
-
-materials.wood=
-new THREE.MeshStandardMaterial({
-color:0x17100e,
-roughness:.9
-});
-
-materials.iron=
-new THREE.MeshStandardMaterial({
-color:0x10131a,
-roughness:.48,
-metalness:.72
-});
-
-materials.gold=
-new THREE.MeshStandardMaterial({
-color:0xd6b96d,
-roughness:.25,
-metalness:.75
-});
-
-materials.blueGlow=
-new THREE.MeshBasicMaterial({
-color:0xbddcff
-});
-
-materials.whiteGlow=
-new THREE.MeshBasicMaterial({
-color:0xffffff
-});
-
-materials.redGlow=
-new THREE.MeshBasicMaterial({
-color:0x9c1835
-});
-
-materials.candle=
-new THREE.MeshStandardMaterial({
-color:0xd8c79c,
-roughness:.65
-});
-
-materials.water=
-new THREE.MeshStandardMaterial({
-color:0x07111c,
-roughness:.08,
-metalness:.65,
-transparent:true,
-opacity:.7
-});
-
-/* =========================================================
-   UTILS
-========================================================= */
-
-function add(group,object){
-group.add(object);
-return object;
-}
-
-function box(
-w,
-h,
-d,
-material,
-x=0,
-y=0,
-z=0
-){
-const mesh=
-new THREE.Mesh(
-new THREE.BoxGeometry(w,h,d),
-material
-);
-mesh.position.set(x,y,z);
-mesh.castShadow=true;
-mesh.receiveShadow=true;
-return mesh;
-}
-
-function sphere(
-r,
-material,
-x=0,
-y=0,
-z=0,
-segments=24
-){
-const mesh=
-new THREE.Mesh(
-new THREE.SphereGeometry(
-r,
-segments,
-segments
-),
-material
-);
-mesh.position.set(x,y,z);
-mesh.castShadow=true;
-mesh.receiveShadow=true;
-return mesh;
-}
-
-function cylinder(
-r1,
-r2,
-h,
-material,
-x=0,
-y=0,
-z=0,
-segments=24
-){
-const mesh=
-new THREE.Mesh(
-new THREE.CylinderGeometry(
-r1,
-r2,
-h,
-segments
-),
-material
-);
-mesh.position.set(x,y,z);
-mesh.castShadow=true;
-mesh.receiveShadow=true;
-return mesh;
-}
-
-function cone(
-r,
-h,
-material,
-x=0,
-y=0,
-z=0
-){
-const mesh=
-new THREE.Mesh(
-new THREE.ConeGeometry(r,h,24),
-material
-);
-mesh.position.set(x,y,z);
-mesh.castShadow=true;
-mesh.receiveShadow=true;
-return mesh;
-}
-
-function plane(
-w,
-h,
-material,
-x=0,
-y=0,
-z=0
-){
-const mesh=
-new THREE.Mesh(
-new THREE.PlaneGeometry(w,h),
-material
-);
-mesh.position.set(x,y,z);
-return mesh;
-}
-
-function clearGroup(group){
-while(group.children.length){
-const child=group.children.pop();
-child.traverse?.(
-object=>{
-if(object.geometry)
-object.geometry.dispose?.();
-if(object.material){
-if(Array.isArray(object.material)){
-object.material.forEach(m=>m.dispose?.());
-}else{
-object.material.dispose?.();
-}
-}
-}
-);
-}
-}
-
-/* =========================================================
-   LIGHTING
-========================================================= */
-
-let moonLight;
-let moonGlow;
-let ambientLight;
-let heavenLight;
-
-function setupLighting(){
-
-clearGroup(lights);
-
-ambientLight=
-new THREE.HemisphereLight(
-0x7890b5,
-0x050609,
-.42
+const ambient=new THREE.HemisphereLight(
+    0x8999ff,
+    0x05030b,
+    1.2
 );
 
-lights.add(ambientLight);
+scene.add(ambient);
 
-moonLight=
-new THREE.DirectionalLight(
-0xaecfff,
-2.4
+
+const moonLight=new THREE.DirectionalLight(
+    0xb9c8ff,
+    3.2
 );
 
-moonLight.position.set(
--30,
-50,
--35
-);
-
+moonLight.position.set(-20,35,15);
 moonLight.castShadow=true;
+moonLight.shadow.mapSize.set(2048,2048);
 
-moonLight.shadow.mapSize.set(
-2048,
-2048
+scene.add(moonLight);
+
+
+const moon=new THREE.Mesh(
+    new THREE.SphereGeometry(7,32,32),
+    new THREE.MeshBasicMaterial({
+        color:0xe8edff
+    })
 );
 
-moonLight.shadow.camera.left=-80;
-moonLight.shadow.camera.right=80;
-moonLight.shadow.camera.top=80;
-moonLight.shadow.camera.bottom=-80;
-moonLight.shadow.camera.near=.5;
-moonLight.shadow.camera.far=220;
+moon.position.set(-45,45,-100);
+scene.add(moon);
 
-lights.add(moonLight);
 
-heavenLight=
-new THREE.DirectionalLight(
-0xdcecff,
-0
+const moonGlow=new THREE.PointLight(
+    0xb8c8ff,
+    8,
+    160
 );
 
-heavenLight.position.set(
-0,
-45,
-10
-);
+moonGlow.position.copy(moon.position);
+scene.add(moonGlow);
 
-heavenLight.castShadow=true;
 
-lights.add(heavenLight);
+/* ============================================================
+   MATERIALS
+============================================================ */
 
-const fill=
-new THREE.PointLight(
-0x355c9e,
-1.4,
-80,
-2
-);
+const M={
+    black:new THREE.MeshStandardMaterial({
+        color:0x090a12,
+        roughness:.8
+    }),
 
-fill.position.set(
-0,
-8,
-20
-);
+    dark:new THREE.MeshStandardMaterial({
+        color:0x171629,
+        roughness:.7
+    }),
 
-lights.add(fill);
+    purple:new THREE.MeshStandardMaterial({
+        color:0x312451,
+        roughness:.55
+    }),
 
+    silver:new THREE.MeshStandardMaterial({
+        color:0xbcc4e8,
+        metalness:.6,
+        roughness:.3
+    }),
+
+    gold:new THREE.MeshStandardMaterial({
+        color:0xd9b86a,
+        metalness:.75,
+        roughness:.25
+    }),
+
+    stone:new THREE.MeshStandardMaterial({
+        color:0x252535,
+        roughness:.95
+    }),
+
+    skin:new THREE.MeshToonMaterial({
+        color:0xf3c7b6
+    }),
+
+    hair:new THREE.MeshToonMaterial({
+        color:0x17152b
+    }),
+
+    white:new THREE.MeshToonMaterial({
+        color:0xf7f3ff
+    }),
+
+    red:new THREE.MeshStandardMaterial({
+        color:0x8b1029,
+        emissive:0x240009,
+        roughness:.4
+    }),
+
+    glow:new THREE.MeshBasicMaterial({
+        color:0xcfc7ff
+    })
+};
+
+
+/* ============================================================
+   HELPERS
+============================================================ */
+
+function box(w,h,d,mat){
+    const m=new THREE.Mesh(
+        new THREE.BoxGeometry(w,h,d),
+        mat
+    );
+
+    m.castShadow=true;
+    m.receiveShadow=true;
+
+    return m;
 }
 
-/* =========================================================
-   MOON
-========================================================= */
 
-function createMoon(
-x=-45,
-y=48,
-z=-90,
-scale=1
-){
+function sphere(r,mat){
+    const m=new THREE.Mesh(
+        new THREE.SphereGeometry(r,32,20),
+        mat
+    );
 
-const moon=
-new THREE.Mesh(
-new THREE.SphereGeometry(
-8*scale,
-48,
-48
-),
-new THREE.MeshBasicMaterial({
-color:0xf2f5ff
-})
-);
+    m.castShadow=true;
+    m.receiveShadow=true;
 
-moon.position.set(
-x,
-y,
-z
-);
-
-add(environment,moon);
-
-const glowMaterial=
-new THREE.MeshBasicMaterial({
-color:0xabcfff,
-transparent:true,
-opacity:.055,
-side:THREE.BackSide
-});
-
-const glow=
-new THREE.Mesh(
-new THREE.SphereGeometry(
-12*scale,
-32,
-32
-),
-glowMaterial
-);
-
-glow.position.copy(moon.position);
-
-add(environment,glow);
-
-moonGlow=glow;
-
+    return m;
 }
 
-/* =========================================================
-   STARS
-========================================================= */
 
-function createStars(
-count=1500,
-radius=500
-){
+function cyl(r1,r2,h,mat,segments=24){
+    const m=new THREE.Mesh(
+        new THREE.CylinderGeometry(
+            r1,r2,h,segments
+        ),
+        mat
+    );
 
-const positions=
-new Float32Array(count*3);
+    m.castShadow=true;
+    m.receiveShadow=true;
 
-const sizes=
-new Float32Array(count);
-
-for(let i=0;i<count;i++){
-
-const r=
-radius*(.55+Math.random()*.45);
-
-const theta=
-Math.random()*Math.PI*2;
-
-const phi=
-Math.acos(
-2*Math.random()-1
-);
-
-positions[i*3]=
-r*Math.sin(phi)*Math.cos(theta);
-
-positions[i*3+1]=
-Math.abs(
-r*Math.cos(phi)
-);
-
-positions[i*3+2]=
-r*Math.sin(phi)*Math.sin(theta);
-
-sizes[i]=
-.5+Math.random()*2.2;
-
+    return m;
 }
 
-const geometry=
-new THREE.BufferGeometry();
 
-geometry.setAttribute(
-"position",
-new THREE.BufferAttribute(
-positions,
-3
-)
-);
+function plane(w,h,mat){
+    const m=new THREE.Mesh(
+        new THREE.PlaneGeometry(w,h),
+        mat
+    );
 
-const material=
-new THREE.PointsMaterial({
-color:0xdcecff,
-size:.8,
-transparent:true,
-opacity:.7,
-sizeAttenuation:true
-});
+    m.receiveShadow=true;
 
-const starField=
-new THREE.Points(
-geometry,
-material
-);
-
-add(environment,starField);
-
-return starField;
+    return m;
 }
 
-/* =========================================================
-   FOG
-========================================================= */
 
-function setFog(
-color=0x050811,
-near=5,
-far=140
-){
+function glowSphere(r,color,intensity=2){
+    const mat=new THREE.MeshBasicMaterial({
+        color,
+        transparent:true,
+        opacity:.85
+    });
 
-world.fog=
-new THREE.Fog(
-color,
-near,
-far
-);
+    const s=new THREE.Mesh(
+        new THREE.SphereGeometry(r,20,20),
+        mat
+    );
 
-world.background=
-new THREE.Color(color);
+    const light=new THREE.PointLight(
+        color,
+        intensity,
+        r*15
+    );
 
+    s.add(light);
+
+    return s;
 }
 
-/* =========================================================
-   GROUND
-========================================================= */
 
-function createGround(
-size=180,
-material=materials.darkStone
-){
+function clearWorld(){
+    while(scene.children.length>0){
+        const obj=scene.children[0];
 
-const ground=
-new THREE.Mesh(
-new THREE.PlaneGeometry(
-size,
-size,
-80,
-80
-),
-material
-);
+        if(
+            obj!==ambient &&
+            obj!==moonLight &&
+            obj!==moon &&
+            obj!==moonGlow
+        ){
+            scene.remove(obj);
+        }else{
+            break;
+        }
+    }
 
-ground.rotation.x=-Math.PI/2;
-
-ground.receiveShadow=true;
-
-add(environment,ground);
-
-return ground;
-
+    scene.fog=null;
 }
 
-/* =========================================================
-   TREES
-========================================================= */
 
-function createTree(
-x,
-z,
-scale=1,
-variant=0
-){
+/* ============================================================
+   ANIME OUTLINE
+============================================================ */
 
-const tree=
-new THREE.Group();
+function outline(mesh,color=0x05030d){
+    if(!mesh.geometry)return;
 
-tree.position.set(
-x,
-0,
-z
-);
+    const clone=new THREE.Mesh(
+        mesh.geometry,
+        new THREE.MeshBasicMaterial({
+            color,
+            side:THREE.BackSide
+        })
+    );
 
-tree.scale.setScalar(scale);
+    clone.scale.multiplyScalar(1.045);
 
-const trunk=
-cylinder(
-.32,
-.48,
-5,
-materials.wood,
-0,
-2.5,
-0,
-12
-);
+    mesh.add(clone);
 
-tree.add(trunk);
-
-const darkLeaf=
-new THREE.MeshStandardMaterial({
-color:
-variant%2===0
-?0x07130f
-:0x0b1514,
-roughness:1
-});
-
-const levels=4;
-
-for(let i=0;i<levels;i++){
-
-const h=
-5.2-i*.75;
-
-const radius=
-2.8-i*.48;
-
-const foliage=
-cone(
-radius,
-3.2,
-darkLeaf,
-0,
-h,
-0
-);
-
-tree.add(foliage);
-
+    return mesh;
 }
 
-tree.rotation.y=
-Math.random()*Math.PI*2;
 
-add(environment,tree);
+/* ============================================================
+   ANIME CHARACTER
+============================================================ */
 
-return tree;
+function createAnimeCharacter(name,opt={}){
 
+    const g=new THREE.Group();
+
+    g.userData.name=name;
+    g.userData.breath=Math.random()*10;
+    g.userData.hair=[];
+    g.userData.parts=[];
+
+    const skin=opt.skin||M.skin;
+    const hair=opt.hair||M.hair;
+    const clothes=opt.clothes||M.dark;
+
+    /* legs */
+
+    const legL=box(.28,1.7,.32,clothes);
+    legL.position.set(-.22,.95,0);
+
+    const legR=box(.28,1.7,.32,clothes);
+    legR.position.set(.22,.95,0);
+
+    g.add(legL,legR);
+
+
+    /* boots */
+
+    const bootL=box(.43,.35,.72,M.black);
+    bootL.position.set(-.22,.15,-.12);
+
+    const bootR=box(.43,.35,.72,M.black);
+    bootR.position.set(.22,.15,-.12);
+
+    g.add(bootL,bootR);
+
+
+    /* torso */
+
+    const torso=new THREE.Mesh(
+        new THREE.CapsuleGeometry(
+            .48,
+            .85,
+            8,
+            20
+        ),
+        clothes
+    );
+
+    torso.position.y=2.25;
+
+    torso.castShadow=true;
+
+    g.add(torso);
+
+
+    /* neck */
+
+    const neck=cyl(
+        .16,
+        .18,
+        .3,
+        skin
+    );
+
+    neck.position.y=2.93;
+
+    g.add(neck);
+
+
+    /* head */
+
+    const head=sphere(.7,skin);
+
+    head.scale.set(
+        .9,
+        1.08,
+        .88
+    );
+
+    head.position.y=3.65;
+
+    outline(head);
+
+    g.add(head);
+
+
+    /* hair cap */
+
+    const hairCap=sphere(.74,hair);
+
+    hairCap.scale.set(
+        .94,
+        .72,
+        .93
+    );
+
+    hairCap.position.set(
+        0,
+        3.98,
+        -.03
+    );
+
+    g.add(hairCap);
+
+
+    /* anime bangs */
+
+    for(let i=0;i<7;i++){
+
+        const bang=new THREE.Mesh(
+            new THREE.ConeGeometry(
+                .16,
+                .7+Math.random()*.3,
+                5
+            ),
+            hair
+        );
+
+        const x=(i-3)*.17;
+
+        bang.position.set(
+            x,
+            3.72+Math.abs(x)*.15,
+            -.62
+        );
+
+        bang.rotation.x=.35;
+
+        bang.rotation.z=(Math.random()-.5)*.3;
+
+        g.add(bang);
+
+        g.userData.hair.push(bang);
+    }
+
+
+    /* eyes */
+
+    const eyeWhite=new THREE.MeshBasicMaterial({
+        color:0xffffff
+    });
+
+    const eyeColor=new THREE.MeshBasicMaterial({
+        color:opt.eye||0x879dff
+    });
+
+    for(const x of [-.27,.27]){
+
+        const eye=sphere(.17,eyeWhite);
+
+        eye.scale.set(
+            1,
+            1.25,
+            .45
+        );
+
+        eye.position.set(
+            x,
+            3.67,
+            -.62
+        );
+
+        g.add(eye);
+
+        const iris=sphere(.10,eyeColor);
+
+        iris.position.set(
+            x,
+            3.66,
+            -.77
+        );
+
+        g.add(iris);
+
+        const pupil=sphere(.045,M.black);
+
+        pupil.position.set(
+            x,
+            3.66,
+            -.86
+        );
+
+        g.add(pupil);
+
+        const shine=sphere(.025,M.white);
+
+        shine.position.set(
+            x-.035,
+            3.71,
+            -.9
+        );
+
+        g.add(shine);
+    }
+
+
+    /* mouth */
+
+    const mouth=new THREE.Mesh(
+        new THREE.TorusGeometry(
+            .08,.012,8,16,
+            Math.PI
+        ),
+        new THREE.MeshBasicMaterial({
+            color:0x6f2940
+        })
+    );
+
+    mouth.rotation.x=Math.PI;
+    mouth.position.set(
+        0,
+        3.38,
+        -.69
+    );
+
+    g.add(mouth);
+
+
+    /* eyebrows */
+
+    for(const x of [-.27,.27]){
+
+        const brow=box(
+            .22,
+            .035,
+            .025,
+            hair
+        );
+
+        brow.position.set(
+            x,
+            3.93,
+            -.65
+        );
+
+        brow.rotation.z=
+            x<0?.08:-.08;
+
+        g.add(brow);
+    }
+
+
+    /* arms */
+
+    const armL=cyl(
+        .13,.16,1.35,clothes
+    );
+
+    armL.position.set(
+        -.63,
+        2.35,
+        0
+    );
+
+    armL.rotation.z=-.12;
+
+    g.add(armL);
+
+
+    const armR=cyl(
+        .13,.16,1.35,clothes
+    );
+
+    armR.position.set(
+        .63,
+        2.35,
+        0
+    );
+
+    armR.rotation.z=.12;
+
+    g.add(armR);
+
+
+    /* hands */
+
+    const handL=sphere(.17,skin);
+    handL.position.set(-.72,1.7,0);
+
+    const handR=sphere(.17,skin);
+    handR.position.set(.72,1.7,0);
+
+    g.add(handL,handR);
+
+
+    /* cloak */
+
+    if(opt.cloak){
+
+        const cloak=new THREE.Mesh(
+            new THREE.ConeGeometry(
+                .85,
+                2.6,
+                32,
+                1,
+                true
+            ),
+            opt.cloakMaterial||new THREE.MeshStandardMaterial({
+                color:0x0b0918,
+                side:THREE.DoubleSide
+            })
+        );
+
+        cloak.position.y=2.05;
+        cloak.rotation.x=Math.PI;
+
+        g.add(cloak);
+    }
+
+
+    /* halo */
+
+    if(opt.halo){
+
+        const halo=new THREE.Mesh(
+            new THREE.TorusGeometry(
+                .85,.035,12,64
+            ),
+            new THREE.MeshBasicMaterial({
+                color:0xf4e8a5
+            })
+        );
+
+        halo.position.y=4.65;
+        halo.rotation.x=.2;
+
+        g.add(halo);
+
+        const haloLight=new THREE.PointLight(
+            0xffeeb0,
+            2.5,
+            8
+        );
+
+        halo.add(haloLight);
+    }
+
+
+    /* wings */
+
+    if(opt.wings){
+
+        for(const side of [-1,1]){
+
+            const wing=new THREE.Group();
+
+            wing.position.set(
+                side*.45,
+                3.1,
+                .15
+            );
+
+            for(let i=0;i<6;i++){
+
+                const feather=new THREE.Mesh(
+                    new THREE.SphereGeometry(
+                        .3,
+                        12,
+                        8
+                    ),
+                    M.white
+                );
+
+                feather.scale.set(
+                    .45,
+                    1.6,
+                    .18
+                );
+
+                feather.position.set(
+                    side*(.25+i*.15),
+                    i*.12,
+                    -.1-i*.05
+                );
+
+                feather.rotation.z=
+                    side*(.5+i*.04);
+
+                wing.add(feather);
+            }
+
+            g.add(wing);
+        }
+    }
+
+
+    /* outline clothing */
+
+    g.traverse(o=>{
+        if(o.isMesh){
+            o.castShadow=true;
+            o.receiveShadow=true;
+        }
+    });
+
+
+    g.position.y=0;
+
+    return g;
 }
 
-/* =========================================================
+
+/* ============================================================
+   RANDY
+============================================================ */
+
+const randy=createAnimeCharacter(
+    "RANDY",
+    {
+        skin:new THREE.MeshToonMaterial({
+            color:0xf2c4b4
+        }),
+        hair:new THREE.MeshToonMaterial({
+            color:0x241b38
+        }),
+        clothes:new THREE.MeshToonMaterial({
+            color:0x191528
+        }),
+        eye:0x8ca9ff,
+        cloak:true
+    }
+);
+
+randy.visible=false;
+
+scene.add(randy);
+
+
+/* ============================================================
+   ANGEL
+============================================================ */
+
+const angel=createAnimeCharacter(
+    "THE ANGEL",
+    {
+        skin:new THREE.MeshToonMaterial({
+            color:0xffeadf
+        }),
+        hair:new THREE.MeshToonMaterial({
+            color:0xf4f0ff
+        }),
+        clothes:new THREE.MeshToonMaterial({
+            color:0xf0ecff
+        }),
+        eye:0xdde7ff,
+        halo:true,
+        wings:true
+    }
+);
+
+angel.scale.setScalar(.95);
+angel.visible=false;
+
+scene.add(angel);
+
+
+/* ============================================================
+   ENVIRONMENT PARTICLES
+============================================================ */
+
+let particles=null;
+
+function createParticles(count,color,size,areaY=15){
+
+    const geo=new THREE.BufferGeometry();
+
+    const arr=new Float32Array(count*3);
+
+    for(let i=0;i<count;i++){
+
+        arr[i*3]=(Math.random()-.5)*100;
+        arr[i*3+1]=Math.random()*areaY;
+        arr[i*3+2]=(Math.random()-.5)*100;
+    }
+
+    geo.setAttribute(
+        "position",
+        new THREE.BufferAttribute(arr,3)
+    );
+
+    const mat=new THREE.PointsMaterial({
+        color,
+        size,
+        transparent:true,
+        opacity:.7,
+        depthWrite:false
+    });
+
+    particles=new THREE.Points(geo,mat);
+
+    scene.add(particles);
+
+    return particles;
+}
+
+
+/* ============================================================
    FOREST
-========================================================= */
+============================================================ */
 
 function buildForest(){
 
-clearGroup(environment);
-clearGroup(props);
-clearGroup(particles);
-clearGroup(characters);
-clearGroup(lights);
+    clearWorld();
 
-setupLighting();
+    state.scene="forest";
 
-setFog(
-0x03070b,
-5,
-125
-);
+    scene.background.set(0x02050b);
 
-createGround(
-190,
-new THREE.MeshStandardMaterial({
-color:0x070b0d,
-roughness:1
-})
-);
+    scene.fog=new THREE.FogExp2(
+        0x050713,
+        .018
+    );
 
-createMoon(
--38,
-47,
--105,
-1
-);
 
-createStars(
-1900,
-450
-);
+    /* ground */
 
-for(let i=0;i<85;i++){
+    const ground=plane(
+        180,
+        180,
+        new THREE.MeshStandardMaterial({
+            color:0x07100c,
+            roughness:1
+        })
+    );
 
-const angle=
-Math.random()*Math.PI*2;
+    ground.rotation.x=-Math.PI/2;
+    ground.position.y=0;
 
-const distance=
-8+Math.random()*75;
+    scene.add(ground);
 
-const x=
-Math.cos(angle)*distance;
 
-const z=
-Math.sin(angle)*distance-20;
+    /* trees */
 
-const scale=
-.65+Math.random()*1.5;
+    for(let i=0;i<110;i++){
 
-createTree(
-x,
-z,
-scale,
-i
-);
+        const tree=new THREE.Group();
 
+        const x=(Math.random()-.5)*90;
+        const z=(Math.random()-.5)*100;
+
+        if(Math.abs(x)<7 && Math.abs(z)<20)continue;
+
+        const trunk=cyl(
+            .22,
+            .45,
+            5+Math.random()*5,
+            new THREE.MeshStandardMaterial({
+                color:0x17100d
+            })
+        );
+
+        trunk.position.y=3;
+
+        tree.add(trunk);
+
+        for(let j=0;j<4;j++){
+
+            const leaves=new THREE.Mesh(
+                new THREE.ConeGeometry(
+                    2.5-j*.35,
+                    4,
+                    8
+                ),
+                new THREE.MeshStandardMaterial({
+                    color:0x07150f,
+                    roughness:1
+                })
+            );
+
+            leaves.position.y=
+                5+j*1.45;
+
+            tree.add(leaves);
+        }
+
+        tree.position.set(x,0,z);
+
+        tree.rotation.y=Math.random()*Math.PI;
+
+        scene.add(tree);
+    }
+
+
+    /* path */
+
+    const path=plane(
+        8,
+        65,
+        new THREE.MeshStandardMaterial({
+            color:0x14121a,
+            roughness:1
+        })
+    );
+
+    path.rotation.x=-Math.PI/2;
+    path.position.z=-20;
+
+    scene.add(path);
+
+
+    /* blue flowers */
+
+    for(let i=0;i<70;i++){
+
+        const f=glowSphere(
+            .035,
+            0x778cff,
+            .15
+        );
+
+        f.position.set(
+            (Math.random()-.5)*25,
+            .08,
+            Math.random()*45-35
+        );
+
+        scene.add(f);
+    }
+
+
+    /* floating fireflies */
+
+    createParticles(
+        1000,
+        0x9daaff,
+        .055,
+        8
+    );
+
+
+    /* lanterns */
+
+    for(let z=5;z>-55;z-=8){
+
+        const lantern=glowSphere(
+            .12,
+            0xa98cff,
+            1.4
+        );
+
+        lantern.position.set(
+            z%16===0?-2.8:2.8,
+            1.7,
+            z
+        );
+
+        scene.add(lantern);
+    }
+
+
+    randy.visible=true;
+    randy.position.set(0,0,15);
+    randy.rotation.y=Math.PI;
+
+    angel.visible=false;
+
+
+    camera.position.set(
+        7,
+        4.5,
+        17
+    );
+
+    camera.lookAt(
+        0,
+        2.5,
+        3
+    );
+
+
+    updateChapter(
+        "PROLOGUE",
+        "THE FOREST IS LISTENING"
+    );
 }
 
-createForestRocks();
 
-createFogBanks();
-
-createFireflies(
-120,
-0x9bcaff
-);
-
-createRain(
-900
-);
-
-createForestLights();
-
-}
-
-/* =========================================================
-   FOREST ROCKS
-========================================================= */
-
-function createForestRocks(){
-
-for(let i=0;i<35;i++){
-
-const rock=
-new THREE.Mesh(
-new THREE.IcosahedronGeometry(
-.5+Math.random()*1.4,
-1
-),
-materials.oldStone
-);
-
-rock.position.set(
-(Math.random()-.5)*100,
-.2+Math.random()*.6,
-Math.random()*90-50
-);
-
-rock.scale.y=
-.45+Math.random()*.5;
-
-rock.rotation.set(
-Math.random(),
-Math.random(),
-Math.random()
-);
-
-rock.castShadow=true;
-rock.receiveShadow=true;
-
-add(props,rock);
-
-}
-
-}
-
-/* =========================================================
-   FOREST LIGHTS
-========================================================= */
-
-function createForestLights(){
-
-for(let i=0;i<8;i++){
-
-const light=
-new THREE.PointLight(
-0x9bcaff,
-1.8,
-13,
-2
-);
-
-light.position.set(
-(Math.random()-.5)*60,
-1.8+Math.random()*3,
-Math.random()*60-30
-);
-
-add(lights,light);
-
-const orb=
-sphere(
-.055,
-materials.blueGlow,
-light.position.x,
-light.position.y,
-light.position.z,
-12
-);
-
-add(props,orb);
-
-}
-
-}
-
-/* =========================================================
-   FOG BANKS
-========================================================= */
-
-function createFogBanks(){
-
-const fogMaterial=
-new THREE.MeshBasicMaterial({
-color:0x93a9bf,
-transparent:true,
-opacity:.035,
-depthWrite:false
-});
-
-for(let i=0;i<30;i++){
-
-const fog=
-new THREE.Mesh(
-new THREE.SphereGeometry(
-3+Math.random()*8,
-20,
-12
-),
-fogMaterial.clone()
-);
-
-fog.scale.y=
-.25+Math.random()*.4;
-
-fog.position.set(
-(Math.random()-.5)*100,
-.7+Math.random()*2,
-Math.random()*100-50
-);
-
-fog.userData.speed=
-.002+Math.random()*.006;
-
-add(particles,fog);
-
-}
-
-}
-
-/* =========================================================
-   FIRELIES
-========================================================= */
-
-function createFireflies(
-count,
-color
-){
-
-const positions=
-new Float32Array(count*3);
-
-const data=[];
-
-for(let i=0;i<count;i++){
-
-positions[i*3]=
-(Math.random()-.5)*100;
-
-positions[i*3+1]=
-.6+Math.random()*5;
-
-positions[i*3+2]=
-Math.random()*100-50;
-
-data.push({
-phase:Math.random()*Math.PI*2,
-speed:.3+Math.random()*1.2,
-radius:.3+Math.random()*1.8
-});
-
-}
-
-const geometry=
-new THREE.BufferGeometry();
-
-geometry.setAttribute(
-"position",
-new THREE.BufferAttribute(
-positions,
-3
-)
-);
-
-const material=
-new THREE.PointsMaterial({
-color,
-size:.09,
-transparent:true,
-opacity:.85,
-blending:THREE.AdditiveBlending
-});
-
-const points=
-new THREE.Points(
-geometry,
-material
-);
-
-points.userData.fireflies=data;
-
-add(particles,points);
-
-}
-
-/* =========================================================
-   RAIN
-========================================================= */
-
-let rain;
-
-function createRain(count=1000){
-
-const positions=
-new Float32Array(count*3);
-
-const velocities=
-new Float32Array(count);
-
-for(let i=0;i<count;i++){
-
-positions[i*3]=
-(Math.random()-.5)*120;
-
-positions[i*3+1]=
-Math.random()*55;
-
-positions[i*3+2]=
-Math.random()*120-60;
-
-velocities[i]=
-.35+Math.random()*.8;
-
-}
-
-const geometry=
-new THREE.BufferGeometry();
-
-geometry.setAttribute(
-"position",
-new THREE.BufferAttribute(
-positions,
-3
-)
-);
-
-const material=
-new THREE.PointsMaterial({
-color:0x9bb8d8,
-size:.055,
-transparent:true,
-opacity:.5
-});
-
-rain=
-new THREE.Points(
-geometry,
-material
-);
-
-rain.userData.velocities=velocities;
-
-add(particles,rain);
-
-}
-
-/* =========================================================
+/* ============================================================
    PATH
-========================================================= */
+============================================================ */
 
 function buildPath(){
 
-clearGroup(environment);
-clearGroup(props);
-clearGroup(particles);
-clearGroup(characters);
-clearGroup(lights);
+    clearWorld();
 
-setupLighting();
+    scene.background.set(0x030511);
 
-setFog(
-0x070b13,
-4,
-130
-);
+    scene.fog=new THREE.FogExp2(
+        0x060817,
+        .014
+    );
 
-createGround(
-190,
-new THREE.MeshStandardMaterial({
-color:0x090c12,
-roughness:.98
-})
-);
 
-createMoon(
-32,
-42,
--110,
-.85
-);
+    const ground=plane(
+        160,
+        160,
+        new THREE.MeshStandardMaterial({
+            color:0x090b15
+        })
+    );
 
-createStars(
-1200,
-400
-);
+    ground.rotation.x=-Math.PI/2;
+    scene.add(ground);
 
-for(let i=0;i<40;i++){
 
-const x=
-(i%2===0?1:-1)*
-(5+Math.random()*14);
+    /* giant trees */
 
-const z=
--i*4+
-Math.random()*3;
+    for(let i=0;i<70;i++){
 
-createTree(
-x,
-z,
-.7+Math.random()*1.2,
-i
-);
+        const t=new THREE.Group();
 
+        const h=7+Math.random()*8;
+
+        const trunk=cyl(
+            .35,.65,h,
+            new THREE.MeshStandardMaterial({
+                color:0x16101a
+            })
+        );
+
+        trunk.position.y=h/2;
+
+        t.add(trunk);
+
+        const crown=new THREE.Mesh(
+            new THREE.ConeGeometry(
+                3.5,
+                8,
+                8
+            ),
+            new THREE.MeshStandardMaterial({
+                color:0x081019
+            })
+        );
+
+        crown.position.y=h;
+
+        t.add(crown);
+
+        t.position.set(
+            (Math.random()-.5)*80,
+            0,
+            -Math.random()*100
+        );
+
+        scene.add(t);
+    }
+
+
+    /* glowing stones */
+
+    for(let i=0;i<35;i++){
+
+        const stone=box(
+            .6,
+            .12,
+            1.1,
+            new THREE.MeshBasicMaterial({
+                color:0x7770b9
+            })
+        );
+
+        stone.position.set(
+            Math.sin(i*.7)*1.7,
+            .08,
+            20-i*3
+        );
+
+        scene.add(stone);
+    }
+
+
+    /* moonlit particles */
+
+    createParticles(
+        700,
+        0xc4c9ff,
+        .04,
+        12
+    );
+
+
+    randy.visible=true;
+    randy.position.set(0,0,18);
+    randy.rotation.y=Math.PI;
+
+    angel.visible=true;
+    angel.position.set(4,0,-18);
+    angel.rotation.y=Math.PI+.3;
+
+
+    camera.position.set(
+        6,
+        4,
+        23
+    );
+
+    camera.lookAt(
+        0,
+        2.5,
+        -8
+    );
+
+
+    updateChapter(
+        "CHAPTER I",
+        "FOLLOW THE LIGHT"
+    );
 }
 
-createStonePath();
 
-createPathLanterns();
-
-createFireflies(
-80,
-0xbddcff
-);
-
-createRain(
-650
-);
-
-createPathArch();
-
-}
-
-/* =========================================================
-   STONE PATH
-========================================================= */
-
-function createStonePath(){
-
-for(let i=0;i<32;i++){
-
-const stone=
-new THREE.Mesh(
-new THREE.BoxGeometry(
-3.4+Math.random()*1.5,
-.25,
-2.4+Math.random()*.8
-),
-materials.stone
-);
-
-stone.position.set(
-(Math.random()-.5)*2.2,
-.13,
--i*4
-);
-
-stone.rotation.y=
-(Math.random()-.5)*.35;
-
-stone.rotation.x=
-(Math.random()-.5)*.04;
-
-stone.receiveShadow=true;
-stone.castShadow=true;
-
-add(props,stone);
-
-}
-
-}
-
-/* =========================================================
-   LANTERNS
-========================================================= */
-
-function createPathLanterns(){
-
-for(let i=0;i<12;i++){
-
-const side=
-i%2===0?1:-1;
-
-const z=
--i*10-2;
-
-const x=
-side*(4+Math.random()*1.5);
-
-const pole=
-cylinder(
-.07,
-.1,
-2.5,
-materials.iron,
-x,
-1.25,
-z,
-10
-);
-
-add(props,pole);
-
-const top=
-box(
-.42,
-.42,
-.42,
-materials.iron,
-x,
-2.6,
-z
-);
-
-add(props,top);
-
-const flame=
-sphere(
-.1,
-materials.blueGlow,
-x,
-2.6,
-z,
-16
-);
-
-add(props,flame);
-
-const light=
-new THREE.PointLight(
-0x9fc8ff,
-2,
-12,
-2
-);
-
-light.position.set(
-x,
-2.6,
-z
-);
-
-add(lights,light);
-
-}
-
-}
-
-/* =========================================================
-   ARCH
-========================================================= */
-
-function createPathArch(){
-
-const z=-125;
-
-const left=
-box(
-2.5,
-12,
-3,
-materials.oldStone,
--8,
-6,
-z
-);
-
-const right=
-box(
-2.5,
-12,
-3,
-materials.oldStone,
-8,
-6,
-z
-);
-
-const top=
-box(
-18,
-3,
-3,
-materials.oldStone,
-0,
-11,
-z
-);
-
-add(props,left);
-add(props,right);
-add(props,top);
-
-const symbol=
-new THREE.Mesh(
-new THREE.TorusGeometry(
-3,
-.15,
-12,
-48
-),
-new THREE.MeshBasicMaterial({
-color:0xdcecff
-})
-);
-
-symbol.position.set(
-0,
-6,
-z-1.7
-);
-
-symbol.rotation.x=
-Math.PI/2;
-
-add(props,symbol);
-
-}
-
-/* =========================================================
-   RUINS
-========================================================= */
-
-function buildRuins(){
-
-clearGroup(environment);
-clearGroup(props);
-clearGroup(particles);
-clearGroup(characters);
-clearGroup(lights);
-
-setupLighting();
-
-setFog(
-0x060a12,
-3,
-110
-);
-
-createGround(
-180,
-new THREE.MeshStandardMaterial({
-color:0x080b12,
-roughness:1
-})
-);
-
-createMoon(
--25,
-43,
--80,
-.9
-);
-
-createStars(
-1600,
-420
-);
-
-createRuinWalls();
-
-createBrokenColumns();
-
-createShrine();
-
-createCandles();
-
-createSymbols();
-
-createFireflies(
-110,
-0xd5e8ff
-);
-
-}
-
-/* =========================================================
-   RUIN WALLS
-========================================================= */
-
-function createRuinWalls(){
-
-const walls=[
-[-14,5,-18,2,10,16],
-[14,5,-18,2,10,16],
-[-12,4,-36,2,8,20],
-[12,4,-36,2,8,20],
-[-18,3,-50,20,6,2],
-[18,3,-50,20,6,2]
-];
-
-walls.forEach(
-w=>{
-const mesh=
-box(
-w[3],
-w[4],
-w[5],
-materials.oldStone,
-w[0],
-w[1],
-w[2]
-);
-
-mesh.rotation.y=
-(Math.random()-.5)*.08;
-
-add(props,mesh);
-}
-);
-
-}
-
-/* =========================================================
-   COLUMNS
-========================================================= */
-
-function createBrokenColumns(){
-
-for(let i=0;i<16;i++){
-
-const side=
-i%2===0?1:-1;
-
-const x=
-side*(6+Math.random()*7);
-
-const z=
--5-Math.random()*45;
-
-const height=
-2+Math.random()*6;
-
-const col=
-cylinder(
-.55,
-.7,
-height,
-materials.oldStone,
-x,
-height/2,
-z,
-18
-);
-
-col.rotation.z=
-(Math.random()-.5)*.08;
-
-add(props,col);
-
-const cap=
-cylinder(
-.9,
-.8,
-.3,
-materials.stone,
-x,
-height+.15,
-z,
-18
-);
-
-add(props,cap);
-
-}
-
-}
-
-/* =========================================================
+/* ============================================================
    SHRINE
-========================================================= */
+============================================================ */
 
-function createShrine(){
+function buildShrine(){
 
-const base=
-box(
-8,
-1,
-6,
-materials.darkStone,
-0,
-.5,
--38
-);
+    clearWorld();
 
-add(props,base);
+    scene.background.set(0x050412);
 
-const altar=
-box(
-4,
-2.4,
-2,
-materials.stone,
-0,
-2.2,
--40
-);
+    scene.fog=new THREE.FogExp2(
+        0x0a0717,
+        .012
+    );
 
-add(props,altar);
 
-const halo=
-new THREE.Mesh(
-new THREE.TorusGeometry(
-2.1,
-.12,
-16,
-64
-),
-new THREE.MeshBasicMaterial({
-color:0xdcecff,
-transparent:true,
-opacity:.8
-})
-);
+    const ground=plane(
+        100,
+        100,
+        new THREE.MeshStandardMaterial({
+            color:0x11101b
+        })
+    );
 
-halo.position.set(
-0,
-4.2,
--41.1
-);
+    ground.rotation.x=-Math.PI/2;
+    scene.add(ground);
 
-add(props,halo);
 
-const light=
-new THREE.PointLight(
-0xcfe4ff,
-5,
-28,
-2
-);
+    /* ruins */
 
-light.position.set(
-0,
-4,
--41
-);
+    for(let i=0;i<8;i++){
 
-add(lights,light);
+        const pillar=cyl(
+            .5,
+            .65,
+            5+Math.random()*2,
+            M.stone
+        );
 
+        pillar.position.set(
+            (i%2===0?-1:1)*
+            (3+Math.random()*1),
+            3,
+            -i*3
+        );
+
+        pillar.rotation.z=
+            (Math.random()-.5)*.15;
+
+        scene.add(pillar);
+    }
+
+
+    /* shrine */
+
+    const shrine=box(
+        7,
+        5,
+        3,
+        M.dark
+    );
+
+    shrine.position.set(
+        0,
+        2.5,
+        -18
+    );
+
+    scene.add(shrine);
+
+
+    /* roof */
+
+    const roof=new THREE.Mesh(
+        new THREE.ConeGeometry(
+            6,
+            3,
+            4
+        ),
+        M.purple
+    );
+
+    roof.position.set(
+        0,
+        6.5,
+        -18
+    );
+
+    roof.rotation.y=Math.PI/4;
+
+    scene.add(roof);
+
+
+    /* magic circle */
+
+    const circle=new THREE.Mesh(
+        new THREE.RingGeometry(
+            2.7,
+            2.78,
+            96
+        ),
+        new THREE.MeshBasicMaterial({
+            color:0x9f8cff,
+            side:THREE.DoubleSide
+        })
+    );
+
+    circle.rotation.x=-Math.PI/2;
+    circle.position.y=.03;
+    circle.position.z=-12;
+
+    scene.add(circle);
+
+
+    for(let i=0;i<12;i++){
+
+        const rune=glowSphere(
+            .07,
+            0xaaa0ff,
+            .6
+        );
+
+        const a=i/12*Math.PI*2;
+
+        rune.position.set(
+            Math.cos(a)*3,
+            .08,
+            -12+Math.sin(a)*3
+        );
+
+        scene.add(rune);
+    }
+
+
+    /* angel */
+
+    angel.visible=true;
+    angel.position.set(
+        0,
+        0,
+        -7
+    );
+
+    angel.rotation.y=Math.PI;
+
+
+    randy.visible=true;
+    randy.position.set(
+        0,
+        0,
+        5
+    );
+
+    randy.rotation.y=Math.PI;
+
+
+    camera.position.set(
+        8,
+        5,
+        12
+    );
+
+    camera.lookAt(
+        0,
+        3,
+        -9
+    );
+
+
+    updateChapter(
+        "CHAPTER II",
+        "THE SHRINE KNOWS HER NAME"
+    );
 }
 
-/* =========================================================
-   CANDLES
-========================================================= */
 
-function createCandles(){
-
-for(let i=0;i<28;i++){
-
-const x=
-(Math.random()-.5)*18;
-
-const z=
--5-Math.random()*48;
-
-const candle=
-cylinder(
-.06,
-.08,
-.45,
-materials.candle,
-x,
-.3,
-z,
-10
-);
-
-add(props,candle);
-
-const flame=
-sphere(
-.06,
-materials.gold,
-x,
-.58,
-z,
-12
-);
-
-add(props,flame);
-
-const light=
-new THREE.PointLight(
-0xffd990,
-.35+Math.random()*.5,
-4,
-2
-);
-
-light.position.set(
-x,
-.6,
-z
-);
-
-light.userData.flicker=true;
-
-add(lights,light);
-
-}
-
-}
-
-/* =========================================================
-   SYMBOLS
-========================================================= */
-
-function createSymbols(){
-
-for(let i=0;i<9;i++){
-
-const ring=
-new THREE.Mesh(
-new THREE.TorusGeometry(
-.6+Math.random()*.6,
-.035,
-8,
-40
-),
-new THREE.MeshBasicMaterial({
-color:
-i%2===0
-?0xbddcff
-:0xd5b76b,
-transparent:true,
-opacity:.65
-})
-);
-
-ring.position.set(
-(Math.random()-.5)*16,
-.06,
--8-Math.random()*38
-);
-
-ring.rotation.x=
--Math.PI/2;
-
-add(props,ring);
-
-}
-
-}
-
-/* =========================================================
+/* ============================================================
    CASTLE
-========================================================= */
+============================================================ */
 
 function buildCastle(){
 
-clearGroup(environment);
-clearGroup(props);
-clearGroup(particles);
-clearGroup(characters);
-clearGroup(lights);
+    clearWorld();
 
-setupLighting();
+    scene.background.set(0x010207);
 
-setFog(
-0x04060c,
-5,
-180
-);
+    scene.fog=new THREE.FogExp2(
+        0x03040c,
+        .009
+    );
 
-createGround(
-250,
-new THREE.MeshStandardMaterial({
-color:0x07090f,
-roughness:1
-})
-);
 
-createMoon(
-0,
-55,
--135,
-1.3
-);
+    const ground=plane(
+        220,
+        220,
+        new THREE.MeshStandardMaterial({
+            color:0x080912,
+            roughness:1
+        })
+    );
 
-createStars(
-2200,
-600
-);
+    ground.rotation.x=-Math.PI/2;
 
-createCastleBody();
+    scene.add(ground);
 
-createCastleTowers();
 
-createCastleWindows();
+    /* castle body */
 
-createCastleGate();
+    const castle=box(
+        35,
+        30,
+        18,
+        new THREE.MeshStandardMaterial({
+            color:0x11111d,
+            roughness:.9
+        })
+    );
 
-createCastleBridge();
+    castle.position.set(
+        0,
+        15,
+        -40
+    );
 
-createCastleBats();
+    scene.add(castle);
 
-createRain(
-1200
-);
 
-createCastleMist();
+    /* towers */
 
+    for(const x of [-22,22]){
+
+        const tower=cyl(
+            5,
+            5,
+            42,
+            new THREE.MeshStandardMaterial({
+                color:0x10101a
+            }),
+            8
+        );
+
+        tower.position.set(
+            x,
+            21,
+            -40
+        );
+
+        scene.add(tower);
+
+
+        const roof=new THREE.Mesh(
+            new THREE.ConeGeometry(
+                7,
+                9,
+                8
+            ),
+            M.black
+        );
+
+        roof.position.set(
+            x,
+            46,
+            -40
+        );
+
+        scene.add(roof);
+    }
+
+
+    /* central roof */
+
+    const centralRoof=new THREE.Mesh(
+        new THREE.ConeGeometry(
+            22,
+            18,
+            6
+        ),
+        M.black
+    );
+
+    centralRoof.position.set(
+        0,
+        39,
+        -40
+    );
+
+    scene.add(centralRoof);
+
+
+    /* windows */
+
+    for(let x=-14;x<=14;x+=7){
+
+        for(let y=8;y<=28;y+=7){
+
+            const win=glowSphere(
+                .25,
+                0xa99cff,
+                .6
+            );
+
+            win.scale.set(
+                2,
+                4,
+                .2
+            );
+
+            win.position.set(
+                x,
+                y,
+                -30.7
+            );
+
+            scene.add(win);
+        }
+    }
+
+
+    /* bridge */
+
+    const bridge=box(
+        12,
+        .6,
+        50,
+        new THREE.MeshStandardMaterial({
+            color:0x161522
+        })
+    );
+
+    bridge.position.set(
+        0,
+        .3,
+        -8
+    );
+
+    scene.add(bridge);
+
+
+    /* bats */
+
+    for(let i=0;i<30;i++){
+
+        const bat=box(
+            .2,.03,.8,
+            new THREE.MeshBasicMaterial({
+                color:0x020207
+            })
+        );
+
+        bat.position.set(
+            (Math.random()-.5)*50,
+            8+Math.random()*25,
+            -20-Math.random()*40
+        );
+
+        bat.rotation.z=Math.random()*Math.PI;
+
+        scene.add(bat);
+    }
+
+
+    randy.visible=true;
+    randy.position.set(
+        0,
+        0,
+        17
+    );
+
+    randy.rotation.y=Math.PI;
+
+    angel.visible=false;
+
+
+    camera.position.set(
+        10,
+        7,
+        30
+    );
+
+    camera.lookAt(
+        0,
+        13,
+        -35
+    );
+
+
+    updateChapter(
+        "CHAPTER III",
+        "THE CASTLE WITHOUT A KING"
+    );
 }
 
-/* =========================================================
-   CASTLE BODY
-========================================================= */
 
-function createCastleBody(){
-
-const main=
-box(
-38,
-30,
-16,
-materials.darkStone,
-0,
-15,
--65
-);
-
-add(props,main);
-
-const central=
-box(
-24,
-38,
-14,
-materials.oldStone,
-0,
-19,
--75
-);
-
-add(props,central);
-
-}
-
-/* =========================================================
-   CASTLE TOWERS
-========================================================= */
-
-function createCastleTowers(){
-
-const positions=[
-[-24,22,-69],
-[24,22,-69],
-[-21,27,-88],
-[21,27,-88]
-];
-
-positions.forEach(
-p=>{
-
-const tower=
-cylinder(
-7,
-8,
-44,
-materials.darkStone,
-p[0],
-p[1],
-p[2],
-20
-);
-
-add(props,tower);
-
-const roof=
-cone(
-9,
-10,
-materials.black,
-p[0],
-p[1]+27,
-p[2]
-);
-
-add(props,roof);
-
-const cap=
-cylinder(
-8.4,
-8.4,
-.6,
-materials.stone,
-p[0],
-p[1]+5,
-p[2],
-20
-);
-
-add(props,cap);
-
-}
-);
-
-}
-
-/* =========================================================
-   CASTLE WINDOWS
-========================================================= */
-
-function createCastleWindows(){
-
-for(let side of [-1,1]){
-
-for(let i=0;i<7;i++){
-
-const x=
-side*(i%2===0?5:12);
-
-const y=
-6+i*4;
-
-const z=-73;
-
-const material=
-new THREE.MeshBasicMaterial({
-color:
-i%3===0
-?0xdcecff
-:0x6d8bb7
-});
-
-const window=
-box(
-1.1,
-2.5,
-.15,
-material,
-x,
-y,
-z
-);
-
-add(props,window);
-
-const glow=
-new THREE.PointLight(
-0x9bbcff,
-.5,
-9,
-2
-);
-
-glow.position.set(
-x,
-y,
-z+1
-);
-
-add(lights,glow);
-
-}
-
-}
-
-}
-
-/* =========================================================
-   CASTLE GATE
-========================================================= */
-
-function createCastleGate(){
-
-const frameL=
-box(
-4,
-20,
-4,
-materials.oldStone,
--10,
-10,
--91
-);
-
-const frameR=
-box(
-4,
-20,
-4,
-materials.oldStone,
-10,
-10,
--91
-);
-
-const top=
-box(
-24,
-4,
-4,
-materials.oldStone,
-0,
-20,
--91
-);
-
-add(props,frameL);
-add(props,frameR);
-add(props,top);
-
-const door=
-box(
-15,
-17,
-1.5,
-materials.iron,
-0,
-8.5,
--92
-);
-
-door.userData.gate=true;
-
-add(props,door);
-
-for(let x=-6;x<=6;x+=2){
-
-const spike=
-cone(
-.35,
-2.5,
-materials.iron,
-x,
-18.5,
--92
-);
-
-add(props,spike);
-
-}
-
-}
-
-/* =========================================================
-   BRIDGE
-========================================================= */
-
-function createCastleBridge(){
-
-for(let i=0;i<12;i++){
-
-const block=
-box(
-5,
-.8,
-3,
-materials.stone,
-0,
-.4,
--i*3-15
-);
-
-add(props,block);
-
-}
-
-for(let side of [-1,1]){
-
-const rail=
-box(
-.5,
-2,
-35,
-materials.oldStone,
-side*3,
-1.3,
--32
-);
-
-add(props,rail);
-
-}
-
-}
-
-/* =========================================================
-   BATS
-========================================================= */
-
-let bats=[];
-
-function createCastleBats(){
-
-bats=[];
-
-for(let i=0;i<18;i++){
-
-const bat=
-new THREE.Group();
-
-bat.position.set(
-(Math.random()-.5)*50,
-20+Math.random()*28,
--40-Math.random()*60
-);
-
-const body=
-sphere(
-.18,
-materials.black,
-0,
-0,
-0,
-12
-);
-
-bat.add(body);
-
-const wingL=
-new THREE.Mesh(
-new THREE.PlaneGeometry(
-1.2,
-.6
-),
-materials.black
-);
-
-wingL.position.x=-.55;
-wingL.rotation.z=.25;
-
-bat.add(wingL);
-
-const wingR=
-wingL.clone();
-
-wingR.position.x=.55;
-wingR.rotation.z=-.25;
-
-bat.add(wingR);
-
-bat.userData.phase=
-Math.random()*Math.PI*2;
-
-bat.userData.speed=
-.4+Math.random();
-
-bats.push(bat);
-
-add(particles,bat);
-
-}
-
-}
-
-/* =========================================================
-   CASTLE MIST
-========================================================= */
-
-function createCastleMist(){
-
-for(let i=0;i<18;i++){
-
-const mist=
-new THREE.Mesh(
-new THREE.SphereGeometry(
-4+Math.random()*7,
-18,
-10
-),
-new THREE.MeshBasicMaterial({
-color:0x9bb0c6,
-transparent:true,
-opacity:.025,
-depthWrite:false
-})
-);
-
-mist.position.set(
-(Math.random()-.5)*70,
-1+Math.random()*3,
--20-Math.random()*90
-);
-
-mist.scale.y=.25;
-
-add(particles,mist);
-
-}
-
-}
-
-/* =========================================================
+/* ============================================================
    GATE
-========================================================= */
+============================================================ */
 
 function buildGate(){
 
-buildCastle();
+    clearWorld();
 
-camera.position.set(
-0,
-8,
--55
-);
+    scene.background.set(0x020208);
 
+    scene.fog=new THREE.FogExp2(
+        0x03030a,
+        .012
+    );
+
+
+    const floor=plane(
+        100,
+        100,
+        new THREE.MeshStandardMaterial({
+            color:0x10101b
+        })
+    );
+
+    floor.rotation.x=-Math.PI/2;
+
+    scene.add(floor);
+
+
+    /* walls */
+
+    for(const x of [-10,10]){
+
+        const wall=box(
+            4,
+            18,
+            35,
+            M.stone
+        );
+
+        wall.position.set(
+            x,
+            9,
+            -10
+        );
+
+        scene.add(wall);
+    }
+
+
+    /* gate */
+
+    for(const x of [-3,-1,1,3]){
+
+        const bar=cyl(
+            .16,
+            .16,
+            13,
+            M.black,
+            12
+        );
+
+        bar.position.set(
+            x,
+            6.5,
+            -8
+        );
+
+        scene.add(bar);
+    }
+
+
+    const arch=new THREE.Mesh(
+        new THREE.TorusGeometry(
+            4.5,
+            .35,
+            12,
+            48,
+            Math.PI
+        ),
+        M.black
+    );
+
+    arch.rotation.z=Math.PI;
+
+    arch.position.set(
+        0,
+        13,
+        -8
+    );
+
+    scene.add(arch);
+
+
+    /* rune lock */
+
+    const lock=glowSphere(
+        .5,
+        0x9f83ff,
+        3
+    );
+
+    lock.position.set(
+        0,
+        7,
+        -7.5
+    );
+
+    scene.add(lock);
+
+
+    randy.visible=true;
+    randy.position.set(
+        0,
+        0,
+        8
+    );
+
+    randy.rotation.y=Math.PI;
+
+
+    camera.position.set(
+        5,
+        4,
+        15
+    );
+
+    camera.lookAt(
+        0,
+        6,
+        -8
+    );
+
+
+    updateChapter(
+        "CHAPTER IV",
+        "THE GATE WILL OPEN FOR HER"
+    );
 }
 
-/* =========================================================
+
+/* ============================================================
    HALL
-========================================================= */
+============================================================ */
 
 function buildHall(){
 
-clearGroup(environment);
-clearGroup(props);
-clearGroup(particles);
-clearGroup(characters);
-clearGroup(lights);
+    clearWorld();
 
-setupLighting();
+    scene.background.set(0x03030b);
 
-setFog(
-0x02040a,
-4,
-115
-);
+    scene.fog=new THREE.FogExp2(
+        0x05040e,
+        .009
+    );
 
-createHallFloor();
 
-createHallWalls();
+    const floor=new THREE.Mesh(
+        new THREE.PlaneGeometry(
+            60,
+            140
+        ),
+        new THREE.MeshStandardMaterial({
+            color:0x171522,
+            metalness:.5,
+            roughness:.2
+        })
+    );
 
-createHallColumns();
+    floor.rotation.x=-Math.PI/2;
 
-createChandeliers();
+    scene.add(floor);
 
-createStainedGlass();
 
-createHallCandles();
+    /* pillars */
 
-createHallFog();
+    for(let z=15;z>-70;z-=12){
 
-createHeavenBeams();
+        for(const x of [-10,10]){
 
+            const p=cyl(
+                .8,
+                1,
+                10,
+                M.stone
+            );
+
+            p.position.set(
+                x,
+                5,
+                z
+            );
+
+            scene.add(p);
+        }
+    }
+
+
+    /* chandeliers */
+
+    for(let z=5;z>-55;z-=18){
+
+        const chain=cyl(
+            .05,
+            .05,
+            5,
+            M.black
+        );
+
+        chain.position.set(
+            0,
+            14,
+            z
+        );
+
+        scene.add(chain);
+
+
+        const light=glowSphere(
+            .25,
+            0xe3d0ff,
+            5
+        );
+
+        light.position.set(
+            0,
+            10.5,
+            z
+        );
+
+        scene.add(light);
+    }
+
+
+    /* stained glass */
+
+    for(let z=10;z>-50;z-=15){
+
+        const glass=new THREE.Mesh(
+            new THREE.PlaneGeometry(
+                4,
+                7
+            ),
+            new THREE.MeshBasicMaterial({
+                color:0x5752a4,
+                transparent:true,
+                opacity:.32
+            })
+        );
+
+        glass.position.set(
+            -13,
+            6,
+            z
+        );
+
+        glass.rotation.y=Math.PI/2;
+
+        scene.add(glass);
+    }
+
+
+    randy.visible=true;
+    randy.position.set(
+        0,
+        0,
+        25
+    );
+
+    randy.rotation.y=Math.PI;
+
+
+    angel.visible=true;
+    angel.position.set(
+        0,
+        0,
+        -35
+    );
+
+    angel.rotation.y=0;
+
+
+    camera.position.set(
+        7,
+        4.5,
+        28
+    );
+
+    camera.lookAt(
+        0,
+        3,
+        -25
+    );
+
+
+    updateChapter(
+        "CHAPTER V",
+        "SOMEONE HAS BEEN WAITING"
+    );
 }
 
-/* =========================================================
-   HALL FLOOR
-========================================================= */
 
-function createHallFloor(){
-
-const floor=
-new THREE.Mesh(
-new THREE.PlaneGeometry(
-100,
-180,
-30,
-50
-),
-new THREE.MeshStandardMaterial({
-color:0x11141c,
-roughness:.2,
-metalness:.65
-})
-);
-
-floor.rotation.x=-Math.PI/2;
-
-floor.position.z=-45;
-
-floor.receiveShadow=true;
-
-add(environment,floor);
-
-}
-
-/* =========================================================
-   HALL WALLS
-========================================================= */
-
-function createHallWalls(){
-
-const left=
-box(
-5,
-24,
-120,
-materials.oldStone,
--18,
-12,
--50
-);
-
-const right=
-box(
-5,
-24,
-120,
-materials.oldStone,
-18,
-12,
--50
-);
-
-add(props,left);
-add(props,right);
-
-const ceiling=
-box(
-42,
-3,
-120,
-materials.black,
-0,
-25,
--50
-);
-
-add(props,ceiling);
-
-}
-
-/* =========================================================
-   HALL COLUMNS
-========================================================= */
-
-function createHallColumns(){
-
-for(let z=0;z>-110;z-=10){
-
-for(let side of [-1,1]){
-
-const col=
-cylinder(
-1.8,
-2.2,
-22,
-materials.stone,
-side*14,
-11,
-z,
-24
-);
-
-add(props,col);
-
-const cap=
-box(
-4,
-1,
-4,
-materials.oldStone,
-side*14,
-22.5,
-z
-);
-
-add(props,cap);
-
-}
-
-}
-
-}
-
-/* =========================================================
-   CHANDELIERS
-========================================================= */
-
-function createChandeliers(){
-
-for(let i=0;i<6;i++){
-
-const z=
--8-i*18;
-
-const chain=
-cylinder(
-.05,
-.07,
-5,
-materials.iron,
-0,
-22,
-z,
-8
-);
-
-add(props,chain);
-
-const ring=
-new THREE.Mesh(
-new THREE.TorusGeometry(
-3,
-.18,
-12,
-32
-),
-materials.iron
-);
-
-ring.position.set(
-0,
-19,
-z
-);
-
-ring.rotation.x=Math.PI/2;
-
-add(props,ring);
-
-for(let j=0;j<8;j++){
-
-const angle=
-j/8*Math.PI*2;
-
-const x=
-Math.cos(angle)*2.6;
-
-const zz=
-z+Math.sin(angle)*2.6;
-
-const flame=
-sphere(
-.08,
-materials.gold,
-x,
-18.8,
-zz,
-12
-);
-
-add(props,flame);
-
-const light=
-new THREE.PointLight(
-0xffd894,
-.6,
-10,
-2
-);
-
-light.position.set(
-x,
-18.8,
-zz
-);
-
-light.userData.flicker=true;
-
-add(lights,light);
-
-}
-
-}
-
-}
-
-/* =========================================================
-   STAINED GLASS
-========================================================= */
-
-function createStainedGlass(){
-
-for(let i=0;i<9;i++){
-
-const z=
--8-i*12;
-
-const material=
-new THREE.MeshBasicMaterial({
-color:
-i%2===0
-?0x8eb5df
-:0xc9a95d,
-transparent:true,
-opacity:.32,
-side:THREE.DoubleSide
-});
-
-const glass=
-new THREE.Mesh(
-new THREE.PlaneGeometry(
-8,
-11
-),
-material
-);
-
-glass.position.set(
-0,
-12,
-z
-);
-
-glass.rotation.y=Math.PI;
-
-add(props,glass);
-
-const glow=
-new THREE.PointLight(
-i%2===0
-?0x8ebcff
-:0xd9b85e,
-.35,
-18,
-2
-);
-
-glow.position.set(
-0,
-12,
-z+3
-);
-
-add(lights,glow);
-
-}
-
-}
-
-/* =========================================================
-   HALL CANDLES
-========================================================= */
-
-function createHallCandles(){
-
-for(let z=0;z>-112;z-=6){
-
-for(let side of [-1,1]){
-
-const x=
-side*(7+Math.random()*2);
-
-const candle=
-cylinder(
-.08,
-.1,
-.7,
-materials.candle,
-x,
-.4,
-z,
-12
-);
-
-add(props,candle);
-
-const flame=
-sphere(
-.08,
-materials.gold,
-x,
-.82,
-z,
-12
-);
-
-add(props,flame);
-
-const light=
-new THREE.PointLight(
-0xffc96f,
-.45,
-5,
-2
-);
-
-light.position.set(
-x,
-.8,
-z
-);
-
-light.userData.flicker=true;
-
-add(lights,light);
-
-}
-
-}
-
-}
-
-/* =========================================================
-   HALL FOG
-========================================================= */
-
-function createHallFog(){
-
-for(let i=0;i<22;i++){
-
-const fog=
-new THREE.Mesh(
-new THREE.SphereGeometry(
-2+Math.random()*6,
-16,
-8
-),
-new THREE.MeshBasicMaterial({
-color:0xa9b9ce,
-transparent:true,
-opacity:.018,
-depthWrite:false
-})
-);
-
-fog.position.set(
-(Math.random()-.5)*24,
-.3+Math.random()*2,
--Math.random()*110
-);
-
-fog.scale.y=.2;
-
-add(particles,fog);
-
-}
-
-}
-
-/* =========================================================
-   HEAVEN BEAMS
-========================================================= */
-
-function createHeavenBeams(){
-
-for(let i=0;i<5;i++){
-
-const material=
-new THREE.MeshBasicMaterial({
-color:0xcde5ff,
-transparent:true,
-opacity:.018,
-depthWrite:false,
-side:THREE.DoubleSide
-});
-
-const beam=
-new THREE.Mesh(
-new THREE.PlaneGeometry(
-5+Math.random()*5,
-35
-),
-material
-);
-
-beam.position.set(
--12+i*6,
-17,
--20-i*18
-);
-
-beam.rotation.z=
--.1+Math.random()*.2;
-
-add(particles,beam);
-
-}
-
-heavenLight.intensity=.8;
-
-}
-
-/* =========================================================
+/* ============================================================
    CHAMBER
-========================================================= */
+============================================================ */
 
 function buildChamber(){
 
-clearGroup(environment);
-clearGroup(props);
-clearGroup(particles);
-clearGroup(characters);
-clearGroup(lights);
+    clearWorld();
 
-setupLighting();
+    scene.background.set(0x03010a);
 
-setFog(
-0x020307,
-3,
-90
-);
+    scene.fog=new THREE.FogExp2(
+        0x090313,
+        .012
+    );
 
-createChamberRoom();
 
-createChamberSeal();
+    const floor=plane(
+        45,
+        45,
+        new THREE.MeshStandardMaterial({
+            color:0x100c1c,
+            metalness:.2,
+            roughness:.5
+        })
+    );
 
-createFloatingSymbols();
+    floor.rotation.x=-Math.PI/2;
 
-createChamberCandles();
+    scene.add(floor);
 
-createAngelLight();
 
+    /* circular platform */
+
+    const platform=new THREE.Mesh(
+        new THREE.CylinderGeometry(
+            8,.8,1,64
+        ),
+        M.purple
+    );
+
+    platform.position.y=.5;
+
+    scene.add(platform);
+
+
+    /* magic rings */
+
+    for(let r=3;r<=8;r+=1.25){
+
+        const ring=new THREE.Mesh(
+            new THREE.RingGeometry(
+                r,
+                r+.035,
+                128
+            ),
+            new THREE.MeshBasicMaterial({
+                color:
+                    r%2?
+                    0x8f7cff:
+                    0xd7ccff,
+                transparent:true,
+                opacity:.75,
+                side:THREE.DoubleSide
+            })
+        );
+
+        ring.rotation.x=-Math.PI/2;
+        ring.position.y=1.03;
+
+        scene.add(ring);
+    }
+
+
+    /* floating symbols */
+
+    for(let i=0;i<40;i++){
+
+        const rune=glowSphere(
+            .06,
+            0xb7adff,
+            .25
+        );
+
+        const a=Math.random()*Math.PI*2;
+        const r=4+Math.random()*7;
+
+        rune.position.set(
+            Math.cos(a)*r,
+            1.5+Math.random()*8,
+            Math.sin(a)*r
+        );
+
+        scene.add(rune);
+    }
+
+
+    /* central angel */
+
+    angel.visible=true;
+
+    angel.position.set(
+        0,
+        0,
+        -3
+    );
+
+    angel.rotation.y=0;
+
+    angel.scale.setScalar(1.15);
+
+
+    randy.visible=true;
+
+    randy.position.set(
+        0,
+        0,
+        7
+    );
+
+    randy.rotation.y=Math.PI;
+
+
+    camera.position.set(
+        10,
+        8,
+        15
+    );
+
+    camera.lookAt(
+        0,
+        3,
+        0
+    );
+
+
+    updateChapter(
+        "CHAPTER VI",
+        "THE DOOR BEYOND THE SEAL"
+    );
 }
 
-/* =========================================================
-   CHAMBER ROOM
-========================================================= */
 
-function createChamberRoom(){
-
-const floor=
-box(
-30,
-1,
-34,
-materials.darkStone,
-0,
-0,
--16
-);
-
-add(environment,floor);
-
-const back=
-box(
-30,
-20,
-2,
-materials.oldStone,
-0,
-10,
--33
-);
-
-add(props,back);
-
-const left=
-box(
-2,
-20,
-34,
-materials.oldStone,
--15,
-10,
--16
-);
-
-const right=
-box(
-2,
-20,
-34,
-materials.oldStone,
-15,
-10,
--16
-);
-
-add(props,left);
-add(props,right);
-
-}
-
-/* =========================================================
-   CHAMBER SEAL
-========================================================= */
-
-function createChamberSeal(){
-
-const seal=
-new THREE.Mesh(
-new THREE.TorusGeometry(
-5,
-.12,
-18,
-96
-),
-new THREE.MeshBasicMaterial({
-color:0xdcecff,
-transparent:true,
-opacity:.9
-})
-);
-
-seal.position.set(
-0,
-7,
--31.8
-);
-
-add(props,seal);
-
-for(let i=0;i<8;i++){
-
-const angle=
-i/8*Math.PI*2;
-
-const x=
-Math.cos(angle)*4;
-
-const y=
-7+Math.sin(angle)*4;
-
-const crystal=
-new THREE.Mesh(
-new THREE.OctahedronGeometry(
-.35,
-1
-),
-new THREE.MeshBasicMaterial({
-color:
-i%2===0
-?0xbddcff
-:0xd6b96d
-})
-);
-
-crystal.position.set(
-x,
-y,
--31
-);
-
-crystal.userData.rotationSpeed=
-.003+Math.random()*.006;
-
-add(props,crystal);
-
-}
-
-}
-
-/* =========================================================
-   FLOATING SYMBOLS
-========================================================= */
-
-function createFloatingSymbols(){
-
-for(let i=0;i<20;i++){
-
-const symbol=
-new THREE.Mesh(
-new THREE.TorusGeometry(
-.12+Math.random()*.35,
-.025,
-8,
-24
-),
-new THREE.MeshBasicMaterial({
-color:0xcfe6ff,
-transparent:true,
-opacity:.4
-})
-);
-
-symbol.position.set(
-(Math.random()-.5)*18,
-1+Math.random()*14,
--4-Math.random()*24
-);
-
-symbol.userData.phase=
-Math.random()*Math.PI*2;
-
-symbol.userData.speed=
-.3+Math.random();
-
-add(particles,symbol);
-
-}
-
-}
-
-/* =========================================================
-   CHAMBER CANDLES
-========================================================= */
-
-function createChamberCandles(){
-
-for(let i=0;i<16;i++){
-
-const angle=
-i/16*Math.PI*2;
-
-const radius=
-8+Math.random()*3;
-
-const x=
-Math.cos(angle)*radius;
-
-const z=
--16+Math.sin(angle)*radius;
-
-const candle=
-cylinder(
-.08,
-.11,
-.8,
-materials.candle,
-x,
-.4,
-z,
-12
-);
-
-add(props,candle);
-
-const flame=
-sphere(
-.09,
-materials.gold,
-x,
-.9,
-z,
-12
-);
-
-add(props,flame);
-
-const light=
-new THREE.PointLight(
-0xffd78c,
-.5,
-7,
-2
-);
-
-light.position.set(
-x,
-1,
-z
-);
-
-light.userData.flicker=true;
-
-add(lights,light);
-
-}
-
-}
-
-/* =========================================================
-   ANGEL LIGHT
-========================================================= */
-
-function createAngelLight(){
-
-const halo=
-new THREE.Mesh(
-new THREE.TorusGeometry(
-3,
-.08,
-12,
-64
-),
-new THREE.MeshBasicMaterial({
-color:0xf0f7ff,
-transparent:true,
-opacity:.85
-})
-);
-
-halo.position.set(
-0,
-9,
--10
-);
-
-halo.rotation.x=Math.PI/2;
-
-add(props,halo);
-
-const light=
-new THREE.PointLight(
-0xdcecff,
-6,
-35,
-2
-);
-
-light.position.set(
-0,
-8,
--10
-);
-
-add(lights,light);
-
-}
-
-/* =========================================================
+/* ============================================================
    FINAL ROOM
-========================================================= */
+============================================================ */
 
-function buildFinalRoom(){
+function buildFinal(){
 
-clearGroup(environment);
-clearGroup(props);
-clearGroup(particles);
-clearGroup(characters);
-clearGroup(lights);
+    clearWorld();
 
-setupLighting();
+    scene.background.set(0x010106);
 
-setFog(
-0x02040a,
-3,
-100
-);
+    scene.fog=new THREE.FogExp2(
+        0x03020a,
+        .008
+    );
 
-createFinalFloor();
 
-createFinalWalls();
+    const floor=plane(
+        70,
+        70,
+        new THREE.MeshStandardMaterial({
+            color:0x17131e,
+            metalness:.4,
+            roughness:.25
+        })
+    );
 
-createFinalCandles();
+    floor.rotation.x=-Math.PI/2;
 
-createFinalStars();
+    scene.add(floor);
 
-createFinalPortal();
 
-createBirthdayLights();
+    /* stars */
 
+    createParticles(
+        1600,
+        0xdedaff,
+        .045,
+        25
+    );
+
+
+    /* giant halo */
+
+    const halo=new THREE.Mesh(
+        new THREE.TorusGeometry(
+            7,
+            .08,
+            16,
+            128
+        ),
+        new THREE.MeshBasicMaterial({
+            color:0xd9ccff
+        })
+    );
+
+    halo.position.set(
+        0,
+        7,
+        -10
+    );
+
+    scene.add(halo);
+
+
+    const halo2=halo.clone();
+
+    halo2.scale.setScalar(.72);
+    halo2.position.y=7;
+
+    scene.add(halo2);
+
+
+    /* candles */
+
+    for(let i=0;i<30;i++){
+
+        const candle=cyl(
+            .08,
+            .08,
+            .8,
+            new THREE.MeshStandardMaterial({
+                color:0xded5bd
+            })
+        );
+
+        candle.position.set(
+            (Math.random()-.5)*18,
+            .4,
+            -5-Math.random()*15
+        );
+
+        scene.add(candle);
+
+
+        const flame=glowSphere(
+            .08,
+            0xffd68c,
+            .8
+        );
+
+        flame.position.set(
+            candle.position.x,
+            1,
+            candle.position.z
+        );
+
+        scene.add(flame);
+    }
+
+
+    /* randy */
+
+    randy.visible=true;
+
+    randy.position.set(
+        0,
+        0,
+        -5
+    );
+
+    randy.rotation.y=0;
+
+
+    /* angel disappears */
+
+    angel.visible=false;
+
+
+    camera.position.set(
+        7,
+        4,
+        12
+    );
+
+    camera.lookAt(
+        0,
+        3,
+        -5
+    );
+
+
+    updateChapter(
+        "THE LAST ROOM",
+        "SHE FINALLY FOUND IT"
+    );
 }
 
-/* =========================================================
-   FINAL FLOOR
-========================================================= */
 
-function createFinalFloor(){
+/* ============================================================
+   CHAPTER UI
+============================================================ */
 
-const floor=
-new THREE.Mesh(
-new THREE.PlaneGeometry(
-80,
-80,
-20,
-20
-),
-new THREE.MeshStandardMaterial({
-color:0x11151d,
-roughness:.12,
-metalness:.8
-})
-);
+function updateChapter(ch,obj){
 
-floor.rotation.x=-Math.PI/2;
+    document.getElementById("chapter").textContent=ch;
+    document.getElementById("objective").textContent=obj;
 
-floor.position.z=-15;
-
-floor.receiveShadow=true;
-
-add(environment,floor);
-
+    document.getElementById("topBar").style.opacity=1;
 }
 
-/* =========================================================
-   FINAL WALLS
-========================================================= */
 
-function createFinalWalls(){
+/* ============================================================
+   STORY
+============================================================ */
 
-const back=
-box(
-60,
-28,
-2,
-materials.oldStone,
-0,
-14,
--45
-);
-
-add(props,back);
-
-for(let side of [-1,1]){
-
-const wall=
-box(
-2,
-28,
-60,
-materials.oldStone,
-side*30,
-14,
--15
-);
-
-add(props,wall);
-
-}
-
-}
-
-/* =========================================================
-   FINAL CANDLES
-========================================================= */
-
-function createFinalCandles(){
-
-for(let i=0;i<40;i++){
-
-const angle=
-i/40*Math.PI*2;
-
-const radius=
-7+Math.random()*13;
-
-const x=
-Math.cos(angle)*radius;
-
-const z=
--16+Math.sin(angle)*radius;
-
-const candle=
-cylinder(
-.09,
-.12,
-.9,
-materials.candle,
-x,
-.45,
-z,
-12
-);
-
-add(props,candle);
-
-const flame=
-sphere(
-.1,
-materials.gold,
-x,
-1,
-z,
-12
-);
-
-add(props,flame);
-
-const light=
-new THREE.PointLight(
-0xffd58c,
-.5+Math.random()*.7,
-8,
-2
-);
-
-light.position.set(
-x,
-1,
-z
-);
-
-light.userData.flicker=true;
-
-add(lights,light);
-
-}
-
-}
-
-/* =========================================================
-   FINAL STARS
-========================================================= */
-
-function createFinalStars(){
-
-const geometry=
-new THREE.BufferGeometry();
-
-const count=800;
-
-const positions=
-new Float32Array(count*3);
-
-for(let i=0;i<count;i++){
-
-positions[i*3]=
-(Math.random()-.5)*55;
-
-positions[i*3+1]=
-2+Math.random()*25;
-
-positions[i*3+2]=
--43+Math.random()*2;
-
-}
-
-geometry.setAttribute(
-"position",
-new THREE.BufferAttribute(
-positions,
-3
-)
-);
-
-const points=
-new THREE.Points(
-geometry,
-new THREE.PointsMaterial({
-color:0xeaf4ff,
-size:.09,
-transparent:true,
-opacity:.7
-})
-);
-
-add(particles,points);
-
-}
-
-/* =========================================================
-   FINAL PORTAL
-========================================================= */
-
-function createFinalPortal(){
-
-const outer=
-new THREE.Mesh(
-new THREE.TorusGeometry(
-8,
-.18,
-20,
-100
-),
-new THREE.MeshBasicMaterial({
-color:0xdcecff,
-transparent:true,
-opacity:.9
-})
-);
-
-outer.position.set(
-0,
-9,
--39
-);
-
-outer.rotation.x=Math.PI/2;
-
-add(props,outer);
-
-const inner=
-new THREE.Mesh(
-new THREE.CircleGeometry(
-7.8,
-64
-),
-new THREE.MeshBasicMaterial({
-color:0xabcfff,
-transparent:true,
-opacity:.08,
-side:THREE.DoubleSide
-})
-);
-
-inner.position.set(
-0,
-9,
--38.8
-);
-
-inner.rotation.x=0;
-
-add(props,inner);
-
-}
-
-/* =========================================================
-   BIRTHDAY LIGHTS
-========================================================= */
-
-function createBirthdayLights(){
-
-const colors=[
-0xdcecff,
-0xf0d38b,
-0xb4c9ff,
-0xffffff
-];
-
-for(let i=0;i<20;i++){
-
-const light=
-new THREE.PointLight(
-colors[i%colors.length],
-1.2,
-16,
-2
-);
-
-light.position.set(
-(Math.random()-.5)*25,
-2+Math.random()*12,
--20+Math.random()*20
-);
-
-add(lights,light);
-
-}
-
-heavenLight.intensity=2.4;
-
-}
-
-/* =========================================================
-   CHARACTER ASSETS
-========================================================= */
-
-const ASSETS={
-nour:"./assets/nour.glb",
-randy:"./assets/randy.glb",
-angel:"./assets/angel.glb"
-};
-
-const characterCache={};
-
-async function loadCharacter(
-name,
-url,
-position,
-scale=1
-){
-
-return new Promise(
-resolve=>{
-
-loader.load(
-url,
-gltf=>{
-
-const root=
-gltf.scene;
-
-root.position.copy(position);
-
-root.scale.setScalar(scale);
-
-root.traverse(
-object=>{
-
-if(object.isMesh){
-
-object.castShadow=true;
-object.receiveShadow=true;
-
-if(object.material){
-object.material.needsUpdate=true;
-}
-
-}
-
-}
-);
-
-if(gltf.animations.length){
-
-root.userData.mixer=
-new THREE.AnimationMixer(root);
-
-root.userData.actions=[];
-
-gltf.animations.forEach(
-clip=>{
-
-const action=
-root.userData.mixer.clipAction(
-clip
-);
-
-action.play();
-
-root.userData.actions.push(
-action
-);
-
-}
-);
-
-}
-
-characterCache[name]=root;
-
-add(characters,root);
-
-resolve(root);
-
-},
-undefined,
-()=>{
-
-resolve(
-createFallbackSilhouette(
-name,
-position,
-scale
-)
-);
-
-}
-);
-
-}
-);
-
-}
-
-/* =========================================================
-   FALLBACK SILHOUETTE
-========================================================= */
-
-function createFallbackSilhouette(
-name,
-position,
-scale
-){
-
-const group=
-new THREE.Group();
-
-group.position.copy(position);
-group.scale.setScalar(scale);
-
-const skin=
-new THREE.MeshStandardMaterial({
-color:
-name==="angel"
-?0xe9eff5
-:0x8c5d50,
-roughness:.72
-});
-
-const cloth=
-new THREE.MeshStandardMaterial({
-color:
-name==="nour"
-?0x07080c
-:0x172235,
-roughness:.82
-});
-
-const head=
-sphere(
-.42,
-skin,
-0,
-1.75,
-0,
-32
-);
-
-group.add(head);
-
-const neck=
-cylinder(
-.16,
-.19,
-.35,
-skin,
-0,
-1.35,
-0,
-20
-);
-
-group.add(neck);
-
-const torso=
-new THREE.Mesh(
-new THREE.CapsuleGeometry(
-.45,
-.9,
-8,
-16
-),
-cloth
-);
-
-torso.position.y=.85;
-
-group.add(torso);
-
-const leftArm=
-new THREE.Mesh(
-new THREE.CapsuleGeometry(
-.13,
-.75,
-6,
-12
-),
-cloth
-);
-
-leftArm.position.set(
--.55,
-.9,
-0
-);
-
-leftArm.rotation.z=-.15;
-
-group.add(leftArm);
-
-const rightArm=
-leftArm.clone();
-
-rightArm.position.x=.55;
-rightArm.rotation.z=.15;
-
-group.add(rightArm);
-
-const leftLeg=
-new THREE.Mesh(
-new THREE.CapsuleGeometry(
-.16,
-.9,
-6,
-12
-),
-cloth
-);
-
-leftLeg.position.set(
--.22,
--.15,
-0
-);
-
-group.add(leftLeg);
-
-const rightLeg=
-leftLeg.clone();
-
-rightLeg.position.x=.22;
-
-group.add(rightLeg);
-
-if(name==="angel"){
-
-const wingMaterial=
-new THREE.MeshBasicMaterial({
-color:0xeaf5ff,
-transparent:true,
-opacity:.32,
-side:THREE.DoubleSide
-});
-
-const wingL=
-new THREE.Mesh(
-new THREE.PlaneGeometry(
-2.7,
-5
-),
-wingMaterial
-);
-
-wingL.position.set(
--1.2,
-1.2,
-.1
-);
-
-wingL.rotation.z=-.35;
-
-group.add(wingL);
-
-const wingR=
-wingL.clone();
-
-wingR.position.x=1.2;
-wingR.rotation.z=.35;
-
-group.add(wingR);
-
-const halo=
-new THREE.Mesh(
-new THREE.TorusGeometry(
-.65,
-.06,
-10,
-40
-),
-new THREE.MeshBasicMaterial({
-color:0xfff3c7
-})
-);
-
-halo.position.y=2.35;
-
-halo.rotation.x=Math.PI/2;
-
-group.add(halo);
-
-}
-
-add(characters,group);
-
-return group;
-
-}
-
-/* =========================================================
-   CHARACTER SETUP
-========================================================= */
-
-async function setupCharacters(){
-
-if(state.scene==="forest"){
-
-await loadCharacter(
-"angel",
-ASSETS.angel,
-new THREE.Vector3(
-2,
-0,
--8
-),
-1.4
-);
-
-}
-
-if(state.scene==="chamber"){
-
-await loadCharacter(
-"nour",
-ASSETS.nour,
-new THREE.Vector3(
--4,
-0,
--5
-),
-1.2
-);
-
-await loadCharacter(
-"angel",
-ASSETS.angel,
-new THREE.Vector3(
-4,
-0,
--9
-),
-1.3
-);
-
-}
-
-if(state.scene==="final"){
-
-await loadCharacter(
-"nour",
-ASSETS.nour,
-new THREE.Vector3(
--3,
-0,
--15
-),
-1.2
-);
-
-await loadCharacter(
-"randy",
-ASSETS.randy,
-new THREE.Vector3(
-3,
-0,
--18
-),
-1.2
-);
-
-}
-
-}
-
-/* =========================================================
-   DIALOGUE DATA
-========================================================= */
-
-const dialogues={
+const story={
 
 forest:[
-{
-name:"THE ANGEL",
-text:"نور... لا تخاف. الليلة مو مثل كل ليلة."
-},
-{
-name:"THE ANGEL",
-text:"الغابة ما جابتك لهنا صدفة."
-},
-{
-name:"THE ANGEL",
-text:"امشِ خلف الضوء... ولا تلتفت."
-},
-{
-name:"THE ANGEL",
-text:"هناك شخص ينتظرك خلف أبواب هذه الليلة."
-}
+    ["NARRATOR",
+    "في ليلة لا يظهر فيها القمر إلا كجرحٍ أبيض في السماء... استيقظت رندي وسط غابة لا تعرفها."],
+
+    ["RANDY",
+    "وين أني؟... هذا مو المكان اللي كنت بيه."],
+
+    ["NARRATOR",
+    "لم يكن هناك هاتف. لا طريق. لا صوت مدينة."],
+
+    ["RANDY",
+    "أكو أحد هنا؟"],
+
+    ["UNKNOWN",
+    "رندي..."],
+
+    ["RANDY",
+    "منو؟!"],
+
+    ["UNKNOWN",
+    "لا تخافين. الليلة مو نهايتچ."],
+
+    ["NARRATOR",
+    "ظهر ضوء أبيض بعيد بين الأشجار."],
+
+    ["UNKNOWN",
+    "إذا تريدين تعرفين ليش وصلتي لهنا... اتبعي الضوء."]
 ],
 
 path:[
-{
-name:"THE NIGHT",
-text:"صوت المطر يختلط بخطواتك."
-},
-{
-name:"THE ANGEL",
-text:"كل حجر هنا يعرف اسماً واحداً."
-},
-{
-name:"THE ANGEL",
-text:"Randy."
-},
-{
-name:"THE ANGEL",
-text:"لكن لا تسأل لماذا... بعد."
-}
+    ["RANDY",
+    "هذا الضوء... كأنه يعرف وين أريد أروح."],
+
+    ["ANGEL",
+    "ليس الضوء من يعرف الطريق."],
+
+    ["RANDY",
+    "وأنتِ منو؟"],
+
+    ["ANGEL",
+    "مجرد شخص ينتظر شخصًا آخر."],
+
+    ["RANDY",
+    "ينتظرني؟"],
+
+    ["ANGEL",
+    "منذ وقت طويل."],
+
+    ["NARRATOR",
+    "توقفت رندي."],
+
+    ["RANDY",
+    "شنو راح يصير إذا كملت؟"],
+
+    ["ANGEL",
+    "ستعرفين لماذا كان يجب أن تكوني أنتِ."]
 ],
 
-ruins:[
-{
-name:"THE ANGEL",
-text:"هنا انتهى الطريق بالنسبة للكثيرين."
-},
-{
-name:"THE ANGEL",
-text:"أما أنت... فقد بدأت قصتك هنا."
-},
-{
-name:"THE ANGEL",
-text:"خذ الرمز."
-},
-{
-name:"THE NIGHT",
-text:"الضوء يزداد."
-}
+shrine:[
+    ["ANGEL",
+    "هذا المكان يحتفظ بأشياء لا يستطيع البشر الاحتفاظ بها."],
+
+    ["RANDY",
+    "مثل شنو؟"],
+
+    ["ANGEL",
+    "الأصوات... الذكريات... والوعود."],
+
+    ["RANDY",
+    "وأني شنو علاقتي بهذا كله؟"],
+
+    ["ANGEL",
+    "هناك شخص وضع شيئًا هنا من أجلك."],
+
+    ["RANDY",
+    "منو؟"],
+
+    ["ANGEL",
+    "ستعرفين عندما تصلين إلى القصر."],
+
+    ["NARRATOR",
+    "انطفأت كل الأضواء."],
+
+    ["UNKNOWN",
+    "لا تبحثي عن اسمي بعد."]
 ],
 
 castle:[
-{
-name:"THE ANGEL",
-text:"انظر أمامك."
-},
-{
-name:"THE ANGEL",
-text:"القلعة لم تكن مهجورة يوماً."
-},
-{
-name:"THE ANGEL",
-text:"كانت تنتظر."
-},
-{
-name:"THE ANGEL",
-text:"وأنت وصلت أخيراً."
-}
+    ["NARRATOR",
+    "خرجت رندي من الغابة... وهناك ظهر القصر."],
+
+    ["RANDY",
+    "مستحيل..."],
+
+    ["NARRATOR",
+    "قصر أسود فوق جبل، ونوافذه مضيئة رغم أنه بدا مهجورًا منذ قرون."],
+
+    ["RANDY",
+    "ليش أحس أني شايفته قبل؟"],
+
+    ["UNKNOWN",
+    "لأن بعض الأماكن لا تُرى بالعين أول مرة."],
+
+    ["RANDY",
+    "افتح الباب."],
+
+    ["NARRATOR",
+    "لمست رندي الباب."],
+
+    ["NARRATOR",
+    "فانفتح وحده."]
 ],
 
 gate:[
-{
-name:"THE GATE",
-text:"لا صوت."
-},
-{
-name:"THE ANGEL",
-text:"ضع يدك على الباب."
-},
-{
-name:"THE ANGEL",
-text:"بعض الأبواب لا تُفتح بالقوة."
-},
-{
-name:"THE ANGEL",
-text:"تُفتح عندما تعرف لماذا جئت."
-}
+    ["NARRATOR",
+    "كان خلف الباب ممر طويل... وفي نهايته بوابة حديدية."],
+
+    ["RANDY",
+    "وهسه شلون أفتحها؟"],
+
+    ["ANGEL",
+    "البوابات القديمة لا تفتح بالقوة."],
+
+    ["RANDY",
+    "زين بشنو؟"],
+
+    ["ANGEL",
+    "بشيء لا ينساه القلب."],
+
+    ["NARRATOR",
+    "ظهرت أرقام مضيئة على البوابة."],
+
+    ["ANGEL",
+    "ثلاثة أرقام فقط."],
+
+    ["RANDY",
+    "212."],
+
+    ["NARRATOR",
+    "فتحت البوابة."]
 ],
 
 hall:[
-{
-name:"THE HALL",
-text:"ثلاث نبضات تسمعها في الظلام."
-},
-{
-name:"THE ANGEL",
-text:"تذكّر الرقم."
-},
-{
-name:"THE ANGEL",
-text:"ثلاث خطوات... ثلاث نبضات... ثلاثة أرقام."
-},
-{
-name:"THE NIGHT",
-text:"212."
-}
+    ["NARRATOR",
+    "دخلت رندي القاعة."],
+
+    ["NARRATOR",
+    "لم يكن القصر مهجورًا كما ظنت."],
+
+    ["RANDY",
+    "أكو أحد هنا..." ],
+
+    ["VOICE",
+    "رندي."],
+
+    ["RANDY",
+    "هذا الصوت..." ],
+
+    ["VOICE",
+    "بقيتي قريبة."],
+
+    ["RANDY",
+    "نور؟"],
+
+    ["VOICE",
+    "لا تلتفتين."],
+
+    ["RANDY",
+    "ليش؟"],
+
+    ["VOICE",
+    "لأن المفاجأة أجمل عندما تصلين إليها بنفسچ."]
 ],
 
 chamber:[
-{
-name:"NOUR",
-text:"أخيراً وصلت."
-},
-{
-name:"NOUR",
-text:"كنت أعرف أنك راح تكمل للنهاية."
-},
-{
-name:"THE ANGEL",
-text:"لكن بقي سؤال واحد."
-},
-{
-name:"NOUR",
-text:"إذا عرفت الإجابة... راح ينفتح الباب الأخير."
-}
+    ["RANDY",
+    "وصلت."],
+
+    ["ANGEL",
+    "نعم."],
+
+    ["RANDY",
+    "شنو هذا المكان؟"],
+
+    ["ANGEL",
+    "آخر باب."],
+
+    ["RANDY",
+    "وبعده؟"],
+
+    ["ANGEL",
+    "الحقيقة."],
+
+    ["NARRATOR",
+    "ظهرت دائرة من الضوء تحت قدميها."],
+
+    ["ANGEL",
+    "قولي الكلمة التي تركها لك."],
+
+    ["RANDY",
+    "aiudiwdwu."],
+
+    ["NARRATOR",
+    "انفتح الباب الأخير."]
 ],
 
 final:[
-{
-name:"NOUR",
-text:"كنت أقدر أكتب رسالة."
-},
-{
-name:"NOUR",
-text:"أو أرسل تهنئة."
-},
-{
-name:"NOUR",
-text:"بس حسّيت إن شخص مثلك يستحق ليلة كاملة."
-},
-{
-name:"NOUR",
-text:"وهذه الليلة... كلها إلك."
-}
+    ["NARRATOR",
+    "دخلت رندي الغرفة الأخيرة."],
+
+    ["NARRATOR",
+    "لا وحوش."],
+
+    ["NARRATOR",
+    "لا أشباح."],
+
+    ["NARRATOR",
+    "لا قصر."],
+
+    ["NARRATOR",
+    "فقط غرفة هادئة... ورسالة على الطاولة."],
+
+    ["RANDY",
+    "هاي إلي؟"],
+
+    ["NARRATOR",
+    "اقتربت رندي."],
+
+    ["NARRATOR",
+    "وكان الاسم على الظرف..." ],
+
+    ["RANDY",
+    "رندي."]
 ]
 
 };
 
-/* =========================================================
+
+/* ============================================================
    DIALOGUE ENGINE
-========================================================= */
+============================================================ */
 
-const dialogueElement=
-document.getElementById("dialogue");
+function showDialogue(lines,callback){
 
-const dialogueName=
-document.getElementById("dialogueName");
+    state.currentLines=lines;
+    state.dialogueIndex=0;
+    state.dialogue=true;
+    state.dialogueCallback=callback;
 
-const dialogueText=
-document.getElementById("dialogueText");
+    document.getElementById("dialogue").style.opacity=1;
+    document.getElementById("dialogue").style.transform=
+        "translateY(0)";
 
-let typingTimer=null;
-
-function showDialogue(){
-
-const list=
-dialogues[state.scene]||
-[];
-
-if(state.dialogueIndex>=list.length){
-
-hideDialogue();
-
-afterDialogue();
-
-return;
-
+    renderDialogue();
 }
 
-const line=
-list[state.dialogueIndex];
 
-dialogueName.textContent=
-line.name;
+function renderDialogue(){
 
-dialogueText.textContent="";
+    if(state.dialogueIndex>=state.currentLines.length){
 
-dialogueElement.classList.add(
-"dialogue-visible"
-);
+        closeDialogue();
 
-state.dialogue=true;
-state.typing=true;
+        if(state.dialogueCallback)
+            state.dialogueCallback();
 
-let index=0;
+        return;
+    }
 
-clearInterval(typingTimer);
 
-typingTimer=
-setInterval(
-()=>{
+    const line=
+        state.currentLines[
+            state.dialogueIndex
+        ];
 
-dialogueText.textContent=
-line.text.slice(
-0,
-++index
-);
 
-if(index>=line.text.length){
+    document.getElementById("speaker")
+        .textContent=line[0];
 
-clearInterval(typingTimer);
-
-state.typing=false;
-
-}
-},
-22
-);
-
+    typeText(line[1]);
 }
 
-function advanceDialogue(){
 
-if(!state.dialogue){
-showDialogue();
-return;
+function typeText(text){
+
+    const el=document.getElementById("text");
+
+    el.textContent="";
+
+    state.typing=true;
+
+    let i=0;
+
+    clearInterval(state.lineTimer);
+
+    state.lineTimer=setInterval(()=>{
+
+        el.textContent+=text[i++];
+
+        if(i>=text.length){
+
+            clearInterval(state.lineTimer);
+
+            state.typing=false;
+        }
+
+    },20);
 }
 
-if(state.typing){
 
-clearInterval(typingTimer);
+function closeDialogue(){
 
-const line=
-dialogues[state.scene][
-state.dialogueIndex
-];
+    state.dialogue=false;
 
-dialogueText.textContent=
-line.text;
-
-state.typing=false;
-
-return;
-
+    document.getElementById("dialogue").style.opacity=0;
+    document.getElementById("dialogue").style.transform=
+        "translateY(30px)";
 }
 
-state.dialogueIndex++;
 
-showDialogue();
+function nextDialogue(){
 
+    if(!state.dialogue)return;
+
+    if(state.typing){
+
+        clearInterval(state.lineTimer);
+
+        state.typing=false;
+
+        const line=
+            state.currentLines[
+                state.dialogueIndex
+            ];
+
+        document.getElementById("text")
+            .textContent=line[1];
+
+        return;
+    }
+
+    state.dialogueIndex++;
+
+    renderDialogue();
 }
 
-function hideDialogue(){
 
-dialogueElement.classList.remove(
-"dialogue-visible"
-);
+/* ============================================================
+   CHAPTER START
+============================================================ */
 
-state.dialogue=false;
+function startChapter(index){
 
+    state.sceneIndex=index;
+
+    const name=scenes[index];
+
+    if(name==="forest")buildForest();
+    if(name==="path")buildPath();
+    if(name==="shrine")buildShrine();
+    if(name==="castle")buildCastle();
+    if(name==="gate")buildGate();
+    if(name==="hall")buildHall();
+    if(name==="chamber")buildChamber();
+    if(name==="final")buildFinal();
+
+
+    setTimeout(()=>{
+
+        showDialogue(
+            story[name],
+            ()=>{
+                afterChapter(name);
+            }
+        );
+
+    },1200);
 }
 
-/* =========================================================
-   AFTER DIALOGUE
-========================================================= */
 
-function afterDialogue(){
+/* ============================================================
+   CHAPTER EVENTS
+============================================================ */
 
-if(state.scene==="forest"){
+function afterChapter(name){
 
-showChoice(
-"تسمع صوتاً من خلف الأشجار.",
-"تتبع الضوء.",
-"تعود إلى الطريق."
-);
+    if(name==="forest"){
 
-return;
+        showChoice(
+            [
+                "أتبع الضوء",
+                "أبقى هنا"
+            ],
+            choice=>{
 
+                if(choice===0){
+
+                    transitionTo(1);
+
+                }else{
+
+                    showDialogue([
+                        ["UNKNOWN",
+                        "رندي... الطريق لا ينتظر أحدًا."],
+                        ["RANDY",
+                        "..." ]
+                    ],()=>transitionTo(1));
+                }
+            }
+        );
+
+        return;
+    }
+
+
+    if(name==="path"){
+
+        setTimeout(()=>{
+            transitionTo(2);
+        },900);
+
+        return;
+    }
+
+
+    if(name==="shrine"){
+
+        setTimeout(()=>{
+            transitionTo(3);
+        },900);
+
+        return;
+    }
+
+
+    if(name==="castle"){
+
+        setTimeout(()=>{
+            transitionTo(4);
+        },900);
+
+        return;
+    }
+
+
+    if(name==="gate"){
+
+        setTimeout(()=>{
+            transitionTo(5);
+        },900);
+
+        return;
+    }
+
+
+    if(name==="hall"){
+
+        setTimeout(()=>{
+            transitionTo(6);
+        },900);
+
+        return;
+    }
+
+
+    if(name==="chamber"){
+
+        setTimeout(()=>{
+            transitionTo(7);
+        },900);
+
+        return;
+    }
+
+
+    if(name==="final"){
+
+        setTimeout(()=>{
+            openLetter();
+        },1500);
+
+        return;
+    }
 }
 
-if(state.scene==="path"){
 
-transitionTo("ruins");
+/* ============================================================
+   CHOICES
+============================================================ */
 
-return;
+function showChoice(options,callback){
 
+    const box=document.getElementById("choices");
+
+    box.innerHTML="";
+
+    box.style.display="flex";
+
+    options.forEach((option,index)=>{
+
+        const b=document.createElement("div");
+
+        b.className="choice";
+
+        b.textContent=option;
+
+        b.onclick=()=>{
+
+            box.style.display="none";
+
+            callback(index);
+        };
+
+        box.appendChild(b);
+    });
 }
 
-if(state.scene==="ruins"){
 
-transitionTo("castle");
+/* ============================================================
+   TRANSITION
+============================================================ */
 
-return;
+function transitionTo(index){
 
+    if(state.transition)return;
+
+    state.transition=true;
+
+    const fade=document.getElementById("fade");
+
+    fade.style.opacity=1;
+
+    setTimeout(()=>{
+
+        startChapter(index);
+
+        setTimeout(()=>{
+
+            fade.style.opacity=0;
+
+            state.transition=false;
+
+        },600);
+
+    },900);
 }
 
-if(state.scene==="castle"){
 
-transitionTo("gate");
-
-return;
-
-}
-
-if(state.scene==="gate"){
-
-openGate();
-
-return;
-
-}
-
-if(state.scene==="hall"){
-
-openPuzzle();
-
-return;
-
-}
-
-if(state.scene==="chamber"){
-
-openAnswer();
-
-return;
-
-}
-
-if(state.scene==="final"){
-
-setTimeout(
-openLetter,
-900
-);
-
-}
-
-}
-
-/* =========================================================
-   CHOICE
-========================================================= */
-
-const choiceElement=
-document.getElementById("choice");
-
-const choiceText=
-document.getElementById("choiceText");
-
-const choiceA=
-document.getElementById("choiceA");
-
-const choiceB=
-document.getElementById("choiceB");
-
-function showChoice(
-text,
-a,
-b
-){
-
-choiceText.textContent=text;
-choiceA.textContent=a;
-choiceB.textContent=b;
-
-choiceElement.style.display="block";
-
-state.choiceOpen=true;
-
-}
-
-choiceA.onclick=()=>{
-choiceElement.style.display="none";
-state.choiceOpen=false;
-transitionTo("path");
-};
-
-choiceB.onclick=()=>{
-choiceElement.style.display="none";
-state.choiceOpen=false;
-shakeCamera(.4);
-transitionTo("path");
-};
-
-/* =========================================================
-   PUZZLE
-========================================================= */
-
-const puzzle=
-document.getElementById("puzzle");
-
-const puzzleInput=
-document.getElementById("puzzleInput");
-
-const puzzleButton=
-document.getElementById("puzzleButton");
-
-const puzzleError=
-document.getElementById("puzzleError");
-
-function openPuzzle(){
-
-puzzle.style.display="flex";
-
-puzzleInput.value="";
-
-puzzleError.textContent="";
-
-setTimeout(
-()=>{
-puzzleInput.focus();
-},
-100
-);
-
-}
-
-function closePuzzle(){
-
-puzzle.style.display="none";
-
-}
-
-function checkPuzzle(){
-
-if(
-puzzleInput.value.trim()==="212"
-){
-
-state.puzzleSolved=true;
-
-closePuzzle();
-
-playImpact();
-
-transitionTo("chamber");
-
-}else{
-
-puzzleError.textContent=
-"THE DOOR REMAINS CLOSED.";
-
-shakeCamera(.3);
-
-}
-
-}
-
-puzzleButton.onclick=
-checkPuzzle;
-
-puzzleInput.addEventListener(
-"keydown",
-event=>{
-if(event.key==="Enter"){
-checkPuzzle();
-}
-}
-);
-
-/* =========================================================
-   ANSWER
-========================================================= */
-
-const answer=
-document.getElementById("answer");
-
-const answerInput=
-document.getElementById("answerInput");
-
-const answerButton=
-document.getElementById("answerButton");
-
-const answerMessage=
-document.getElementById("answerMessage");
-
-function openAnswer(){
-
-answer.style.display="flex";
-
-answerInput.value="";
-
-answerMessage.textContent="";
-
-setTimeout(
-()=>{
-answerInput.focus();
-},
-100
-);
-
-}
-
-function closeAnswer(){
-
-answer.style.display="none";
-
-}
-
-function checkAnswer(){
-
-const value=
-answerInput.value
-.trim()
-.toLowerCase();
-
-if(value==="aiudiwdwu"){
-
-state.answerSolved=true;
-
-closeAnswer();
-
-playImpact();
-
-transitionTo("final");
-
-}else{
-
-answerMessage.textContent=
-"THE MEMORY DOES NOT RECOGNIZE THIS.";
-
-shakeCamera(.5);
-
-}
-
-}
-
-answerButton.onclick=
-checkAnswer;
-
-answerInput.addEventListener(
-"keydown",
-event=>{
-if(event.key==="Enter"){
-checkAnswer();
-}
-}
-);
-
-/* =========================================================
+/* ============================================================
    LETTER
-========================================================= */
-
-const letter=
-document.getElementById("letter");
-
-const closeLetter=
-document.getElementById("closeLetter");
+============================================================ */
 
 function openLetter(){
 
-letter.style.display="flex";
+    const letter=document.getElementById("letter");
 
-state.letter=true;
+    letter.style.display="flex";
 
+
+    const message=
+`رندي...
+
+إذا وصلتي لهنا، فهذا يعني إنچ مشيتي كل الطريق وحدچ.
+
+الغابة كانت مجرد بداية.
+والقصر ما كان قصرًا أصلًا.
+
+كان مجرد طريقة حتى أخليچ تعيشين قصة صغيرة...
+وتوصلين للنهاية بدون ما تعرفين شنو ينتظرچ.
+
+يمكن الطريق كان غريب،
+ويمكن بعض اللحظات كانت تخوف،
+بس الحقيقة الوحيدة اللي أريدچ تعرفيها...
+
+إن وجودچ بحد ذاته شيء جميل.
+
+ما أريد منچ جواب،
+ولا وعد،
+ولا حتى كلمة.
+
+أريدچ بس تبتسمين.
+
+لأن هذا اليوم مو يوم عادي.
+
+اليوم هو اليوم اللي أتمنى بيه
+تبقين بخير،
+وتبقين مثل ما إنتِ،
+وما تسمحين لأي شيء يطفّي الضوء اللي بيچ.
+
+كل عام وإنتِ بخير يا رندي.
+
+وإذا يوم من الأيام نسيتي شكد إنتِ مهمة...
+
+ارجعي لهذه الرسالة.
+
+— نور`;
+
+    document.getElementById("letterText")
+        .textContent=message;
+
+
+    setTimeout(()=>{
+
+        letter.onclick=()=>{
+
+            letter.style.display="none";
+
+            showFinal();
+
+        };
+
+    },1000);
 }
 
-closeLetter.onclick=()=>{
 
-letter.style.display="none";
-
-state.letter=false;
-
-showFinal();
-
-};
-
-/* =========================================================
+/* ============================================================
    FINAL
-========================================================= */
+============================================================ */
 
 function showFinal(){
 
-document.getElementById(
-"final"
-).style.display="flex";
+    state.final=true;
 
-state.final=true;
+    document.getElementById("final")
+        .style.display="flex";
 
-playFinale();
+    document.getElementById("topBar")
+        .style.opacity=0;
 
+    createFinalAudio();
 }
 
-/* =========================================================
-   GATE
-========================================================= */
 
-function openGate(){
-
-playGate();
-
-shakeCamera(.9);
-
-setTimeout(
-()=>{
-transitionTo("hall");
-},
-1400
-);
-
-}
-
-/* =========================================================
-   TRANSITIONS
-========================================================= */
-
-async function transitionTo(
-sceneName
-){
-
-if(state.transition)
-return;
-
-state.transition=true;
-
-const flash=
-document.getElementById("flash");
-
-flash.classList.remove("active");
-
-void flash.offsetWidth;
-
-flash.classList.add("active");
-
-state.scene=sceneName;
-
-state.sceneIndex=
-scenes.indexOf(sceneName);
-
-state.dialogueIndex=0;
-
-updateHUD();
-
-await new Promise(
-resolve=>
-setTimeout(
-resolve,
-500
-)
-);
-
-buildCurrentScene();
-
-await setupCharacters();
-
-state.transition=false;
-
-setTimeout(
-showDialogue,
-700
-);
-
-}
-
-/* =========================================================
-   BUILD CURRENT SCENE
-========================================================= */
-
-function buildCurrentScene(){
-
-if(state.scene==="forest"){
-buildForest();
-return;
-}
-
-if(state.scene==="path"){
-buildPath();
-return;
-}
-
-if(state.scene==="ruins"){
-buildRuins();
-return;
-}
-
-if(state.scene==="castle"){
-buildCastle();
-return;
-}
-
-if(state.scene==="gate"){
-buildGate();
-return;
-}
-
-if(state.scene==="hall"){
-buildHall();
-return;
-}
-
-if(state.scene==="chamber"){
-buildChamber();
-return;
-}
-
-if(state.scene==="final"){
-buildFinalRoom();
-return;
-}
-
-}
-
-/* =========================================================
-   HUD
-========================================================= */
-
-function updateHUD(){
-
-document.getElementById(
-"hudChapter"
-).textContent=
-sceneNames[state.scene];
-
-document.getElementById(
-"hudObjective"
-).textContent=
-sceneObjectives[state.scene];
-
-document.getElementById(
-"hudStatus"
-).textContent=
-state.scene==="final"
-?"THE MEMORY IS COMPLETE"
-:"THE NIGHT IS WATCHING";
-
-const chapter=
-document.getElementById("chapter");
-
-chapter.textContent=
-sceneNames[state.scene];
-
-chapter.style.opacity="1";
-
-chapter.style.transform=
-"translate(-50%,0)";
-
-setTimeout(
-()=>{
-chapter.style.opacity="0";
-chapter.style.transform=
-"translate(-50%,-20px)";
-},
-2200
-);
-
-const objective=
-document.getElementById(
-"objective"
-);
-
-objective.textContent=
-sceneObjectives[state.scene];
-
-objective.style.opacity="1";
-
-setTimeout(
-()=>{
-objective.style.opacity="0";
-},
-3000
-);
-
-}
-
-/* =========================================================
+/* ============================================================
    AUDIO ENGINE
-========================================================= */
+============================================================ */
 
-let audioContext;
-let masterGain;
-let ambienceGain;
-let musicGain;
-let heartbeatGain;
+let audioCtx=null;
 
-const audioNodes=[];
+let master=null;
+
+let drone=null;
+
+let wind=null;
+
 
 function initAudio(){
 
-if(state.audio)
-return;
+    if(audioCtx)return;
 
-state.audio=true;
+    audioCtx=
+        new (window.AudioContext||
+        window.webkitAudioContext)();
 
-audioContext=
-new AudioContext();
+    master=
+        audioCtx.createGain();
 
-masterGain=
-audioContext.createGain();
+    master.gain.value=.28;
 
-masterGain.gain.value=.72;
+    master.connect(
+        audioCtx.destination
+    );
 
-masterGain.connect(
-audioContext.destination
-);
 
-ambienceGain=
-audioContext.createGain();
-
-ambienceGain.gain.value=.22;
-
-ambienceGain.connect(
-masterGain
-);
-
-musicGain=
-audioContext.createGain();
-
-musicGain.gain.value=.13;
-
-musicGain.connect(
-masterGain
-);
-
-heartbeatGain=
-audioContext.createGain();
-
-heartbeatGain.gain.value=.0;
-
-heartbeatGain.connect(
-masterGain
-);
-
-createDrone();
-createWind();
-createHeartbeat();
-createChoir();
-
+    createDrone();
+    createWind();
 }
 
-function oscillator(
-type,
-frequency,
-gain,
-destination,
-detune=0
-){
-
-const osc=
-audioContext.createOscillator();
-
-const amp=
-audioContext.createGain();
-
-osc.type=type;
-
-osc.frequency.value=
-frequency;
-
-osc.detune.value=
-detune;
-
-amp.gain.value=
-gain;
-
-osc.connect(amp);
-amp.connect(destination);
-
-osc.start();
-
-audioNodes.push({
-osc,
-amp
-});
-
-return {
-osc,
-amp
-};
-
-}
-
-/* =========================================================
-   DRONE
-========================================================= */
 
 function createDrone(){
 
-const low=
-oscillator(
-"sine",
-38,
-.035,
-musicGain
-);
+    const osc=
+        audioCtx.createOscillator();
 
-const sub=
-oscillator(
-"sine",
-57,
-.018,
-musicGain
-);
+    const gain=
+        audioCtx.createGain();
 
-const mid=
-oscillator(
-"triangle",
-92,
-.008,
-musicGain
-);
+    osc.type="sine";
+    osc.frequency.value=42;
 
-low.osc.frequency.exponentialRampToValueAtTime(
-31,
-audioContext.currentTime+8
-);
+    gain.gain.value=.08;
 
-sub.osc.frequency.exponentialRampToValueAtTime(
-44,
-audioContext.currentTime+12
-);
+    osc.connect(gain);
+    gain.connect(master);
 
+    osc.start();
+
+    drone={osc,gain};
 }
 
-/* =========================================================
-   WIND
-========================================================= */
 
 function createWind(){
 
-const buffer=
-audioContext.createBuffer(
-1,
-audioContext.sampleRate*2,
-audioContext.sampleRate
-);
+    const buffer=
+        audioCtx.createBuffer(
+            1,
+            audioCtx.sampleRate*2,
+            audioCtx.sampleRate
+        );
 
-const data=
-buffer.getChannelData(0);
+    const data=
+        buffer.getChannelData(0);
 
-for(let i=0;i<data.length;i++){
+    for(let i=0;i<data.length;i++)
+        data[i]=Math.random()*2-1;
 
-data[i]=
-(Math.random()*2-1)
-*
-.25;
+    const src=
+        audioCtx.createBufferSource();
 
+    src.buffer=buffer;
+    src.loop=true;
+
+    const filter=
+        audioCtx.createBiquadFilter();
+
+    filter.type="lowpass";
+    filter.frequency.value=600;
+
+    const gain=
+        audioCtx.createGain();
+
+    gain.gain.value=.018;
+
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(master);
+
+    src.start();
+
+    wind=src;
 }
 
-const source=
-audioContext.createBufferSource();
 
-source.buffer=buffer;
-source.loop=true;
+function sound(freq=100,duration=.2,type="sine",volume=.1){
 
-const filter=
-audioContext.createBiquadFilter();
+    if(!audioCtx)return;
 
-filter.type="lowpass";
-filter.frequency.value=750;
+    const osc=
+        audioCtx.createOscillator();
 
-const gain=
-audioContext.createGain();
+    const gain=
+        audioCtx.createGain();
 
-gain.gain.value=.05;
+    osc.type=type;
+    osc.frequency.value=freq;
 
-source
-.connect(filter)
-.connect(gain)
-.connect(ambienceGain);
+    gain.gain.setValueAtTime(
+        volume,
+        audioCtx.currentTime
+    );
 
-source.start();
+    gain.gain.exponentialRampToValueAtTime(
+        .001,
+        audioCtx.currentTime+duration
+    );
 
+    osc.connect(gain);
+    gain.connect(master);
+
+    osc.start();
+
+    osc.stop(
+        audioCtx.currentTime+duration
+    );
 }
 
-/* =========================================================
-   HEARTBEAT
-========================================================= */
-
-function createHeartbeat(){
-
-setInterval(
-()=>{
-
-if(!state.audio)
-return;
-
-if(
-state.scene==="chamber"||
-state.scene==="final"
-){
-
-heartbeat();
-
-}
-
-},
-2200
-);
-
-}
 
 function heartbeat(){
 
-const now=
-audioContext.currentTime;
+    sound(65,.12,"sine",.15);
 
-const osc=
-audioContext.createOscillator();
-
-const gain=
-audioContext.createGain();
-
-osc.type="sine";
-
-osc.frequency.setValueAtTime(
-55,
-now
-);
-
-gain.gain.setValueAtTime(
-0,
-now
-);
-
-gain.gain.linearRampToValueAtTime(
-.16,
-now+.04
-);
-
-gain.gain.exponentialRampToValueAtTime(
-.001,
-now+.22
-);
-
-osc.connect(gain);
-gain.connect(heartbeatGain);
-
-osc.start(now);
-osc.stop(now+.25);
-
-setTimeout(
-()=>{
-const osc2=
-audioContext.createOscillator();
-
-const gain2=
-audioContext.createGain();
-
-osc2.type="sine";
-
-osc2.frequency.value=48;
-
-gain2.gain.setValueAtTime(
-0,
-audioContext.currentTime
-);
-
-gain2.gain.linearRampToValueAtTime(
-.1,
-audioContext.currentTime+.035
-);
-
-gain2.gain.exponentialRampToValueAtTime(
-.001,
-audioContext.currentTime+.18
-);
-
-osc2.connect(gain2);
-gain2.connect(heartbeatGain);
-
-osc2.start();
-osc2.stop(
-audioContext.currentTime+.2
-);
-
-},
-180
-);
-
+    setTimeout(()=>{
+        sound(55,.18,"sine",.12);
+    },140);
 }
 
-/* =========================================================
-   CHOIR
-========================================================= */
 
-function createChoir(){
+function createFinalAudio(){
 
-const frequencies=[
-220,
-277.18,
-329.63,
-440
-];
+    if(!audioCtx)return;
 
-frequencies.forEach(
-(f,i)=>{
+    drone.gain.gain.exponentialRampToValueAtTime(
+        .015,
+        audioCtx.currentTime+2
+    );
 
-const node=
-oscillator(
-"sine",
-f,
-.006,
-musicGain,
-i*3
-);
+    setTimeout(()=>{
+        sound(523,.8,"sine",.08);
+    },500);
 
-node.amp.gain.value=.003;
+    setTimeout(()=>{
+        sound(659,1,"sine",.07);
+    },900);
 
-}
-);
-
+    setTimeout(()=>{
+        sound(784,1.3,"sine",.06);
+    },1300);
 }
 
-/* =========================================================
-   IMPACT
-========================================================= */
 
-function playImpact(){
-
-if(!state.audio)
-return;
-
-const now=
-audioContext.currentTime;
-
-const osc=
-audioContext.createOscillator();
-
-const gain=
-audioContext.createGain();
-
-osc.type="sawtooth";
-
-osc.frequency.setValueAtTime(
-110,
-now
-);
-
-osc.frequency.exponentialRampToValueAtTime(
-35,
-now+.55
-);
-
-gain.gain.setValueAtTime(
-.24,
-now
-);
-
-gain.gain.exponentialRampToValueAtTime(
-.001,
-now+.55
-);
-
-osc.connect(gain);
-gain.connect(masterGain);
-
-osc.start(now);
-osc.stop(now+.6);
-
-}
-
-/* =========================================================
-   GATE SOUND
-========================================================= */
-
-function playGate(){
-
-if(!state.audio)
-return;
-
-const now=
-audioContext.currentTime;
-
-const osc=
-audioContext.createOscillator();
-
-const gain=
-audioContext.createGain();
-
-osc.type="sawtooth";
-
-osc.frequency.setValueAtTime(
-70,
-now
-);
-
-osc.frequency.exponentialRampToValueAtTime(
-22,
-now+2
-);
-
-gain.gain.setValueAtTime(
-.25,
-now
-);
-
-gain.gain.exponentialRampToValueAtTime(
-.001,
-now+2
-);
-
-osc.connect(gain);
-gain.connect(masterGain);
-
-osc.start(now);
-osc.stop(now+2.1);
-
-}
-
-/* =========================================================
-   FINALE AUDIO
-========================================================= */
-
-function playFinale(){
-
-if(!state.audio)
-return;
-
-const now=
-audioContext.currentTime;
-
-const notes=[
-261.63,
-329.63,
-392,
-523.25
-];
-
-notes.forEach(
-(f,i)=>{
-
-const osc=
-audioContext.createOscillator();
-
-const gain=
-audioContext.createGain();
-
-osc.type="sine";
-
-osc.frequency.value=f;
-
-gain.gain.setValueAtTime(
-0,
-now+i*.16
-);
-
-gain.gain.linearRampToValueAtTime(
-.045,
-now+i*.16+.4
-);
-
-gain.gain.exponentialRampToValueAtTime(
-.001,
-now+i*.16+3
-);
-
-osc.connect(gain);
-gain.connect(musicGain);
-
-osc.start(
-now+i*.16
-);
-
-osc.stop(
-now+i*.16+3
-);
-
-}
-);
-
-}
-
-/* =========================================================
-   CAMERA
-========================================================= */
-
-const cameraTarget=
-new THREE.Vector3();
-
-const cameraLook=
-new THREE.Vector3();
-
-const cameraVelocity=
-new THREE.Vector3();
-
-function setCamera(
-position,
-lookAt
-){
-
-camera.position.copy(position);
-cameraTarget.copy(position);
-cameraLook.copy(lookAt);
-
-camera.lookAt(
-cameraLook
-);
-
-}
-
-function shakeCamera(
-amount
-){
-
-state.shake=
-Math.max(
-state.shake,
-amount
-);
-
-}
-
-/* =========================================================
-   CAMERA PRESETS
-========================================================= */
-
-function updateCamera(delta){
-
-const t=
-state.time;
-
-if(state.scene==="forest"){
-
-const target=
-new THREE.Vector3(
-Math.sin(t*.08)*3,
-4.5+Math.sin(t*.25)*.25,
-10+Math.cos(t*.07)*3
-);
-
-camera.position.lerp(
-target,
-.012
-);
-
-cameraLook.set(
-0,
-3,
--25
-);
-
-}
-
-if(state.scene==="path"){
-
-const target=
-new THREE.Vector3(
-Math.sin(t*.12)*1.5,
-3.8,
-16-t*1.1
-);
-
-camera.position.lerp(
-target,
-.02
-);
-
-cameraLook.set(
-0,
-2,
--35
-);
-
-}
-
-if(state.scene==="ruins"){
-
-const target=
-new THREE.Vector3(
-Math.sin(t*.08)*8,
-5+Math.sin(t*.18),
-8+Math.cos(t*.08)*4
-);
-
-camera.position.lerp(
-target,
-.012
-);
-
-cameraLook.set(
-0,
-4,
--30
-);
-
-}
-
-if(
-state.scene==="castle"||
-state.scene==="gate"
-){
-
-const target=
-new THREE.Vector3(
-Math.sin(t*.035)*2,
-7,
-25
-);
-
-camera.position.lerp(
-target,
-.01
-);
-
-cameraLook.set(
-0,
-12,
--70
-);
-
-}
-
-if(state.scene==="hall"){
-
-const target=
-new THREE.Vector3(
-Math.sin(t*.04)*1.4,
-5,
-8-t*.6
-);
-
-camera.position.lerp(
-target,
-.014
-);
-
-cameraLook.set(
-0,
-6,
--45
-);
-
-}
-
-if(state.scene==="chamber"){
-
-const target=
-new THREE.Vector3(
-Math.sin(t*.09)*5,
-7+Math.sin(t*.15)*.3,
-10
-);
-
-camera.position.lerp(
-target,
-.014
-);
-
-cameraLook.set(
-0,
-7,
--20
-);
-
-}
-
-if(state.scene==="final"){
-
-const target=
-new THREE.Vector3(
-Math.sin(t*.05)*7,
-7,
-5+Math.cos(t*.05)*3
-);
-
-camera.position.lerp(
-target,
-.008
-);
-
-cameraLook.set(
-0,
-7,
--18
-);
-
-}
-
-if(state.shake>0){
-
-camera.position.x+=
-(Math.random()-.5)
-*
-state.shake;
-
-camera.position.y+=
-(Math.random()-.5)
-*
-state.shake;
-
-state.shake*=
-Math.pow(.001,delta);
-
-if(state.shake<.001)
-state.shake=0;
-
-}
-
-camera.lookAt(
-cameraLook
-);
-
-}
-
-/* =========================================================
-   PARTICLE UPDATE
-========================================================= */
-
-function updateParticles(delta){
-
-if(rain){
-
-const positions=
-rain.geometry.attributes.position.array;
-
-const velocities=
-rain.userData.velocities;
-
-for(let i=0;i<velocities.length;i++){
-
-positions[i*3+1]-=
-velocities[i]*delta*35;
-
-positions[i*3]-=
-delta*2;
-
-if(positions[i*3+1]<0){
-
-positions[i*3+1]=
-45+Math.random()*10;
-
-positions[i*3]=
-(Math.random()-.5)*120;
-
-}
-
-}
-
-rain.geometry.attributes.position.needsUpdate=true;
-
-}
-
-particles.children.forEach(
-object=>{
-
-if(object.userData.fireflies){
-
-const positions=
-object.geometry.attributes.position.array;
-
-const data=
-object.userData.fireflies;
-
-for(let i=0;i<data.length;i++){
-
-const d=data[i];
-
-positions[i*3+1]+=
-Math.sin(
-state.time*d.speed+d.phase
-)
-*.002;
-
-positions[i*3]+=
-Math.cos(
-state.time*d.speed*.7+d.phase
-)
-*.002;
-
-}
-
-object.geometry.attributes.position.needsUpdate=true;
-
-}
-
-if(object.userData.phase!==undefined){
-
-object.rotation.y+=
-delta*
-(object.userData.speed||.2);
-
-object.position.y+=
-Math.sin(
-state.time*
-(object.userData.speed||.5)
-+
-object.userData.phase
-)
-*.002;
-
-}
-
-}
-);
-
-bats.forEach(
-bat=>{
-
-bat.position.x+=
-Math.sin(
-state.time*.7+
-bat.userData.phase
-)
-*
-delta*2;
-
-bat.position.y+=
-Math.sin(
-state.time*
-bat.userData.speed
-+
-bat.userData.phase
-)
-*
-delta*.7;
-
-const flap=
-Math.sin(
-state.time*
-8+
-bat.userData.phase
-)
-*.5;
-
-if(bat.children[1])
-bat.children[1].rotation.z=
-.25+flap;
-
-if(bat.children[2])
-bat.children[2].rotation.z=
--.25-flap;
-
-}
-);
-
-}
-
-/* =========================================================
-   LIGHT FLICKER
-========================================================= */
-
-function updateLights(){
-
-lights.children.forEach(
-light=>{
-
-if(
-light.userData.flicker
-){
-
-light.intensity=
-light.userData.baseIntensity||
-light.intensity;
-
-const base=
-light.userData.baseIntensity||
-light.intensity;
-
-light.userData.baseIntensity=
-base;
-
-light.intensity=
-base+
-(
-Math.random()-.5
-)
-*.18;
-
-}
-
-}
-);
-
-}
-
-/* =========================================================
-   CHARACTERS UPDATE
-========================================================= */
-
-function updateCharacters(delta){
-
-characters.children.forEach(
-character=>{
-
-if(character.userData.mixer){
-
-character.userData.mixer.update(
-delta
-);
-
-}
-
-if(
-character.userData.angel
-){
-
-character.position.y=
-Math.sin(state.time*.8)*.15;
-
-}
-
-}
-);
-
-}
-
-/* =========================================================
+/* ============================================================
    LIGHTNING
-========================================================= */
+============================================================ */
 
-let lightningTimer=0;
+function lightning(){
 
-function updateLightning(delta){
+    const flash=document.createElement("div");
 
-lightningTimer-=delta;
+    flash.style.position="absolute";
+    flash.style.inset="0";
+    flash.style.background="#fff";
+    flash.style.opacity=".8";
+    flash.style.zIndex="70";
 
-if(lightningTimer<=0){
+    document.body.appendChild(flash);
 
-lightningTimer=
-5+
-Math.random()*13;
+    setTimeout(()=>{
+        flash.remove();
+    },80);
 
-if(
-state.scene==="forest"||
-state.scene==="path"||
-state.scene==="castle"||
-state.scene==="gate"
-){
-
-triggerLightning();
-
+    sound(
+        40,
+        .7,
+        "sawtooth",
+        .12
+    );
 }
 
-}
 
-}
+/* ============================================================
+   INPUT
+============================================================ */
 
-function triggerLightning(){
+document.addEventListener(
+    "click",
+    e=>{
 
-const flash=
-document.getElementById("flash");
+        if(
+            e.target.closest(".choice") ||
+            e.target.id==="startButton"
+        )return;
 
-flash.style.background="#dcecff";
-
-flash.classList.remove("active");
-
-void flash.offsetWidth;
-
-flash.classList.add("active");
-
-const original=
-moonLight.intensity;
-
-moonLight.intensity=
-7;
-
-setTimeout(
-()=>{
-moonLight.intensity=
-original;
-},
-90
+        nextDialogue();
+    }
 );
 
-if(Math.random()>.45){
 
-setTimeout(
-()=>{
-moonLight.intensity=4;
-setTimeout(
-()=>{
-moonLight.intensity=original;
-},
-100
+document.addEventListener(
+    "keydown",
+    e=>{
+
+        if(e.code==="Space"){
+            e.preventDefault();
+            nextDialogue();
+        }
+
+        if(e.key==="Enter"){
+            nextDialogue();
+        }
+    }
 );
-},
-130
-);
 
-}
 
-}
-
-/* =========================================================
+/* ============================================================
    START
-========================================================= */
+============================================================ */
 
-const startButton=
-document.getElementById(
-"startButton"
-);
+document.getElementById("startButton")
+.onclick=()=>{
 
-startButton.onclick=
-async()=>{
+    initAudio();
 
-initAudio();
+    if(audioCtx.state==="suspended")
+        audioCtx.resume();
 
-await audioContext.resume();
+    state.started=true;
 
-state.started=true;
+    const start=document.getElementById("start");
 
-const title=
-document.getElementById("title");
+    start.style.opacity=0;
 
-title.style.opacity="0";
-title.style.transform=
-"translateY(30px)";
+    setTimeout(()=>{
+        start.style.display="none";
+    },1800);
 
-document.getElementById(
-"hud"
-).style.opacity="1";
-
-setTimeout(
-()=>{
-title.style.display="none";
-},
-1100
-);
-
-buildCurrentScene();
-
-await setupCharacters();
-
-updateHUD();
-
-setTimeout(
-showDialogue,
-1300
-);
-
+    setTimeout(()=>{
+        startChapter(0);
+    },1200);
 };
 
-/* =========================================================
-   POINTER
-========================================================= */
 
-window.addEventListener(
-"pointerdown",
-event=>{
-
-pointer.x=
-(event.clientX/window.innerWidth)*2-1;
-
-pointer.y=
--(event.clientY/window.innerHeight)*2+1;
-
-if(
-state.started&&
-!state.choiceOpen&&
-!state.typing
-){
-
-advanceDialogue();
-
-}
-
-}
-);
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-document.getElementById(
-"mobile"
-).onclick=
-()=>{
-
-if(state.started){
-advanceDialogue();
-}
-
-};
-
-/* =========================================================
-   KEYBOARD
-========================================================= */
-
-window.addEventListener(
-"keydown",
-event=>{
-
-if(event.key==="Enter"){
-
-if(
-puzzle.style.display==="flex"
-){
-
-checkPuzzle();
-
-return;
-
-}
-
-if(
-answer.style.display==="flex"
-){
-
-checkAnswer();
-
-return;
-
-}
-
-if(
-state.started&&
-!state.choiceOpen
-){
-
-advanceDialogue();
-
-}
-
-}
-
-if(event.key==="Escape"){
-
-if(
-state.letter
-){
-
-letter.style.display="none";
-
-state.letter=false;
-
-}
-
-}
-
-}
-);
-
-/* =========================================================
-   RESIZE
-========================================================= */
-
-window.addEventListener(
-"resize",
-()=>{
-
-camera.aspect=
-window.innerWidth/
-window.innerHeight;
-
-camera.updateProjectionMatrix();
-
-renderer.setSize(
-window.innerWidth,
-window.innerHeight
-);
-
-renderer.setPixelRatio(
-Math.min(
-window.devicePixelRatio,
-2
-)
-);
-
-}
-);
-
-/* =========================================================
-   BOOT
-========================================================= */
-
-setTimeout(
-()=>{
-
-const boot=
-document.getElementById("boot");
-
-boot.style.opacity="0";
-
-setTimeout(
-()=>{
-boot.style.display="none";
-},
-1500
-);
-
-},
-3000
-);
-
-/* =========================================================
-   INITIAL WORLD
-========================================================= */
-
-setupLighting();
-
-setFog(
-0x02030a,
-5,
-150
-);
-
-createStars(
-1200,
-500
-);
-
-createMoon(
--30,
-48,
--100,
-1
-);
-
-/* =========================================================
-   MAIN LOOP
-========================================================= */
+/* ============================================================
+   ANIMATION
+============================================================ */
 
 function animate(){
 
-requestAnimationFrame(
-animate
-);
+    requestAnimationFrame(animate);
 
-const delta=
-Math.min(
-clock.getDelta(),
-.05
-);
+    const dt=Math.min(
+        clock.getDelta(),
+        .05
+    );
 
-state.time+=delta;
+    state.time+=dt;
 
-if(state.started){
 
-updateCamera(delta);
+    /* Randy breathing */
 
-updateParticles(delta);
+    if(randy.visible){
 
-updateLights();
+        const breathe=
+            Math.sin(
+                state.time*2+
+                randy.userData.breath
+            )*.025;
 
-updateCharacters(delta);
+        randy.scale.y=
+            1+breathe;
 
-updateLightning(delta);
+        randy.position.y=
+            Math.sin(
+                state.time*1.4
+            )*.018;
+    }
 
+
+    /* Angel floating */
+
+    if(angel.visible){
+
+        angel.position.y=
+            Math.sin(
+                state.time*1.2
+            )*.18;
+
+        angel.rotation.y+=
+            Math.sin(
+                state.time*.3
+            )*.0004;
+    }
+
+
+    /* hair movement */
+
+    [randy,angel].forEach(char=>{
+
+        if(!char.visible)return;
+
+        char.userData.hair.forEach(
+            (h,i)=>{
+                h.rotation.z+=
+                    Math.sin(
+                        state.time*1.3+i
+                    )*.0007;
+            }
+        );
+    });
+
+
+    /* particles */
+
+    if(particles){
+
+        const pos=
+            particles.geometry
+            .attributes.position;
+
+        for(let i=0;i<pos.count;i++){
+
+            let y=
+                pos.getY(i);
+
+            y+=dt*.25;
+
+            if(y>15)y=0;
+
+            pos.setY(i,y);
+        }
+
+        pos.needsUpdate=true;
+    }
+
+
+    /* subtle cinematic camera */
+
+    if(state.started){
+
+        const sx=
+            Math.sin(state.time*.5)*.018;
+
+        const sy=
+            Math.cos(state.time*.7)*.012;
+
+        camera.position.x+=sx;
+        camera.position.y+=sy;
+    }
+
+
+    renderer.render(
+        scene,
+        camera
+    );
 }
 
-renderer.render(
-world,
-camera
-);
-
-}
 
 animate();
 
-/* =========================================================
-   EXTRA CINEMATIC EFFECTS
-========================================================= */
 
-function cinematicPulse(){
+/* ============================================================
+   RESIZE
+============================================================ */
 
-const grade=
-document.getElementById(
-"colorGrade"
+addEventListener(
+    "resize",
+    ()=>{
+        camera.aspect=
+            innerWidth/innerHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(
+            innerWidth,
+            innerHeight
+        );
+
+        renderer.setPixelRatio(
+            Math.min(devicePixelRatio,2)
+        );
+    }
 );
 
-grade.animate(
-[
-{
-opacity:.2
-},
-{
-opacity:.65
-},
-{
-opacity:.2
-}
-],
-{
-duration:1600,
-easing:"ease-in-out"
-}
+
+/* ============================================================
+   PERIODIC ATMOSPHERE
+============================================================ */
+
+setInterval(()=>{
+
+    if(
+        state.started &&
+        !state.final &&
+        Math.random()<.18
+    ){
+        heartbeat();
+    }
+
+},5000);
+
+
+setInterval(()=>{
+
+    if(
+        state.started &&
+        state.scene==="forest" &&
+        Math.random()<.35
+    ){
+        lightning();
+    }
+
+},12000);
+
+
+/* ============================================================
+   EXTRA ANIME LIGHTS
+============================================================ */
+
+const animeLight=new THREE.PointLight(
+    0x8b7cff,
+    1.2,
+    25
 );
 
-}
-
-function cinematicDarken(){
-
-const veil=
-document.getElementById(
-"vignette"
+animeLight.position.set(
+    0,
+    4,
+    5
 );
 
-veil.animate(
-[
-{
-opacity:1
-},
-{
-opacity:.55
-},
-{
-opacity:1
-}
-],
-{
-duration:1200,
-easing:"ease-in-out"
-}
-);
+scene.add(animeLight);
 
-}
 
-setInterval(
-()=>{
+setInterval(()=>{
 
-if(
-state.started&&
-Math.random()>.55
-){
+    animeLight.intensity=
+        1+
+        Math.sin(
+            performance.now()*.001
+        )*.4;
 
-cinematicPulse();
+},50);
 
-}
 
-},
-8000
-);
+/* ============================================================
+   END
+============================================================ */
 
-/* =========================================================
-   EXTRA ATMOSPHERIC MOTES
-========================================================= */
-
-function createAtmosphericMotes(){
-
-const geometry=
-new THREE.BufferGeometry();
-
-const count=500;
-
-const positions=
-new Float32Array(count*3);
-
-for(let i=0;i<count;i++){
-
-positions[i*3]=
-(Math.random()-.5)*100;
-
-positions[i*3+1]=
-Math.random()*30;
-
-positions[i*3+2]=
-Math.random()*100-50;
-
-}
-
-geometry.setAttribute(
-"position",
-new THREE.BufferAttribute(
-positions,
-3
-)
-);
-
-const material=
-new THREE.PointsMaterial({
-color:0xc7ddf5,
-size:.035,
-transparent:true,
-opacity:.4
-});
-
-const mote=
-new THREE.Points(
-geometry,
-material
-);
-
-add(particles,mote);
-
-}
-
-createAtmosphericMotes();
-
-/* =========================================================
-   EXTRA FLOATING DUST
-========================================================= */
-
-function createDust(){
-
-for(let i=0;i<100;i++){
-
-const dust=
-sphere(
-.018,
-new THREE.MeshBasicMaterial({
-color:0xdbe8f8,
-transparent:true,
-opacity:.2
-}),
-(Math.random()-.5)*50,
-Math.random()*20,
-Math.random()*80-40,
-8
-);
-
-dust.userData.phase=
-Math.random()*Math.PI*2;
-
-dust.userData.speed=
-.1+Math.random()*.4;
-
-add(particles,dust);
-
-}
-
-}
-
-createDust();
-
-/* =========================================================
-   EXTRA ANGEL AURA
-========================================================= */
-
-function createAngelAura(){
-
-const aura=
-new THREE.Mesh(
-new THREE.SphereGeometry(
-2.5,
-32,
-32
-),
-new THREE.MeshBasicMaterial({
-color:0xcfe6ff,
-transparent:true,
-opacity:.025,
-side:THREE.BackSide
-})
-);
-
-aura.position.set(
-2,
-3,
--8
-);
-
-add(particles,aura);
-
-}
-
-createAngelAura();
-
-/* =========================================================
-   SECRET ATMOSPHERE
-========================================================= */
-
-function createSecretSigils(){
-
-for(let i=0;i<14;i++){
-
-const ring=
-new THREE.Mesh(
-new THREE.RingGeometry(
-.2,
-.23,
-32
-),
-new THREE.MeshBasicMaterial({
-color:
-i%2===0
-?0x9cc9ff
-:0xd6b96d,
-transparent:true,
-opacity:.22,
-side:THREE.DoubleSide
-})
-);
-
-ring.position.set(
-(Math.random()-.5)*50,
-.02+Math.random()*4,
--Math.random()*100
-);
-
-ring.rotation.x=
--Math.PI/2;
-
-ring.userData.phase=
-Math.random()*Math.PI*2;
-
-add(particles,ring);
-
-}
-
-}
-
-createSecretSigils();
-
-/* =========================================================
-   SIGIL ANIMATION
-========================================================= */
-
-function updateSigils(){
-
-particles.children.forEach(
-object=>{
-
-if(
-object.geometry&&
-object.geometry.type==="RingGeometry"&&
-object.userData.phase!==undefined
-){
-
-object.material.opacity=
-.12+
-Math.sin(
-state.time*.7+
-object.userData.phase
-)
-*.08;
-
-object.rotation.z+=.002;
-
-}
-
-}
-);
-
-}
-
-/* =========================================================
-   EXTENDED LOOP HOOK
-========================================================= */
-
-const oldAnimate=animate;
-
-setInterval(
-()=>{
-
-if(state.started){
-
-updateSigils();
-
-}
-
-},
-16
-);
-
-/* =========================================================
-   INTERACTION RAYCAST
-========================================================= */
-
-window.addEventListener(
-"pointermove",
-event=>{
-
-pointer.x=
-(event.clientX/window.innerWidth)*2-1;
-
-pointer.y=
--(event.clientY/window.innerHeight)*2+1;
-
-if(!state.started)
-return;
-
-raycaster.setFromCamera(
-pointer,
-camera
-);
-
-const hits=
-raycaster.intersectObjects(
-props.children,
-true
-);
-
-if(hits.length){
-
-document.body.style.cursor=
-"pointer";
-
-}else{
-
-document.body.style.cursor=
-"default";
-
-}
-
-}
-);
-
-/* =========================================================
-   GATE INTERACTION
-========================================================= */
-
-window.addEventListener(
-"click",
-event=>{
-
-if(
-!state.started||
-state.scene!=="gate"||
-state.dialogue||
-state.choiceOpen
-)
-return;
-
-raycaster.setFromCamera(
-pointer,
-camera
-);
-
-const hits=
-raycaster.intersectObjects(
-props.children,
-true
-);
-
-for(const hit of hits){
-
-if(hit.object.userData.gate){
-
-openGate();
-
-break;
-
-}
-
-}
-
-}
-);
-
-/* =========================================================
-   SPECIAL NIGHT MODE
-========================================================= */
-
-function nightMode(){
-
-if(!state.started)
-return;
-
-if(state.scene==="final"){
-
-heavenLight.intensity=
-2.8;
-
-world.fog.near=2;
-world.fog.far=90;
-
-}else{
-
-heavenLight.intensity=
-state.scene==="chamber"
-?.9
-:0;
-
-}
-
-}
-
-/* =========================================================
-   SPECIAL CAMERA EVENTS
-========================================================= */
-
-function cameraReveal(){
-
-const original=
-camera.position.clone();
-
-camera.position.set(
-original.x,
-original.y+2,
-original.z+6
-);
-
-setTimeout(
-()=>{
-camera.position.lerp(
-original,
-.08
-);
-},
-400
-);
-
-}
-
-/* =========================================================
-   FINAL REVEAL EVENT
-========================================================= */
-
-function birthdayReveal(){
-
-if(!state.final)
-return;
-
-cinematicPulse();
-
-playFinale();
-
-for(let i=0;i<6;i++){
-
-setTimeout(
-()=>{
-triggerLightning();
-},
-i*350
-);
-
-}
-
-}
-
-/* =========================================================
-   FINAL WATCHER
-========================================================= */
-
-setInterval(
-()=>{
-
-nightMode();
-
-if(
-state.final
-){
-
-birthdayReveal();
-
-}
-
-},
-7000
-);
-
-/* =========================================================
-   ACCESSIBILITY / PERFORMANCE
-========================================================= */
-
-if(
-window.matchMedia(
-"(prefers-reduced-motion: reduce)"
-).matches
-){
-
-document.getElementById(
-"grain"
-).style.animation="none";
-
-}
-
-/* =========================================================
-   PREVENT CONTEXT MENU
-========================================================= */
-
-window.addEventListener(
-"contextmenu",
-event=>{
-event.preventDefault();
-}
-);
-
-/* =========================================================
-   PREVENT SCROLL
-========================================================= */
-
-window.addEventListener(
-"wheel",
-event=>{
-event.preventDefault();
-},
-{
-passive:false
-}
-);
-
-/* =========================================================
-   PREVENT DOUBLE TAP ZOOM
-========================================================= */
-
-let lastTouch=0;
-
-window.addEventListener(
-"touchend",
-event=>{
-
-const now=
-Date.now();
-
-if(
-now-lastTouch<300
-){
-
-event.preventDefault();
-
-}
-
-lastTouch=now;
-
-},
-{
-passive:false
-});
-
-/* =========================================================
-   END OF CORE ENGINE
-========================================================= */
-
-/*
-THE NIGHT REMEMBERS
-
-Scene flow:
-
-FOREST
-↓
-PATH
-↓
-RUINS
-↓
-CASTLE
-↓
-GATE
-↓
-HALL
-↓
-CHAMBER
-↓
-FINAL
-
-Secret code:
-212
-
-Secret answer:
-aiudiwdwu
-
-Final:
-HAPPY BIRTHDAY RANDY
-
-Recommended assets:
-
-assets/nour.glb
-assets/randy.glb
-assets/angel.glb
-
-Optional audio assets can be integrated
-through Web Audio or HTML Audio if desired.
-
-The procedural fallback exists only so the
-experience remains playable if the GLB files
-are unavailable.
-
-For genuinely realistic human characters,
-use high-quality rigged GLB/GLTF characters.
-*/
 </script>
-
 </body>
 </html>
