@@ -47,7 +47,7 @@
         font-weight: bold;
     }
 
-    input, textarea, select {
+    input, select {
         width: 100%;
         box-sizing: border-box;
         padding: 13px;
@@ -57,13 +57,8 @@
         outline: none;
     }
 
-    input:focus, textarea:focus, select:focus {
+    input:focus, select:focus {
         border: 2px solid #673ab7;
-    }
-
-    textarea {
-        min-height: 110px;
-        resize: vertical;
     }
 
     .options label {
@@ -94,6 +89,11 @@
         background: #512da8;
     }
 
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
     .required {
         color: red;
     }
@@ -108,6 +108,16 @@
         margin-top: 15px;
         font-size: 18px;
     }
+
+    #error {
+        display: none;
+        background: #ffebee;
+        color: #c62828;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 15px;
+    }
 </style>
 </head>
 
@@ -118,125 +128,118 @@
     <div class="header">
         <h1>استمارة التسجيل</h1>
         <p>يرجى ملء المعلومات التالية لإتمام التسجيل.</p>
-        <small><span class="required">*</span> السؤال مطلوب</small>
+        <small>
+            <span class="required">*</span> السؤال مطلوب
+        </small>
     </div>
 
     <form id="registrationForm">
 
-        <!-- الاسم -->
         <div class="question">
             <label>
                 الاسم الثلاثي بالعربي
                 <span class="required">*</span>
             </label>
-            <input 
-                type="text" 
+
+            <input
+                type="text"
                 name="full_name"
                 placeholder="اكتب اسمك الثلاثي بالعربي"
+                maxlength="100"
                 required>
         </div>
 
-        <!-- العمر -->
         <div class="question">
             <label>
                 العمر
                 <span class="required">*</span>
             </label>
-            <input 
-                type="number" 
+
+            <input
+                type="number"
                 name="age"
                 placeholder="اكتب عمرك"
                 min="1"
+                max="120"
                 required>
         </div>
 
-        <!-- تيليجرام -->
         <div class="question">
             <label>
-                معرف التيجرام
+                معرف التليجرام
                 <span class="required">*</span>
             </label>
-            <input 
-                type="text" 
+
+            <input
+                type="text"
                 name="telegram"
                 placeholder="@username"
+                maxlength="100"
                 required>
         </div>
 
-        <!-- واتساب -->
         <div class="question">
             <label>
                 رقم حساب واتساب
                 <span class="required">*</span>
             </label>
-            <input 
-                type="tel" 
+
+            <input
+                type="tel"
                 name="whatsapp"
                 placeholder="07xxxxxxxxx"
+                maxlength="30"
                 required>
         </div>
 
-        <!-- مصدر الورشة -->
         <div class="question">
             <label>
-                من أين سمعت عن الورشة
+                من أين سمعت عن الحفل؟
                 <span class="required">*</span>
             </label>
 
             <select name="source" required>
                 <option value="">اختر إجابة</option>
-                <option>التليجرام</option>
-                <option>الواتساب</option>
-                <option>الإنستغرام</option>
-                <option>صديق أو شخص أعرفه</option>
-                <option>من إعلان</option>
-                <option>أخرى</option>
+                <option value="التليجرام">التليجرام</option>
+                <option value="الواتساب">الواتساب</option>
+                <option value="الإنستغرام">الإنستغرام</option>
+                <option value="صديق أو شخص أعرفه">
+                    صديق أو شخص أعرفه
+                </option>
+                <option value="من إعلان">من إعلان</option>
+                <option value="أخرى">أخرى</option>
             </select>
         </div>
 
-        <!-- سبب الحضور -->
         <div class="question">
             <label>
-                لماذا تود الحضور
-                <span class="required">*</span>
-            </label>
-
-            <textarea 
-                name="reason"
-                placeholder="اكتب سبب رغبتك بالحضور..."
-                required></textarea>
-        </div>
-
-        <!-- تأكيد الحضور -->
-        <div class="question">
-            <label>
-                هل انت متاكد من حظورك؟
+                هل أنت متأكد من حضورك؟
                 <span class="required">*</span>
             </label>
 
             <div class="options">
 
                 <label>
-                    <input 
-                        type="radio" 
-                        name="attendance" 
+                    <input
+                        type="radio"
+                        name="attendance"
                         value="نعم"
                         required>
                     نعم
                 </label>
 
                 <label>
-                    <input 
-                        type="radio" 
-                        name="attendance" 
+                    <input
+                        type="radio"
+                        name="attendance"
                         value="لا">
                     لا
                 </label>
 
                 <label>
-                    <input 
-                        type="radio" 
-                        name="attendance" 
+                    <input
+                        type="radio"
+                        name="attendance"
                         value="ربما">
                     ربما
                 </label>
@@ -244,7 +247,7 @@
             </div>
         </div>
 
-        <button type="submit">
+        <button type="submit" id="submitButton">
             إرسال
         </button>
 
@@ -254,18 +257,67 @@
         ✅ تم إرسال الاستمارة بنجاح!
     </div>
 
+    <div id="error">
+        ❌ حدث خطأ أثناء الإرسال. حاول مرة أخرى.
+    </div>
+
 </div>
 
 <script>
-document.getElementById("registrationForm").addEventListener("submit", function(e) {
+
+const GOOGLE_SCRIPT_URL =
+    "ضع_رابط_Google_Apps_Script_هنا";
+
+const form = document.getElementById("registrationForm");
+const button = document.getElementById("submitButton");
+const success = document.getElementById("success");
+const error = document.getElementById("error");
+
+form.addEventListener("submit", async function(e) {
 
     e.preventDefault();
 
-    document.getElementById("registrationForm").style.display = "none";
+    button.disabled = true;
+    button.textContent = "جارٍ الإرسال...";
+    error.style.display = "none";
 
-    document.getElementById("success").style.display = "block";
+    const formData = new FormData(form);
+
+    const data = {
+        full_name: formData.get("full_name"),
+        age: formData.get("age"),
+        telegram: formData.get("telegram"),
+        whatsapp: formData.get("whatsapp"),
+        source: formData.get("source"),
+        attendance: formData.get("attendance")
+    };
+
+    try {
+
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify(data)
+        });
+
+        form.style.display = "none";
+        success.style.display = "block";
+
+    } catch (err) {
+
+        console.error(err);
+
+        error.style.display = "block";
+
+        button.disabled = false;
+        button.textContent = "إرسال";
+    }
 
 });
+
 </script>
 
 </body>
